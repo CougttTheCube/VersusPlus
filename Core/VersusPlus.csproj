@@ -1,0 +1,48 @@
+﻿<Project Sdk="RaptorRush135.PvZR.Sdk">
+
+  <PropertyGroup>
+    <IsModBuild>true</IsModBuild>
+    <ModMelonType>$(RootNamespace).Core</ModMelonType>
+    <ModColor>255, 0, 200, 0</ModColor>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <MinVerTagPrefix>v</MinVerTagPrefix>
+    <MinVerDefaultPreReleaseIdentifiers>dev</MinVerDefaultPreReleaseIdentifiers>
+  </PropertyGroup>
+
+  <Target Name="EnableZipVersionDotReplacementForStableRelease" AfterTargets="MinVer" Condition="'$(MinVerPreRelease)' == ''">
+    <PropertyGroup>
+      <ModZipReplaceVersionDots>true</ModZipReplaceVersionDots>
+    </PropertyGroup>
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="System.Resources.Extensions" Version="10.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="BloomEngine">
+      <HintPath>D:\SteamLibrary\steamapps\common\PVZ Replanted\Mods\BloomEngine.dll</HintPath>
+    </Reference>
+    <Reference Include="ReplantAPI">
+      <HintPath>D:\SteamLibrary\steamapps\common\PVZ Replanted\Mods\ReplantAPINew.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>
