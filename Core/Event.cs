@@ -22,24 +22,26 @@ using static VersusPlus.Core;
 
 internal class Event : MonoBehaviour
 {
-    public void StartMod()
+    public void OnEnable()
     {
+        EventsManager.OnPlantPlaced += HandlePlantSpawned;
         // Subscribe to events using +=
         MelonLogger.Msg("Plant Event initialized!");
         
     }
 
     // Call this if your mod unloads or is disabled
-    public void StopMod()
+    public void OnDisable()
     {
         // Always unsubscribe using -= to prevent memory leaks and infinite loops
-        
+        EventsManager.OnPlantPlaced -= HandlePlantSpawned;
+
     }
 
     // Matches Action<Plant>
     private void HandlePlantSpawned(Plant spawnedPlant)
     {
         // Example: Apply a custom buff or effect to the plant as soon as it is placed
-        Console.WriteLine($"A plant was placed: {spawnedPlant.mSeedType}");
+        MelonLogger.Msg($"A plant was placed: {spawnedPlant.mSeedType}");
     }
 }

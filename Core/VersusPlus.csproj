@@ -26,7 +26,7 @@
       <HintPath>D:\SteamLibrary\steamapps\common\PVZ Replanted\Mods\BloomEngine.dll</HintPath>
     </Reference>
     <Reference Include="ReplantAPI">
-      <HintPath>D:\SteamLibrary\steamapps\common\PVZ Replanted\Mods\ReplantAPINew.dll</HintPath>
+      <HintPath>D:\SteamLibrary\steamapps\common\PVZ Replanted\Mods\ReplantAPI.dll</HintPath>
     </Reference>
   </ItemGroup>
 

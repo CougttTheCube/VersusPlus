@@ -43,7 +43,11 @@ internal class Timer : MonoBehaviour
 {
     private TextMeshProUGUI timerText;
     float elapsedTime;
+    bool checkEnd = false;
 
+    private float nextTriggerTime = 19f;
+    private const float Interval = 19f; // Repeats every 1 minute (1:30, 2:30, etc.)
+    int random;
     void Start()
     {
 
@@ -73,7 +77,17 @@ internal class Timer : MonoBehaviour
         rect.anchorMax = new Vector2(0.5f, 0.5f);
         rect.pivot = new Vector2(0.5f, 0.5f);
         rect.sizeDelta = new Vector2(300, 60);
-        rect.localPosition = new Vector2(0, -1030);
+        
+        if (BloomConfig.TestEnum.Value == TimerPos.BottomMiddle){
+            rect.localPosition = new Vector2(0, -1030);
+        } else if (BloomConfig.TestEnum.Value == TimerPos.BottomRight)
+        {
+            rect.localPosition = new Vector2(1690, -985);
+        } else if (BloomConfig.TestEnum.Value == TimerPos.TopMiddle)
+        {
+            rect.localPosition = new Vector2(0, 650);
+        }
+        
         
         var loadedFonts = Resources.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<TMP_FontAsset>());
 
@@ -136,10 +150,23 @@ internal class Timer : MonoBehaviour
 
     void Update()
     {
+
+        var board = BoardManager.Board;
+        if (board == null) return;
         if (BoardManager.Board.m_startDrawTime == 0)
         {
-            elapsedTime += Time.deltaTime;
+            if (!checkEnd) elapsedTime += Time.deltaTime;
             Core.StartMatch = true;
+            if (BloomConfig.TestBoolInput9.Value){
+                if (elapsedTime >= nextTriggerTime)
+                {
+                    OnTimerMilestoneReached(nextTriggerTime);
+
+                    // Advance to the next mark
+                    nextTriggerTime += Interval;
+                }
+            }
+            
 
             int minutes = Mathf.FloorToInt(elapsedTime / 60);
             int seconds = Mathf.FloorToInt(elapsedTime % 60);
@@ -167,12 +194,26 @@ internal class Timer : MonoBehaviour
             }
             timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
             
-            if (BoardManager.Board.mApp != null && BoardManager.Board.mApp.VersusMode != null
+            if (BoardManager.Board.mApp != null 
             && BoardManager.Board.mApp.VersusMode.m_winInitialized)
             {
-
-                elapsedTime -= Time.deltaTime;
+                checkEnd = true;
+                //elapsedTime -= Time.deltaTime;
             }
+        }
+    }
+
+    private void OnTimerMilestoneReached(float time)
+    {
+        // Your event code here (e.g., spawn special wave, grant sun/brains)
+        MelonLogger.Msg($"Triggered milestone at {timerText.text}!");
+        random = UnityEngine.Random.Range(1, 5);
+        if (random == 1) MelonLoader.MelonCoroutines.Start(Events.Event1());
+        else if (random == 2) MelonLoader.MelonCoroutines.Start(Events.Event2());
+        else if (random == 3) MelonLoader.MelonCoroutines.Start(Events.Event3());
+        else if (random == 4){ 
+            MelonLoader.MelonCoroutines.Start(Events.Event4());
+            MelonLoader.MelonCoroutines.Start(Events.Event42());
         }
     }
 }

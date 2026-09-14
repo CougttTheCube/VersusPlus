@@ -79,6 +79,21 @@ using static UnityEngine.ParticleSystem.PlaybackState;
 // - Hidden issues:
 // + idk, it's hidden lol
 
+// 1.0 : initial release
+
+// 1.0.1
+// Fix Huge wave theme of Flag Zombie still plays outside of Versus Mode
+// Fix Plantern, Marigold being banned
+// Fix ??? mode enable on default
+
+// 1.1
+// Add Timer Position (done)
+// Add Random Events
+// Shockwave (done)
+// Ambush (done)
+// Crashing Economy (set sun/brain to 0)
+// Flourishing Economy (add 750 sun/brain to both)
+// Fix Instance bug in Timer.Update() (done)
 public class Core : ReplantAPI
 {
     public bool hasPlayedSuddenDeath = false;
@@ -93,10 +108,15 @@ public class Core : ReplantAPI
     public bool InitializeMatch = false;
 
     public const string Name = "VersusPlus";
-    public const string Version = "0.1-beta";
-    public const string Author = "Cougtt";
+    public const string Version = "1.1";
+    public const string Author = "Cougtt and many more";
 
     SeedPacket temp;
+    public enum TimerPos{
+        TopMiddle,
+        BottomMiddle,
+        BottomRight
+    }
 
 
     internal static class BloomConfig 
@@ -121,6 +141,11 @@ public class Core : ReplantAPI
             defaultValue: true,
             description: "Shows the timer."
         );
+        public static EnumConfigInput<TimerPos> TestEnum{ get; } = ConfigService.CreateEnum<TimerPos>(
+            name: "Timer Position",
+            defaultValue: TimerPos.BottomMiddle,
+            description: "Changes the timer's position."
+        );
         public static BoolConfigInput TestBoolInput5 { get; } = ConfigService.CreateBool(
             name: "Initial Recharge",
             defaultValue: true,
@@ -132,13 +157,13 @@ public class Core : ReplantAPI
             description: "Sets Gravestone's brain rate to around 27 - 30 seconds and initial brain production. Disable this if you have custom brain rate logic (or just wants zombies to win)."
         );
         public static BoolConfigInput TestBoolInput7 { get; } = ConfigService.CreateBool(
-            name: "No More Than 35",
+            name: "Lighter Projectiles",
             defaultValue: true,
             description: "Targets and Gravestones take no more than 35 damage per hit. Disable this if you are not afraid of Melon-pult."
         );
         public static BoolConfigInput TestBoolInput8 { get; } = ConfigService.CreateBool(
             name: "???",
-            defaultValue: true,
+            defaultValue: false,
             description: "This option is created solely for credits only. Do not enable, or else...\n" +
             "\n" +
             "Seed Recharge Tooltip - by RaptorRush, inspired by PvZ DLC Mod\n" +
@@ -150,6 +175,11 @@ public class Core : ReplantAPI
             "Thank you very much :) You 2 are the goat. I wouldn't have tried my best if it hadn't been for these two.\n" +
             "Also thank you HenHen for ReplantAPI, " +
             "and thank you PalmForest for BloomEngine."
+        );
+        public static BoolConfigInput TestBoolInput9 { get; } = ConfigService.CreateBool(
+            name: "Random Events",
+            defaultValue: false,
+            description: "Enables random events."
         );
     }
     // Custom DieRow
@@ -201,7 +231,7 @@ public class Core : ReplantAPI
         if (BoardManager.Board.mApp != null && BoardManager.Board.mApp.VersusMode != null
             && BoardManager.Board.mApp.VersusMode.m_gameplayInitialized)
         {
-            
+
             if (!InitializeMatch){
                 InitializeMatch = true;
                 if (!BloomConfig.TestBoolInput5.Value) return;
@@ -227,6 +257,19 @@ public class Core : ReplantAPI
                         def.m_seedType == SeedType.ZombieTrashCan)
                         {
                             continue;
+                        } else if(
+                        def.m_seedType == SeedType.Cherrybomb ||
+                            def.m_seedType == SeedType.Iceshroom ||
+                            def.m_seedType == SeedType.Doomshroom ||
+                            def.m_seedType == SeedType.Jalapeno ||
+                            def.m_seedType == SeedType.Gatlingpea ||
+                            def.m_seedType == SeedType.Twinsunflower ||
+                            def.m_seedType == SeedType.Wintermelon)
+                        { 
+                            temp.mActive = true;
+                            temp.mActive = false;
+                            temp.mRefreshTime = 3500;
+                            temp.mRefreshing = true;
                         }
                         else
                         {
@@ -380,6 +423,17 @@ public class Core : ReplantAPI
             }
         }
 
+
+
+        // test
+        if (Input.GetKeyDown(KeyCode.T)){
+            MelonLoader.MelonCoroutines.Start(Events.Event1());
+        }
+        if (Input.GetKeyDown(KeyCode.Y))
+        {
+            MelonLoader.MelonCoroutines.Start(Events.Event4());
+            MelonLoader.MelonCoroutines.Start(Events.Event42());
+        }
     }
         
     public override void OnSceneWasInitialized(int buildIndex, string sceneName)
@@ -432,60 +486,116 @@ public class Core : ReplantAPI
         //LoggerInstance.Msg("Scene Loaded: " + sceneName);
         /*
         var allDefs = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<PlantDefinition>());
-		foreach (var obj in allDefs)
+        PlantDefinition coneTemplate = null;
+        PlantDefinition snorkelDef = null;
+
+        // Pass 1: Find both definitions
+        foreach (var obj in allDefs)
+        {
+            var def = obj.Cast<PlantDefinition>();
+            if (def.m_seedType == (SeedType)61) // Conehead template
+            {
+                coneTemplate = def;
+            }
+            else if (def.m_seedType == SeedType.ZombiquariumSnorkel)
+            {
+                snorkelDef = def;
+            }
+
+            if (coneTemplate != null && snorkelDef != null) break;
+        }
+
+        // Pass 2: Apply the override
+        if (snorkelDef != null)
+        {
+            snorkelDef.m_plantName = "Peashooter Zombie";
+            snorkelDef.m_plantToolTip = "Shoots peas at the enemy.";
+            snorkelDef.m_defaultSkin = "Normal";
+
+            snorkelDef.m_seedCost = 100;
+            snorkelDef.m_versusCost = 50;
+            snorkelDef.m_refreshTime = 1500;
+            snorkelDef.m_versusBaseRefreshTime = 1500;
+            snorkelDef.m_versusSuddenDeathRefreshTime = 500;
+
+            snorkelDef.m_packetIndex = 22;
+            snorkelDef.m_subClass = PlantSubClass.Shooter; // or 0
+
+            snorkelDef.m_entryStatus = ReloadedEntryStatus.Ready;
+
+
+            // Borrow working Addressable references from Conehead so UI and preview don't break
+            if (coneTemplate != null)
+            {
+                snorkelDef.m_plantImage = coneTemplate.m_plantImage;
+                snorkelDef.m_versusImage = coneTemplate.m_versusImage;
+                snorkelDef.m_previewSprite = coneTemplate.m_previewSprite;
+                snorkelDef.m_previewSpriteOffset = coneTemplate.m_previewSpriteOffset;
+                snorkelDef.m_previewSpriteScale = coneTemplate.m_previewSpriteScale;
+                snorkelDef.m_animationType = coneTemplate.m_animationType;
+            }
+        }
+
+        
+        foreach (var obj in allDefs)
         {
 			var def = obj.Cast<PlantDefinition>();
             
             //                                                                                                                 Upgraded plants
-            if (def.m_seedType == SeedType.Gatlingpea)
-            {
-                //def.m_versusBaseRefreshTime = 6000;
-                //def.m_versusSuddenDeathRefreshTime = 6000;
-                //def.m_versusCost = 100;
-            }
-            if (def.m_seedType == SeedType.Twinsunflower)
-            {
-                //def.m_versusBaseRefreshTime = 6000;
-                //def.m_versusSuddenDeathRefreshTime = 6000;
-                //def.m_versusCost = 50;
-            }
-            if (def.m_seedType == SeedType.Wintermelon)
-            {
-                //def.m_versusBaseRefreshTime = 6000;
-                //def.m_versusSuddenDeathRefreshTime = 6000;
-                //def.m_versusCost = 100;
-            }
+                                                                                                                         
 
-            //                                                                                                                 Zombies
+            if (def.m_seedType == SeedType.ZombiquariumSnorkel)
+            {
+                def.m_plantToolTip = "Shoots peas at the enemy.";
+                //def.m_animationType = ReanimationType.ZombiePeashooterHead;
+                def.m_plantName = "Peashooter Zombie";
+                def.m_defaultSkin = "Normal";
+                //def.m_plantImage = AssetReferenceSprite.
 
-            if (def.m_seedType == SeedType.ZombieBalloon)
-            {
-                //def.m_plantToolTip = "This zombie is now forced to act as a weak shield to your almighty defense";
-            }
-            if (def.m_seedType == SeedType.ZombieImp)
-            {
-                //def.m_plantToolTip = "Imps are just as strong as a normal zombie";
+                AssetReferenceSprite emptyImageRef = new("");
+                AssetReferenceGameObject emptyGoRef = new("");
+                def.m_prefab = emptyGoRef;
+                def.m_preview = emptyGoRef;
+                def.m_easterEggGameObject = emptyGoRef;
+                def.m_preorderGameObject = emptyGoRef;
+                def.m_chinaGameObject = emptyGoRef;
+                def.m_chinaPlantImage = emptyImageRef;
+                def.m_chinaPreviewSprite = emptyImageRef;
+                def.m_decemberGameObject = emptyGoRef;
+                def.m_seedCost = 50;    
+                def.m_versusBaseRefreshTime = 1500;
+                def.m_versusSuddenDeathRefreshTime = 500;
 
 
             }
-
+            
             
 
         }
         
+
         var allDefsZ = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<ZombieDefinition>());
         foreach (var obj in allDefsZ){
             var def = obj.Cast<ZombieDefinition>();
             if (def.m_zombieType == ZombieType.Imp){
-
+                
             }
         }
         */
+        var allDefs = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<PlantDefinition>());
+        foreach (var obj in allDefs)
+        {
+            var def = obj.Cast<PlantDefinition>();
+            if (def.m_versusCost == 500 || def.m_seedCost == 500)
+            {
+                MelonLogger.Msg($"[MATCH] Name: {def.name} | SeedType: {def.m_seedType} ({(int)def.m_seedType}) | PlantName: {def.PlantName}");
+            }
+        }
 
 
     }
 
-    
+
 
     // Patch: Allow everything in Versus Mode
     [HarmonyPatch(typeof(SeedChooserScreen), nameof(SeedChooserScreen.SeedNotAllowedToPick))]
@@ -502,12 +612,15 @@ public class Core : ReplantAPI
             theSeedType == SeedType.Twinsunflower ||
             theSeedType == SeedType.Wintermelon ||
             theSeedType == SeedType.Flowerpot ||
-            theSeedType == SeedType.Blover
+            theSeedType == SeedType.Blover ||
+            theSeedType == SeedType.Plantern ||
+            theSeedType == SeedType.Marigold
             ))
             {
                 __result = false;
                 return false;
             }
+
             return true;
         }
         
@@ -564,11 +677,28 @@ public class Core : ReplantAPI
                 //Clear data models
 
                 __instance.m_zombieEntriesModel.Clear();
-     
+                
+                // Make Gravestone on top
                 for (int i = 0; i < __instance.m_seedChooserScreen.mChosenZombies.Count; i++)
                 {
                     var zombieChosenSeed = __instance.m_seedChooserScreen.mChosenZombies[i];
                     if (zombieChosenSeed.mSeedType == SeedType.None) continue;
+                    if (zombieChosenSeed.mSeedType == SeedType.ZombieGravestone){
+                        PlantDefinition zombieDefinition = __instance.m_seedChooserScreen.mApp.GetPlantDefinition(zombieChosenSeed.mSeedType);
+                        if (zombieDefinition == null || zombieDefinition.m_versusBaseRefreshTime == 0) continue;
+
+                        SeedChooserEntryModel zombieEntry = new SeedChooserEntryModel(zombieDefinition, zombieChosenSeed, __instance.m_seedChooserScreen, __instance, false, i);
+                        __instance.m_zombieEntriesModel.Add(i.ToString(), zombieEntry);
+                        break;
+                    }
+
+                    
+                }
+                for (int i = 0; i < __instance.m_seedChooserScreen.mChosenZombies.Count; i++)
+                {
+                    var zombieChosenSeed = __instance.m_seedChooserScreen.mChosenZombies[i];
+                    if (zombieChosenSeed.mSeedType == SeedType.None) continue;
+                    if (zombieChosenSeed.mSeedType == SeedType.ZombieGravestone) continue;
 
                     PlantDefinition zombieDefinition = __instance.m_seedChooserScreen.mApp.GetPlantDefinition(zombieChosenSeed.mSeedType);
                     if (zombieDefinition == null || zombieDefinition.m_versusBaseRefreshTime == 0) continue;
@@ -576,7 +706,6 @@ public class Core : ReplantAPI
                     SeedChooserEntryModel zombieEntry = new SeedChooserEntryModel(zombieDefinition, zombieChosenSeed, __instance.m_seedChooserScreen, __instance, false, i);
                     __instance.m_zombieEntriesModel.Add(i.ToString(), zombieEntry);
                 }
-                
                 return false;
             }
 
@@ -592,6 +721,7 @@ public class Core : ReplantAPI
         {
 
             if (__instance.mZombieType != ZombieType.Imp) return;
+
             if (!__instance.mApp.IsVersusMode()) return;
 
 
@@ -676,62 +806,91 @@ public class Core : ReplantAPI
     }
 
 
-
     [HarmonyPatch(typeof(Board), nameof(Board.AddZombieInRow))]
     internal static class SpawnPlant
     {
 
-        /*
+        
             [HarmonyPrefix]
-            private static bool Prefix0(Board __instance, ref SeedType theZombieType)
+            private static bool Prefix0(Board __instance, ref ZombieType theZombieType)
             {
                 if (!__instance.mApp.IsVersusMode()) return true;
 
                 SeedType zombieCursor = CursorManager.GetSeedTypeInCursor(1);
                 SeedType plantCursor = CursorManager.GetSeedTypeInCursor(0);
 
-                if (((int)zombieCursor >= 60 && (int)zombieCursor <= 80) 
-                || ((int)plantCursor >= 60 && (int)plantCursor <= 80))
-                {
-                    // Force the translation
-
-                    return true;
+                if (zombieCursor == SeedType.ZombiquariumSnorkel 
+                || plantCursor == SeedType.ZombiquariumSnorkel)
+            {
+                // Force the translation
+                    theZombieType = ZombieType.PeaHead;
+                return true;
                 }
 
                 return true;
             }
 
-                if (zombieCursor == SeedType.ZombieBalloon || plantCursor == SeedType.ZombieBalloon)
-                {
-                    // Force the translation
-                    theZombieType = ZombieType.Balloon;
-                }
-
-
-                return true;
-                */
-        internal static class sigma
-        {
+                
+        
             [HarmonyPrefix]
-            private static bool Prefix(Board __instance, ref SeedType theZombieType)
+            private static bool Prefix(Board __instance, ref ZombieType theZombieType, int theRow)
             {
                 if (!__instance.mApp.IsVersusMode()) return true;
 
                 SeedType zombieCursor = CursorManager.GetSeedTypeInCursor(1);
                 SeedType plantCursor = CursorManager.GetSeedTypeInCursor(0);
-                if (zombieCursor == SeedType.ZombieNormal || plantCursor == SeedType.ZombieNormal)
-                {
-                    // Force the translation
-                    //theZombieType = ZombieType.Balloon;
-                    //if (GridItemManager.GetAt(GridItemType.Gravestone, theGridX, theGridY) != null)
-                    //{
-                    theZombieType = SeedType.ZombieFootball;
-                    //}
+                // Check if holding seed packet
+                bool holdingZombieSeed = ((int)zombieCursor >= 60 && (int)zombieCursor <= 80) ||
+                         ((int)plantCursor >= 60 && (int)plantCursor <= 80);
 
+            if ((int)zombieCursor == 65 ||
+            (int)zombieCursor == 68 ||
+            (int)zombieCursor == 70 ||
+            (int)zombieCursor == 72 ||
+            (int)zombieCursor == 73 ||
+            (int)zombieCursor == 75 ||
+            (int)zombieCursor == 78 ||
+            (int)zombieCursor == 79) holdingZombieSeed = false;
+
+            if ((int)plantCursor == 65 ||
+            (int)plantCursor == 68 ||
+            (int)plantCursor == 70 ||
+            (int)plantCursor == 72 ||
+            (int)plantCursor == 73 ||
+            (int)plantCursor == 75 ||
+            (int)plantCursor == 78 ||
+            (int)plantCursor == 79) holdingZombieSeed = false;
+
+
+            if (holdingZombieSeed)
+                {
+
+                int targetCol = __instance.PixelToGridX(
+                    __instance.mApp.m_widgetManager.LastMouseX[0],
+                    __instance.mApp.m_widgetManager.LastMouseY[0]
+                );
+                int targetCol2 = __instance.PixelToGridX(
+                    __instance.mApp.m_widgetManager.LastMouseX[1],
+                    __instance.mApp.m_widgetManager.LastMouseY[1]   
+                );
+
+                if (GridItemManager.GetAt(GridItemType.Crater, targetCol, theRow) != null ||
+                GridItemManager.GetAt(GridItemType.Crater, targetCol2, theRow) != null)
+                {
+                    var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
+                    if (activity != null)
+                    {
+                        activity.m_audioService.PlaySample(Constants.Sound.SOUND_BUZZER);
+                    }
+                    return false;
                 }
-                return true;
+
+                
             }
-        }
+
+            return true;
+            }
+        
 
 
 
@@ -740,6 +899,7 @@ public class Core : ReplantAPI
         [HarmonyPrefix]
         private static bool Prefix2(Board __instance, ZombieType theZombieType)
         {
+            if (!__instance.mApp.IsVersusMode()) return true;
             if (theZombieType == ZombieType.Flag){
                 var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
                 if (activity != null)
@@ -756,7 +916,7 @@ public class Core : ReplantAPI
       
     }
 
-    
+
 
     [HarmonyPatch(typeof(Board), nameof(Board.StartLevel))]
     internal static class SpawnTimerPatch
@@ -837,32 +997,39 @@ public class Core : ReplantAPI
             }
 
             if (i <= 5){
-                if (i % 2 == 0){
+                if (i % 2 == 0)
+                {
                     PlantManager.Spawn(i, random, SeedType.Doomshroom);
                     PlantManager.Spawn(i, random2, SeedType.Doomshroom);
 
                     PlantManager.Spawn(i, random, SeedType.InstantCoffee);
                     PlantManager.Spawn(i, random2, SeedType.InstantCoffee);
-                } else {
-                    //PlantManager.Spawn(i, random, SeedType.Doomshroom);
-
-                    //PlantManager.Spawn(i, random, SeedType.InstantCoffee);
-
-                    BoardManager.Board.mEnableGraveStones = true;
-                    BoardManager.Board.AddAGraveStone(i, random);
-
                 }
-                   
-                    
+                else
+                {
+                    PlantManager.Spawn(i, random, SeedType.Doomshroom);
+
+                    PlantManager.Spawn(i, random, SeedType.InstantCoffee);
+
+                    //BoardManager.Board.mEnableGraveStones = true;
+                    //BoardManager.Board.AddAGraveStone(i, random);
+
+                } 
                 
                 //BoardManager.Board.AddAGraveStone(i, random2);
 
-
             } else {
-                BoardManager.Board.mEnableGraveStones = true;
-                BoardManager.Board.AddAGraveStone(i, random);
-                BoardManager.Board.AddAGraveStone(i, random2);
+                PlantManager.Spawn(i, random, SeedType.Doomshroom);
+                PlantManager.Spawn(i, random2, SeedType.Doomshroom);
+
+                PlantManager.Spawn(i, random, SeedType.InstantCoffee);
+                PlantManager.Spawn(i, random2, SeedType.InstantCoffee);
             }
+            
+                //BoardManager.Board.mEnableGraveStones = true;
+                //BoardManager.Board.AddAGraveStone(i, random);
+                //BoardManager.Board.AddAGraveStone(i, random2);
+            
             yield return new WaitForSecondsRealtime(0.15f);
         }
 
@@ -877,19 +1044,21 @@ public class Core : ReplantAPI
         [HarmonyPrefix]
         private static bool Prefix(int theGridX, int theGridY, SeedType theType, ref PlantingReason __result)
         {
-            if (theType == SeedType.ZombieGravestone && 
-            GridItemManager.GetAt(GridItemType.Gravestone, theGridX, theGridY) != null)
+            if (( (int)theType >= 60 && (int)theType <= 80 ) && 
+            GridItemManager.GetAt(GridItemType.Crater, theGridX, theGridY) != null)
             {
-                __result = PlantingReason.NotOnGrave;
+                if ((int)theType == 65 ||
+                (int)theType == 68 ||
+                (int)theType == 70 ||
+                (int)theType == 72 ||
+                (int)theType == 73 ||
+                (int)theType == 75 ||
+                (int)theType == 78 ||
+                (int)theType == 79) return true;
+                __result = PlantingReason.NotOnCrater;
                 return false;
             }
 
-            if (theType == SeedType.ZombieGravestone &&
-            theGridX == 8)
-            {
-                __result = PlantingReason.NotHere;
-                return false;
-            }
             return true;
         }
     }

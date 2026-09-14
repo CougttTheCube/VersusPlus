@@ -91,11 +91,7 @@ internal class Timer2 : MonoBehaviour
                 RechargeText[i].fontSize = 55;
                 RechargeText[i].alignment = TextAlignmentOptions.Center;
                 RechargeText[i].characterSpacing = 2f;
-                //239.9179 968.0215 0
-                //729.949 448.5851 0
-                //-730.5 448 0
-                //-628 448 0
-                //-1481 900 0 -1481 910 0
+
                 RectTransform rect = RechargeText[i].GetComponent<RectTransform>();
                 //Set center which is the middle of the screen
                 rect.anchorMin = new Vector2(1f, 1f);
