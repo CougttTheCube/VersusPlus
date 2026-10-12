@@ -1,5 +1,5 @@
 ﻿#pragma warning disable SA1313 // Parameter names should begin with lower-case letter
-namespace VersusPlus;
+namespace VersusPlus.Helper;
 
 using HarmonyLib;
 

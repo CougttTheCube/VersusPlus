@@ -1,4 +1,4 @@
-﻿namespace VersusPlus;
+﻿namespace VersusPlus.Helper;
 
 using Il2CppReloaded.Data;
 

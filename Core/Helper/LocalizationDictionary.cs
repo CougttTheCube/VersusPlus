@@ -3,7 +3,7 @@
 using Il2CppTekly.Localizations;
 
 using CppCollections = Il2CppSystem.Collections.Generic;
-namespace VersusPlus;
+namespace VersusPlus.Helper;
 
 internal sealed class LocalizationDictionary
 {

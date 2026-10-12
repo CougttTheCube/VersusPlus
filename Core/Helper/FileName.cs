@@ -1,4 +1,7 @@
 ﻿#pragma warning disable
+// D1GQ - GetZombies Extension
+// https://github.com/D1GQ/ReplantedOnline/blob/3f1fe17378ec0c98ab9866aa74bb775a3fd71ff6/src/Modules/Modded/PriorityVar.cs#L8
+// https://github.com/D1GQ/ReplantedOnline/blob/3f1fe17378ec0c98ab9866aa74bb775a3fd71ff6/src/Utilities/Modded/PvZRUtils.cs#L147
 using System;
 using System.Collections.Generic;
 using System.Linq;

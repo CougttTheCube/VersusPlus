@@ -1,4 +1,4 @@
-﻿namespace VersusPlus;
+﻿namespace VersusPlus.UI;
 #pragma warning disable
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,7 @@ using Il2CppReloaded;
 using Il2CppReloaded.Data;
 using Il2CppReloaded.DataModels;
 using Il2CppReloaded.Gameplay;
+using Il2CppReloaded.Input;
 using Il2CppReloaded.Services;
 using Il2CppReloaded.TreeStateActivities;
 
@@ -37,7 +38,8 @@ using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 
 using static MelonLoader.MelonLogger;
-using static VersusPlus.Core;
+using VersusPlus.Core;
+using static VersusPlus.Core.Core;
 
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
@@ -55,7 +57,8 @@ internal class Timer2 : MonoBehaviour
 
     void Start()
     {
-        MelonLogger.Msg("Timer2 initialized!");
+
+        //MelonLogger.Msg("Timer2 initialized!");
         Canvas customCanvas = gameObject.AddComponent<Canvas>();
         customCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
 
@@ -179,25 +182,33 @@ internal class Timer2 : MonoBehaviour
                             elapsedTime[j] = (temp.mRefreshTime - temp.mRefreshCounter) / 100f;
 
                             RechargeText[j].color = Color.white;
-                            if (elapsedTime[j] >= 10) RechargeText[j].text = $"{elapsedTime[j]:0}";
+                            if (elapsedTime[j] >= 10) RechargeText[j].text = $"{(int)elapsedTime[j]}";
                             else  RechargeText[j].text = $"{elapsedTime[j]:0.0}";
 
 
                             if (temp.mActive || Mathf.Abs(elapsedTime[j] - temp.mRefreshTime) < 1e-9) RechargeText[j].color = new Color(1f, 1f, 1f, 0.0f);
-
+                            
                         }
                         else
                         {
                             elapsedTime2[j] = (temp.mRefreshTime - temp.mRefreshCounter) / 100f;
 
                             RechargeTextZ[j].color = Color.white;
-                            if (elapsedTime2[j] >= 10) RechargeTextZ[j].text = $"{elapsedTime2[j]:0}";
+                            if (elapsedTime2[j] >= 10) RechargeTextZ[j].text = $"{(int)elapsedTime2[j]}";
                             else RechargeTextZ[j].text = $"{elapsedTime2[j]:0.0}";
 
-      
-                            if (temp.mActive || Mathf.Abs(elapsedTime2[j] - temp.mRefreshTime) < 1e-9) RechargeTextZ[j].color = new Color(1f, 1f, 1f, 0.0f);
-
+                            if (BoardManager.Board.mApp.VersusMode.Phase == VersusPhase.SuddenDeath) {
+                                if (j == 0) RechargeTextZ[j].color = new Color(1f, 1f, 1f, 0.0f);
+                                else {
+                                    if (temp.mActive || Mathf.Abs(elapsedTime2[j] - temp.mRefreshTime) < 1e-9) RechargeTextZ[j].color = new Color(1f, 1f, 1f, 0.0f);
+                                }
+                            } else {
+                                if (temp.mActive || Mathf.Abs(elapsedTime2[j] - temp.mRefreshTime) < 1e-9) RechargeTextZ[j].color = new Color(1f, 1f, 1f, 0.0f);
+                            }
+                            
+                            
                         }
+                        
                     }
                 }
 

@@ -1,4 +1,4 @@
-﻿namespace VersusPlus;
+﻿namespace VersusPlus.Helper;
 
 internal sealed class LocalizationOverride
 {

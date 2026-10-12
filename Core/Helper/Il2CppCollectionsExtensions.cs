@@ -1,5 +1,5 @@
 ﻿using CppCollections = Il2CppSystem.Collections.Generic;
-namespace VersusPlus;
+namespace VersusPlus.Helper;
 
 public static class Il2CppCollectionsExtensions
 {
