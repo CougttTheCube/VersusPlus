@@ -149,7 +149,7 @@ public sealed class Patch2 : MelonMod
             if (__instance.mProjectileType != ProjectileType.Melon &&
             __instance.mProjectileType != ProjectileType.Wintermelon) return;
 
-            // Prevent target zombies and gravestones from taking Melonpult splash damage
+            // Prevent target zombies and gravestones from taking splash damage
             if (theZombie.mZombieType == ZombieType.Gravestone || theZombie.mZombieType == ZombieType.Target)
             {
                 if (__instance.mRow != theZombie.mRow)

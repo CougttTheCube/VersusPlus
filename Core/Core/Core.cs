@@ -768,61 +768,6 @@ public class Core : ReplantAPI
         }
 
     }
-    
-    /*
-    [HarmonyPatch(typeof(SeedChooserDataModel), nameof(SeedChooserDataModel.UpdateEntries))]
-    internal static class SeedChooserDataModel_UpdateEntries_Patch
-    {
-        [HarmonyPostfix]
-        private static void Postfix(SeedChooserDataModel __instance)
-        {
-            if (!__instance.m_seedChooserScreen.mApp.IsVersusMode()) return;
-            // Remove aquatic plants
-            //__instance.m_entriesModel.RemoveModel("16");
-            //__instance.m_entriesModel.RemoveModel("19");
-            //__instance.m_entriesModel.RemoveModel("24");
-
-            // Add Gatling Pea
-            //ChosenSeed gatlingPea = __instance.m_seedChooserScreen.mChosenSeeds[40];
-
-            // 2. Build entries manually up to Gatling Pea (40) and Twin Sunflower (41)
-
-            __instance.m_entriesModel.Clear();
-            for (int i = 0; i <= 48; i++)
-            {
-                if (i >= 42 && i <= 48) continue;
-
-                var plantChosenSeed = __instance.m_seedChooserScreen.mChosenSeeds[i];
-
-                SeedType seedType = (SeedType)i;
-                PlantDefinition plantDef = __instance.m_seedChooserScreen.mApp.GetPlantDefinition(seedType);
-
-                if (plantDef != null)
-                {
-                    SeedChooserEntryModel entryModel = new SeedChooserEntryModel(
-                        plantDef,
-                        plantChosenSeed,
-                        __instance.m_seedChooserScreen,
-                        __instance,
-                        false, 
-                        i
-                    );
-
-                    __instance.m_entriesModel.Add(i.ToString(), entryModel);
-
-                }
-            }
-
-            return;
-
-        }
-    }
-    */
-
-
-
-
-
 
 
 

@@ -50,14 +50,6 @@ using Zombie = Il2CppReloaded.Gameplay.Zombie;
 
 using System.Runtime.CompilerServices;
 
-// Todo:
-// - Add Balloon, Imp, Blover (done)
-// - Port over the patches
-// - Fix initial recharge
-// - Add a timer
-// - Detect the controllers
-// - Fix Random Mode
-// - (maybe) Add toggle button for Versus tooltips
 public sealed class Patch : MelonMod
 {
     public override void OnInitializeMelon()
