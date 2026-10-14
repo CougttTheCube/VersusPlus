@@ -12,10 +12,9 @@
 
 
 
-using VersusPlus.Core;
-using static VersusPlus.Core.Core;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.CompilerServices;
 
 using HarmonyLib;
@@ -29,6 +28,7 @@ using Il2CppReloaded.Data;
 using Il2CppReloaded.DataModels;
 using Il2CppReloaded.Gameplay;
 using Il2CppReloaded.Services;
+using Il2CppReloaded.Services.StreamPlayService;
 using Il2CppReloaded.TreeStateActivities;
 
 using Il2CppSource.Binders;
@@ -46,15 +46,15 @@ using ReplantAPI.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
-using static Il2CppReloaded.Constants;
+using VersusPlus.Core;
 
+using static Il2CppReloaded.Constants;
+using static MelonLoader.MelonLogger;
+using static VersusPlus.Core.Core;
 
 using Common = Il2CppReloaded.Gameplay.Common;
 using Vector2 = UnityEngine.Vector2;
 using Zombie = Il2CppReloaded.Gameplay.Zombie;
-
-using System.Runtime.CompilerServices;
-using Il2CppReloaded.Services.StreamPlayService;
 
 public sealed class Patch2 : MelonMod
 {
@@ -202,6 +202,10 @@ public sealed class Patch2 : MelonMod
         }
     }
 
+
+
+
+
     [HarmonyPatch(typeof(Plant), nameof(Plant.FindTargetZombie))]
     public static class PultTargetingPatch
     {
@@ -221,30 +225,7 @@ public sealed class Patch2 : MelonMod
             (__result.mZombieType != ZombieType.Gravestone && __result.mZombieType != ZombieType.Target))
                 return;
 
-            Zombie bestRealZombie = null;
-            float lowestX = 99999f;
-
-            foreach (var zombie in __instance.mBoard.GetZombies()) // Thank you D1GQ for GetZombies extension
-            {
-                if (zombie == null || zombie.mDead || zombie.mRow != __instance.mRow)
-                    continue;
-
-                if (zombie.mZombieType == ZombieType.Gravestone || 
-                    zombie.mZombieType == ZombieType.Target|| 
-                    zombie.mZombieType == ZombieType.Balloon)
-                    continue;
-
-                // Make sure the zombie is actually in front of the plant
-                if (zombie.mPosX > __instance.mX)
-                {
-                    // Find the one furthest left
-                    if (zombie.mPosX < lowestX)
-                    {
-                        lowestX = zombie.mPosX;
-                        bestRealZombie = zombie;
-                    }
-                }
-            }
+            Zombie bestRealZombie = getBestRealZombieInRow(__instance.mBoard, __instance.mRow, __instance.mX);
 
             // If null then result would be Gravestone/Target
             if (bestRealZombie != null)
@@ -252,8 +233,6 @@ public sealed class Patch2 : MelonMod
                 __result = bestRealZombie;
             }
         }
-
-
     }
 
 
@@ -264,36 +243,49 @@ public sealed class Patch2 : MelonMod
         {
             if (__instance.mMotionType != ProjectileMotion.Lobbed) return;
 
-
             if (__result != null &&
-               (__result.mZombieType == ZombieType.Gravestone || __result.mZombieType == ZombieType.Target)
-               && isRealZombieInRow(__instance.mApp.m_board, __result.mRow))
+               (__result.mZombieType == ZombieType.Gravestone || __result.mZombieType == ZombieType.Target))
             {
-                __result = null;
+                Zombie bestRealZombie = getBestRealZombieInRow(__instance.mBoard, __result.mRow);
+                if (bestRealZombie != null) __result = bestRealZombie;
             }
         }
     }
 
+    public static Zombie getBestRealZombieInRow(Board board, int row, float plantX = -99999f){
+        if (board == null) return null;
 
-    public static bool isRealZombieInRow(Board board, int row)
-    {
-        if (board == null) return false;
+        Zombie bestRealZombie = null;
+        float lowestX = 99999f;
 
-        foreach (var zombie in board.GetZombies())
+        foreach (var zombie in board.GetZombies()) // Thank you D1GQ for GetZombies extension
         {
             if (zombie == null || zombie.mDead || zombie.mRow != row)
                 continue;
 
-            if (zombie.mZombieType != ZombieType.Gravestone &&
-                zombie.mZombieType != ZombieType.Target &&
-                zombie.mZombieType != ZombieType.Balloon)
+            if (zombie.mZombieType == ZombieType.Gravestone ||
+                zombie.mZombieType == ZombieType.Target ||
+                zombie.mZombieType == ZombieType.Balloon)
+                continue;
+
+            // Make sure the zombie is actually in front of the plant
+            if (zombie.mPosX > plantX)
             {
-                return true;
+                // Find the one furthest left
+                if (zombie.mPosX < lowestX)
+                {
+                    lowestX = zombie.mPosX;
+                    bestRealZombie = zombie;
+                }
             }
         }
-
-        return false;
+        return bestRealZombie;
     }
+
+
+
+
+
 
     // Select Sunflower to swap
     // ts just mumbo jumbo code, need to fix
