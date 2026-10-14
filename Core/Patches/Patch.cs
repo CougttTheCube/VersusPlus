@@ -125,7 +125,7 @@ public sealed class Patch : MelonMod
 
 
 
-    // i dont remember if this is useful
+    // i dont remember if this is useful, but i swear if i delete it something bad happens
     [HarmonyPatch(typeof(FocusCircleController), nameof(FocusCircleController.OnEnable))]
     public static class SuppressFocusPatch
     {
@@ -159,12 +159,19 @@ public sealed class Patch : MelonMod
             if (__instance.mZombieType == ZombieType.Gravestone)
             {
                 
-                
                 __instance.mController.m_scale = new(1.2f, 1.2f);
                 __instance.mController.m_visualOffset = new(125f, -335, 0f);
                 __instance.mController.m_shadowController.m_shadowImageOffset = new(-0f, -0f, 0f);
                 __instance.mController.m_shadowController.transform.localScale = new(0f, 0f, 0f);
+                
+                var rect2 = __instance.mZombieRect;
+                rect2.x += 14f;
+                __instance.mZombieRect = rect2;
             }
+            var rect = __instance.mZombieRect;
+            rect.y += 55f;
+            __instance.mZombieRect = rect;
+
         }
     }
 

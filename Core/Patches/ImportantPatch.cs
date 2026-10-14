@@ -54,7 +54,7 @@ using Vector2 = UnityEngine.Vector2;
 using Zombie = Il2CppReloaded.Gameplay.Zombie;
 
 using System.Runtime.CompilerServices;
-
+using Il2CppReloaded.Services.StreamPlayService;
 
 public sealed class Patch2 : MelonMod
 {
@@ -202,12 +202,11 @@ public sealed class Patch2 : MelonMod
         }
     }
 
-
-
-    // Catapult plants prioritize zombies over gravestones
     [HarmonyPatch(typeof(Plant), nameof(Plant.FindTargetZombie))]
     public static class PultTargetingPatch
     {
+        // Catapult plants prioritize zombies over gravestones
+
         [HarmonyPostfix]
         public static void Postfix(Plant __instance, ref Zombie __result)
         {
@@ -253,10 +252,48 @@ public sealed class Patch2 : MelonMod
                 __result = bestRealZombie;
             }
         }
+
+
     }
 
 
+    [HarmonyPatch(typeof(Projectile), nameof(Projectile.FindCollisionTarget))]
+    internal static class xd{
+        [HarmonyPostfix]
+        public static void Postfix(Projectile __instance, ref Zombie __result)
+        {
+            if (__instance.mMotionType != ProjectileMotion.Lobbed) return;
 
+
+            if (__result != null &&
+               (__result.mZombieType == ZombieType.Gravestone || __result.mZombieType == ZombieType.Target)
+               && isRealZombieInRow(__instance.mApp.m_board, __result.mRow))
+            {
+                __result = null;
+            }
+        }
+    }
+
+
+    public static bool isRealZombieInRow(Board board, int row)
+    {
+        if (board == null) return false;
+
+        foreach (var zombie in board.GetZombies())
+        {
+            if (zombie == null || zombie.mDead || zombie.mRow != row)
+                continue;
+
+            if (zombie.mZombieType != ZombieType.Gravestone &&
+                zombie.mZombieType != ZombieType.Target &&
+                zombie.mZombieType != ZombieType.Balloon)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     // Select Sunflower to swap
     // ts just mumbo jumbo code, need to fix
@@ -305,4 +342,8 @@ public sealed class Patch2 : MelonMod
             ChosenSeedPatch.hasRun = false;
         }
     }
+
+
+
+    
 }
