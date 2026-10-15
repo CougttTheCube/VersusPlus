@@ -163,14 +163,16 @@ public sealed class Patch : MelonMod
                 __instance.mController.m_visualOffset = new(125f, -335, 0f);
                 __instance.mController.m_shadowController.m_shadowImageOffset = new(-0f, -0f, 0f);
                 __instance.mController.m_shadowController.transform.localScale = new(0f, 0f, 0f);
-                
+                /*
                 var rect2 = __instance.mZombieRect;
                 rect2.x += 14f;
                 __instance.mZombieRect = rect2;
+                */
+                __instance.mZombieRect = new(50f, 50f, __instance.mZombieRect.width, __instance.mZombieRect.height);
             }
-            var rect = __instance.mZombieRect;
-            rect.y += 55f;
-            __instance.mZombieRect = rect;
+            //var rect = __instance.mZombieRect;
+            //rect.y += 55f;
+            //__instance.mZombieRect = rect;
 
         }
     }

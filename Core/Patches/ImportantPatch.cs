@@ -63,6 +63,37 @@ public sealed class Patch2 : MelonMod
         this.LoggerInstance.Msg("Loading Versus Important patches...");
 
     }
+    public static class isFumeshroomAttacking
+    {
+        public static bool IsFumeshroomAttacking = false;
+    }
+
+
+    [HarmonyPatch(typeof(Plant), nameof(Plant.Fire))]
+    public static class FumeshroomAttackScopePatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(Plant __instance)
+        {
+            if (__instance.mSeedType == SeedType.Fumeshroom)
+            {
+                isFumeshroomAttacking.IsFumeshroomAttacking = true;
+                //MelonLogger.Msg("Fume-shroom fires!");
+            }
+
+        }
+
+        [HarmonyPostfix]
+        public static void Postfix()
+        {
+            isFumeshroomAttacking.IsFumeshroomAttacking = false;
+            //MelonLogger.Msg("Fume-shroom stops firing!");
+        }
+    }
+
+
+
+
 
     // Hypnotized zombies will not eat target and gravestone
     // Fume-shroom will not hit thru gravestones and targets behind one
@@ -94,6 +125,7 @@ public sealed class Patch2 : MelonMod
         {
             // Make Target Zombies and Gravestones invulnerable when behind another gravestone
             // This is a direct fix to Fumeshroom OP piercing logic
+            if (!isFumeshroomAttacking.IsFumeshroomAttacking) return;
             if (__instance.mZombieType != ZombieType.Gravestone && __instance.mZombieType != ZombieType.Target) return;
 
             foreach (var gravestone in __instance.mBoard.m_vsGravestones)
@@ -137,7 +169,7 @@ public sealed class Patch2 : MelonMod
         }
     }
 
-
+    
     // Gravestones and Targets don't take splash damage
     [HarmonyPatch]
     internal static class Gravestone_Target_SplashDamagePatch
@@ -160,6 +192,7 @@ public sealed class Patch2 : MelonMod
             }
         }
     }
+    
 
 
 
@@ -236,7 +269,7 @@ public sealed class Patch2 : MelonMod
         }
     }
 
-    
+    // find a way to shorten gravestone hitbox
     [HarmonyPatch(typeof(Projectile), nameof(Projectile.FindCollisionTarget))]
     internal static class xd{
         [HarmonyPostfix]
@@ -248,10 +281,12 @@ public sealed class Patch2 : MelonMod
             __instance.mProjectileType == ProjectileType.Kernel ||
             __instance.mProjectileType == ProjectileType.Butter ||
             __instance.mProjectileType == ProjectileType.Wintermelon ||
-            __instance.mProjectileType == ProjectileType.Melon){
+            __instance.mProjectileType == ProjectileType.Melon)
+            {
 
-                //if (__result != null) 
-                //    MelonLogger.Msg("Zombie before collided with projectile:" + __result.mZombieType);
+
+                if (__result != null) 
+                    //MelonLogger.Msg("Zombie before collided with projectile:" + __result.mZombieType);
 
                 if (__result != null &&
                    (__result.mZombieType == ZombieType.Gravestone || __result.mZombieType == ZombieType.Target))
@@ -260,8 +295,10 @@ public sealed class Patch2 : MelonMod
                     if (bestRealZombie != null)
                     {
                         __result = bestRealZombie;
-
                         //MelonLogger.Msg("Zombie collided with projectile:" + bestRealZombie.mZombieType);
+
+
+
                     }
                 }
             }
@@ -272,7 +309,7 @@ public sealed class Patch2 : MelonMod
     
 
 
-    public static Zombie getBestRealZombieInRow(Board board, int row, float plantX = -99999f){
+    public static Zombie getBestRealZombieInRow(Board board, int row, float plantX = -9999f){
         if (board == null) return null;
 
         Zombie bestRealZombie = null;
@@ -306,6 +343,8 @@ public sealed class Patch2 : MelonMod
 
 
 
+
+    
 
     // Select Sunflower to swap
     // ts just mumbo jumbo code, need to fix
@@ -356,6 +395,4 @@ public sealed class Patch2 : MelonMod
     }
 
 
-
-    
 }
