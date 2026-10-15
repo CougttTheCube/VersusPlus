@@ -5,11 +5,9 @@
 // https://github.com/D1GQ/ReplantedOnline/blob/main/src/Network/Reloaded/Client/Object/Gameplay/ZombieComponents/GravestoneNetworkComponent.cs
 
 
-using VersusPlus.Core;
-using static VersusPlus.Core.Core;
-
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.CompilerServices;
 
 using HarmonyLib;
@@ -29,6 +27,8 @@ using Il2CppSource.Binders;
 using Il2CppSource.Controllers;
 using Il2CppSource.DataModels;
 
+using Il2CppSpine.Unity;
+
 using Il2CppSystem.Numerics;
 
 using Il2CppTMPro;
@@ -40,15 +40,15 @@ using ReplantAPI.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
+using VersusPlus.Core;
+
 using static Il2CppReloaded.Constants;
-
-
+using static MelonLoader.MelonLogger;
+using static VersusPlus.Core.Core;
 
 using Common = Il2CppReloaded.Gameplay.Common;
 using Vector2 = UnityEngine.Vector2;
 using Zombie = Il2CppReloaded.Gameplay.Zombie;
-
-using System.Runtime.CompilerServices;
 
 public sealed class Patch : MelonMod
 {
@@ -199,7 +199,7 @@ public sealed class Patch : MelonMod
     }
 
 
-
+    // Fix upgraded plants offset (except Winter Melon)
     [HarmonyPatch(typeof(Plant), nameof(Plant.PlantInitialize))]
     public static class PlantInitPatch
     {
@@ -223,6 +223,92 @@ public sealed class Patch : MelonMod
 
                 __instance.mController.m_visualOffset = currentOffset;
            }
+        }
+    }
+
+    [HarmonyPatch(typeof(PlantController), nameof(PlantController.OnInit))]
+    public static class PlantControllerOffsetPatch
+    {
+        public static void Postfix(EffectController __instance)
+        {
+            if (__instance.gameObject.name.Contains("CoffeeBean"))
+            {
+                __instance.VisualOffset = new UnityEngine.Vector3(125f, -135f, 0f);
+                __instance.m_scale = new UnityEngine.Vector2(1.2f, 1.2f);
+            }
+
+
+        }
+    }
+
+    // Fix Wall-nut bite particles offset
+    [HarmonyPatch(typeof(EffectController), nameof(EffectController.OnEnable))]
+    public static class EffectControllerOffsetPatch
+    {
+        public static void Postfix(EffectController __instance)
+        {
+            if (__instance.gameObject.name.Contains("P_WallnutEatSmall"))
+            {
+                __instance.VisualOffset = new UnityEngine.Vector3(23f, -20f, 0f);
+            }
+            else if (__instance.gameObject.name.Contains("P_FumeShroomCloud"))
+            {
+                __instance.VisualOffset = new UnityEngine.Vector3(78f, 11f, 0f);
+            }
+            else if (__instance.gameObject.name.Contains("P_PeaSplat"))
+            {
+                float random = UnityEngine.Random.Range(32, 39);
+                __instance.VisualOffset = new UnityEngine.Vector3(-34f, -random, 0f);
+            }
+            else if (__instance.gameObject.name.Contains("P_Wintermelon"))
+            {
+                //__instance.VisualOffset = new UnityEngine.Vector3(-25f, -100f, 0f);
+            }
+            else if (__instance.gameObject.name.Contains("P_MelonSplash"))
+            {
+                //__instance.VisualOffset = new UnityEngine.Vector3(-25f, -100f, 0f);
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(ProjectileController), nameof(ProjectileController.OnInit))]
+    public static class ProjectileControllerOffsetPatch
+    {
+        public static void Postfix(ProjectileController __instance)
+        {
+            if (__instance.gameObject.name.Contains("Projectile-Pea"))
+            {
+                __instance.VisualOffset = new UnityEngine.Vector3(0f, -15f, 0f);
+            }
+        }
+    }
+
+
+
+
+    [HarmonyPatch(typeof(Camera), nameof(Camera.set_orthographicSize_Injected))]
+    public static class CameraOrthoPatch
+    {
+        [HarmonyPrefix]
+        public static void Prefix(Camera __instance, ref float value)
+        {
+            if (__instance != null && __instance.CompareTag("MainCamera"))
+            {
+                value = 1000f;
+            }
+        }
+    }
+
+
+    [HarmonyPatch(typeof(ReanimationController), nameof(ReanimationController.StartCoroutine))]
+    public static class ReanimationControllerOffsetPatch
+    {
+        public static void Postfix(EffectController __instance)
+        {
+            if (__instance.gameObject.name.Contains("P_Reanim_ZenGargen_Phonograph(Clone)"))
+            {
+                __instance.m_animRate = 0.8f;
+            }
         }
     }
 }

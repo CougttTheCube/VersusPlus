@@ -231,26 +231,48 @@ public sealed class Patch2 : MelonMod
             if (bestRealZombie != null)
             {
                 __result = bestRealZombie;
+                //MelonLogger.Msg("Zombie nearest:" + bestRealZombie.mZombieType);
             }
         }
     }
 
-
+    
     [HarmonyPatch(typeof(Projectile), nameof(Projectile.FindCollisionTarget))]
     internal static class xd{
         [HarmonyPostfix]
         public static void Postfix(Projectile __instance, ref Zombie __result)
         {
-            if (__instance.mMotionType != ProjectileMotion.Lobbed) return;
+            if (__instance == null || __instance.mBoard == null) return;
 
-            if (__result != null &&
-               (__result.mZombieType == ZombieType.Gravestone || __result.mZombieType == ZombieType.Target))
-            {
-                Zombie bestRealZombie = getBestRealZombieInRow(__instance.mBoard, __result.mRow);
-                if (bestRealZombie != null) __result = bestRealZombie;
+            if (__instance.mProjectileType == ProjectileType.Cabbage ||
+            __instance.mProjectileType == ProjectileType.Kernel ||
+            __instance.mProjectileType == ProjectileType.Butter ||
+            __instance.mProjectileType == ProjectileType.Wintermelon ||
+            __instance.mProjectileType == ProjectileType.Melon){
+
+                if (__result != null) 
+                    //MelonLogger.Msg("Zombie before collided with projectile:" + __result.mZombieType);
+
+                if (__result != null &&
+                   (__result.mZombieType == ZombieType.Gravestone || __result.mZombieType == ZombieType.Target))
+                {
+                    Zombie bestRealZombie = getBestRealZombieInRow(__instance.mBoard, __result.mRow);
+                    if (bestRealZombie != null)
+                    {
+                        __result = bestRealZombie;
+
+                        //MelonLogger.Msg("Zombie collided with projectile:" + bestRealZombie.mZombieType);
+                    } else {
+                        __result = null;
+                    }
+                }
             }
+
+            
         }
     }
+    
+
 
     public static Zombie getBestRealZombieInRow(Board board, int row, float plantX = -99999f){
         if (board == null) return null;
