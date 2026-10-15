@@ -250,8 +250,8 @@ public sealed class Patch2 : MelonMod
             __instance.mProjectileType == ProjectileType.Wintermelon ||
             __instance.mProjectileType == ProjectileType.Melon){
 
-                if (__result != null) 
-                    //MelonLogger.Msg("Zombie before collided with projectile:" + __result.mZombieType);
+                //if (__result != null) 
+                //    MelonLogger.Msg("Zombie before collided with projectile:" + __result.mZombieType);
 
                 if (__result != null &&
                    (__result.mZombieType == ZombieType.Gravestone || __result.mZombieType == ZombieType.Target))
@@ -262,8 +262,6 @@ public sealed class Patch2 : MelonMod
                         __result = bestRealZombie;
 
                         //MelonLogger.Msg("Zombie collided with projectile:" + bestRealZombie.mZombieType);
-                    } else {
-                        __result = null;
                     }
                 }
             }
