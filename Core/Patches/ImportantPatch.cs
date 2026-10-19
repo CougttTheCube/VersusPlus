@@ -37,6 +37,8 @@ using Il2CppSource.DataModels;
 
 using Il2CppSystem.Numerics;
 
+using Il2CppTekly.Injectors;
+
 using Il2CppTMPro;
 
 using MelonLoader;
@@ -341,13 +343,38 @@ public sealed class Patch2 : MelonMod
 
 
 
+    [HarmonyPatch(typeof(VersusMode), nameof(VersusMode.ClearBoard))]
+    internal static class clearboard
+    {
+        [HarmonyPrefix]
+
+        private static bool Prefix()
+        {
+            return false;
 
 
+        }
 
-    
+    }
+    /*
+    [HarmonyPatch(typeof(VersusMode), nameof(VersusMode.Initialize))]
+    internal static class UpdatePickSide
+    {
+        [HarmonyPostfix]
+        private static void Postfix(VersusMode __instance)
+        {
+            if (__instance.m_app != null)
+            {
+                __instance.m_app.VersusMode.Phase = VersusPhase.ChooseZombiePacket;
+            }
+        }
+    }
+    */
+
 
     // Select Sunflower to swap
     // ts just mumbo jumbo code, need to fix
+
     [HarmonyPatch(typeof(ChosenSeed), nameof(ChosenSeed.Selected))]
     internal static class ChosenSeedPatch
     {
@@ -356,28 +383,20 @@ public sealed class Patch2 : MelonMod
 
         private static void Prefix(SeedChooserScreen seedChooserScreen, int playerIndex, ChosenSeed __instance)
         {
+            
             if (!seedChooserScreen.mApp.IsVersusMode()) return;
             if (hasRun) return;
 
-            if (playerIndex == 0)
-            {
-                playerIndex = 1;
-
-            }
-            else if (playerIndex == 1)
-            {
-                playerIndex = 0;
-
-            }
             hasRun = true;
+            
             //GameplayActivity.VersusMode.Phase = VersusPhase.ChooseZombiePacket;
             seedChooserScreen.mApp.VersusMode.Phase = VersusPhase.ChooseZombiePacket;
-
+            
 
         }
 
     }
-
+    
     [HarmonyPatch(typeof(LoadSceneActivity), nameof(LoadSceneActivity.IsDoneLoading))]
     internal static class W
     {
@@ -394,5 +413,6 @@ public sealed class Patch2 : MelonMod
         }
     }
 
+    
 
 }

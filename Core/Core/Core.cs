@@ -7,6 +7,7 @@
 
 using static VersusPlus.Helper.CoreHelper;
 using VersusPlus.UI;
+using UnityEngine.UI;
 using static VersusPlus.UI.Concede0;
 using static VersusPlus.UI.Timer;
 using static VersusPlus.UI.Timer2;
@@ -253,7 +254,7 @@ public class Core : ReplantAPI
 
         // Player 0: Mouse Right-Click OR their assigned Gamepad B
         bool p0Pressed = Input.GetKey(KeyCode.Mouse1) || p0GamepadB;
-        if (p0Pressed)
+        if (p0Pressed && BoardManager.Board != null && BoardManager.Board.mApp.IsVersusMode() && BoardManager.Board.mApp.m_versusMode.m_gameplayInitialized)
         {
             holdDuration += Time.deltaTime;
         }
@@ -264,7 +265,7 @@ public class Core : ReplantAPI
 
         // Player 1: Their assigned Gamepad B (Player 1 can never be mouse)
         bool p1Pressed = p1GamepadB;
-        if (p1Pressed)
+        if (p1Pressed && BoardManager.Board != null && BoardManager.Board.mApp.IsVersusMode() && BoardManager.Board.mApp.m_versusMode.m_gameplayInitialized)
         {
             holdDuration2 += Time.deltaTime;
         }
@@ -569,6 +570,9 @@ public class Core : ReplantAPI
             }
             
         }
+
+
+        
 
 
     }

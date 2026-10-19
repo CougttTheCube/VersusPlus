@@ -228,6 +228,7 @@ public sealed class Patch : MelonMod
         }
     }
 
+    // Coffee bean size patch
     [HarmonyPatch(typeof(PlantController), nameof(PlantController.OnInit))]
     public static class PlantControllerOffsetPatch
     {
@@ -238,8 +239,28 @@ public sealed class Patch : MelonMod
                 __instance.VisualOffset = new UnityEngine.Vector3(125f, -135f, 0f);
                 __instance.m_scale = new UnityEngine.Vector2(1.2f, 1.2f);
             }
+        }
 
-
+        public static void Postfix(PlantController __instance)
+        {
+            if (__instance.gameObject.name.Contains("SplitPea"))
+            {
+                //__instance.AnimationController.SkeletonAnimation.timeScale = 0.7f;
+                /*
+                foreach (var x in __instance.AnimationController.SkeletonAnimation.state.tracks){
+                    if (x != null && x.Animation != null && x.Animation.Name.Contains("head_idle")){
+                        x.timeScale = 1f;
+                       
+                    }
+                    if (x != null && x.Animation != null && x.Animation.Name.Contains("idle"))
+                    {
+                        x.timeScale = 1f;
+                        
+                    }
+                }
+                */
+            }
+            
         }
     }
 
@@ -255,7 +276,7 @@ public sealed class Patch : MelonMod
             }
             else if (__instance.gameObject.name.Contains("P_FumeShroomCloud"))
             {
-                __instance.VisualOffset = new UnityEngine.Vector3(78f, 11f, 0f);
+                __instance.VisualOffset = new UnityEngine.Vector3(75f, 11f, 0f);
             }
             else if (__instance.gameObject.name.Contains("P_PeaSplat"))
             {
@@ -270,6 +291,7 @@ public sealed class Patch : MelonMod
             {
                 //__instance.VisualOffset = new UnityEngine.Vector3(-25f, -100f, 0f);
             }
+            
         }
     }
 
@@ -282,35 +304,39 @@ public sealed class Patch : MelonMod
             {
                 __instance.VisualOffset = new UnityEngine.Vector3(0f, -15f, 0f);
             }
-        }
-    }
-
-
-
-
-    [HarmonyPatch(typeof(Camera), nameof(Camera.set_orthographicSize_Injected))]
-    public static class CameraOrthoPatch
-    {
-        [HarmonyPrefix]
-        public static void Prefix(Camera __instance, ref float value)
-        {
-            if (__instance != null && __instance.CompareTag("MainCamera"))
+            else if (__instance.gameObject.name.Contains("Projectile-Star"))
             {
-                value = 1000f;
+                __instance.ObjectOffset = new Unity.Mathematics.float2(-5f, 3f);
             }
         }
     }
 
 
-    [HarmonyPatch(typeof(ReanimationController), nameof(ReanimationController.StartCoroutine))]
-    public static class ReanimationControllerOffsetPatch
+
+    [HarmonyPatch(typeof(Zombie), nameof(Zombie.WalkIntoHouse))]
+    public static class BoardMovePatch
     {
-        public static void Postfix(EffectController __instance)
+        public static bool isZombieWalkIntoHouse = false;
+        public static void Prefix()
         {
-            if (__instance.gameObject.name.Contains("P_Reanim_ZenGargen_Phonograph(Clone)"))
-            {
-                __instance.m_animRate = 0.8f;
+            isZombieWalkIntoHouse = true;
+        }
+
+    }
+
+    [HarmonyPatch(typeof(Board), nameof(Board.Move))]
+    public static class FreezeCameraPatch
+    {
+        // Returning false skips the original Move method execution,
+        // locking the camera in place.
+        public static bool Prefix()
+        {
+            if (BoardMovePatch.isZombieWalkIntoHouse) {
+                BoardMovePatch.isZombieWalkIntoHouse = false;
+                return false; 
             }
+            return true;
+
         }
     }
 }
