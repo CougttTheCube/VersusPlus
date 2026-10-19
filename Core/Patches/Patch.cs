@@ -41,6 +41,7 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using VersusPlus.Core;
+using VersusPlus.UI;
 
 using static Il2CppReloaded.Constants;
 using static MelonLoader.MelonLogger;
@@ -312,7 +313,7 @@ public sealed class Patch : MelonMod
     }
 
 
-
+    // Camera doesn't pan when zombie walk into house anymore
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.WalkIntoHouse))]
     public static class BoardMovePatch
     {
@@ -327,8 +328,7 @@ public sealed class Patch : MelonMod
     [HarmonyPatch(typeof(Board), nameof(Board.Move))]
     public static class FreezeCameraPatch
     {
-        // Returning false skips the original Move method execution,
-        // locking the camera in place.
+        // Returning false skips the original Move method => locking camera (because i like it)
         public static bool Prefix()
         {
             if (BoardMovePatch.isZombieWalkIntoHouse) {
@@ -339,5 +339,7 @@ public sealed class Patch : MelonMod
 
         }
     }
+    
+
 }
 

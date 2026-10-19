@@ -72,12 +72,11 @@ internal class Timer2 : MonoBehaviour
         scaler.screenMatchMode = CanvasScaler.ScreenMatchMode.MatchWidthOrHeight;
         scaler.matchWidthOrHeight = 0.5f;
 
-        // Find the exact container that holds the seed bank
         GameObject seedContainerPlants = GameObject.Find("Panels/P_Gameplay_MainHUD/Canvas/Layout/Center/TopLeftLayout/SeedBankContainer/SeedBank/SeedPacks_Layout");
         GameObject seedContainerZombies = GameObject.Find("Panels/P_Gameplay_MainHUD/Canvas/Layout/Center/VersusBank/VersusBankContainer/P_VsZombiePacks_Layout");
 
 
-        // 2. Create the timer text object under the HUD hierarchy
+        // Create the live recharge text objects
 
         if (seedContainerPlants != null)
         {

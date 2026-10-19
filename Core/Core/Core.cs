@@ -72,7 +72,7 @@ using VersusPlus.Patches;
 using VersusPlus.Helper;
 
 using Vector2 = UnityEngine.Vector2;
-
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 public class Core : ReplantAPI
 {
@@ -113,9 +113,13 @@ public class Core : ReplantAPI
 
     private bool connected = false;
 
-    private static UnityEngine.InputSystem.Gamepad p0Pad = null;
-    private static UnityEngine.InputSystem.Gamepad p1Pad = null;
+    public static UnityEngine.InputSystem.Gamepad p0Pad = null;
+    public static UnityEngine.InputSystem.Gamepad p1Pad = null;
     public static int random;
+
+    public static bool isp0Gamepad = false;
+    public static bool isp1Gamepad = false;
+
     internal static class BloomConfig
     {
         public static BoolConfigInput TestBoolInput { get; } = ConfigService.CreateBool(
@@ -220,6 +224,8 @@ public class Core : ReplantAPI
         ModMenuService.CreateEntry(this)
             .AddIcon(AssetHelper.LoadSprite<Core>("VersusPlus.Resources.icon.png"));
 
+
+
     }
 
 
@@ -229,6 +235,46 @@ public class Core : ReplantAPI
         base.OnUpdate();
         if (!BoardManager.IsLoaded) return;
 
+        
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            /*
+                foreach (var device in InputSystem.devices)
+                    MelonLogger.Msg($"{device.name} | {device.displayName} | {device.layout}");
+
+                var pads = Gamepad.all;   // all connected gamepads, in connection order
+
+                for (int i = 0; i < pads.Count; i++)
+                {
+                    var pad = pads[i];
+                    MelonLogger.Msg($"Pad {i}: {pad.displayName} | id {pad.deviceId} | name {pad.name}");
+                }
+                if (pads.Count == 1)
+                {
+                    p2Only = pads[0];
+                }
+                if (pads.Count >= 2)
+                {
+                    Gamepad p1 = pads[0];
+                    Gamepad p2 = pads[1];
+                }
+                */
+            GameObject subheadingObj = GameObject.Find("GlobalPanels(Clone)/P_PopUpMessage02/Canvas/Layout/Center/Window/SubheadingText");
+
+            if (subheadingObj != null)
+            {
+                var tmpText = subheadingObj.GetComponent<TextMeshProUGUI>();
+                if (tmpText != null)
+                {
+                    tmpText.text = "quandale dingle";
+                }
+            }
+        }
+        
+
+        
+
+
         // Detect input for both players
 
         var cursor0 = CursorManager.GetCursor(0);
@@ -237,20 +283,27 @@ public class Core : ReplantAPI
         bool p0GamepadB = false;
         bool p1GamepadB = false;
 
+        // check whether p0, p1 is gamepad or not
+
+
         if (cursor0 != null && cursor0.m_player != null)
         {
-            if (cursor0.m_player.TryGetGamepad(out Gamepad p0Pad) && p0Pad != null)
+            isp0Gamepad = cursor0.m_player.TryGetGamepad(out p0Pad) && p0Pad != null;
+            if (isp0Gamepad)
             {
                 p0GamepadB = p0Pad.bButton.isPressed;
             }
         }
         if (cursor1 != null && cursor1.m_player != null)
         {
-            if (cursor1.m_player.TryGetGamepad(out Gamepad p1Pad) && p1Pad != null)
+            isp1Gamepad = cursor1.m_player.TryGetGamepad(out p1Pad) && p1Pad != null;
+            if (isp1Gamepad)
             {
                 p1GamepadB = p1Pad.bButton.isPressed;
             }
         }
+
+        
 
         // Player 0: Mouse Right-Click OR their assigned Gamepad B
         bool p0Pressed = Input.GetKey(KeyCode.Mouse1) || p0GamepadB;
@@ -572,8 +625,8 @@ public class Core : ReplantAPI
         }
 
 
-        
 
+        
 
     }
 
