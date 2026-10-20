@@ -239,4 +239,52 @@ public class CoreHelper : ReplantAPI
 
 
     }
+
+
+    public static void MovePlantTitle(float xOffset, float yOffset)
+    {
+        GameObject titleObj = Resources.FindObjectsOfTypeAll<GameObject>()
+        .FirstOrDefault(g => g.name == "Title" &&
+                             g.transform.parent != null &&
+                             g.transform.parent.name == "SidePlants");
+
+        if (titleObj != null)
+        {
+            RectTransform rect = titleObj.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                // Set custom anchored position (X, Y)
+                rect.localPosition = new UnityEngine.Vector3(xOffset, yOffset, 0);
+                MelonLogger.Msg("Moved plant title!!");
+            }
+        }
+    }
+
+    public static void CameraZooming(int value){
+        if (Camera.main != null)
+        {
+            Camera.main.orthographicSize = value;
+        }
+    }
+
+    public static void FlipZombieAvatar()
+    {
+        GameObject titleObj = Resources.FindObjectsOfTypeAll<GameObject>()
+        .FirstOrDefault(g => g.name == "ZombieAvatar" &&
+                             g.transform.parent != null &&
+                             g.transform.parent.name == "PlayerAvatar");
+
+        if (titleObj != null)
+        {
+            RectTransform rect = titleObj.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                // Set custom anchored position (X, Y)
+                rect.localScale = new UnityEngine.Vector3(-1, 1, 1);
+                rect.localPosition = new UnityEngine.Vector3(4f, 7.2f, 0);
+                MelonLogger.Msg("Flipped zombie avatar!");
+            }
+        }
+    }
+
 }

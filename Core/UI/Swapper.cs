@@ -86,14 +86,23 @@ public class SpriteSwapper : MonoBehaviour
             if (nameUpper.Contains("XBOX") || nameUpper.Contains("XINPUT"))
                 spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_XboxOne_Plant");
 
-            else if (nameUpper.Contains("GENERIC"))
-                spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_Generic_Plant");
-
             else if (nameUpper.Contains("PS4") || nameUpper.Contains("DUALSHOCK"))
                 spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_PS4_Plant");
 
             else if (nameUpper.Contains("PS5") || nameUpper.Contains("DUALSENSE"))
                 spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_PS5_Plant");
+
+            else if (nameUpper.Contains("STEAMDECK"))
+                spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_Steamdeck_Plant");
+
+            else if (nameUpper.Contains("BLUE"))
+                spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_Switch1Blue_Plant");
+
+            else if (nameUpper.Contains("RED"))
+                spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_Switch1Red_Plant");
+
+            else 
+                spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_Generic_Plant");
 
 
             Sprite spriteEmptyPlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_Empty_Plant");
@@ -123,19 +132,25 @@ public class SpriteSwapper : MonoBehaviour
 
             // get all plant sprite, because it's already loaded along w/ empty bg
             Sprite spritePlant = null;
-            string nameUpper = controllerName?.ToUpperInvariant() ?? "";
+            string nameUpper = controllerName.ToUpperInvariant() ?? "";
 
             if (nameUpper.Contains("XBOX") || nameUpper.Contains("XINPUT"))
                 spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_XboxOne_Zombie");
-
-            else if (nameUpper.Contains("GENERIC"))
-                spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_Generic_Zombie");
 
             else if (nameUpper.Contains("PS4") || nameUpper.Contains("DUALSHOCK"))
                 spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_PS4_Zombie");
 
             else if (nameUpper.Contains("PS5") || nameUpper.Contains("DUALSENSE"))
                 spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_PS5_Zombie");
+
+            else if (nameUpper.Contains("BLUE"))
+                spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_Switch1Blue_Zombie");
+
+            else if (nameUpper.Contains("RED"))
+                spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_Switch1Red_Zombie");
+
+            else
+                spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_Generic_Zombie");
 
 
             Sprite spriteEmptyPlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_Empty_Zombie");
@@ -167,7 +182,10 @@ public class SpriteSwapper : MonoBehaviour
         public static string ActivePlantInput = null;
         public static string ActiveZombieInput = null;
     }
+    
+    public static void UpdatePlayerHelper(){
 
+    }
 
 
     [HarmonyPatch(typeof(VersusDataModel), nameof(VersusDataModel.UpdatePlantsPlayer))]

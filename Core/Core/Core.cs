@@ -696,7 +696,9 @@ public class Core : ReplantAPI
             def.m_versusSuddenDeathRefreshTime = def.m_versusBaseRefreshTime;
 
         }
-
+        MovePlantTitle(-44f, -472.5f);
+        CameraZooming(1000);
+        FlipZombieAvatar();
         /*
          * Not related to Vs Mode
         foreach (var obj in allDefs){
@@ -717,7 +719,7 @@ public class Core : ReplantAPI
             }
         }
         */
-        
+
         // Add health to Wall-nut and Tall-nut Zombie in Versus Mode
         var allDefsZ = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<ZombieDefinition>());
         foreach (var obj in allDefsZ)

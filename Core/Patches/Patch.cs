@@ -31,6 +31,8 @@ using Il2CppSpine.Unity;
 
 using Il2CppSystem.Numerics;
 
+using Il2CppTekly.Localizations;
+
 using Il2CppTMPro;
 
 using MelonLoader;
@@ -218,11 +220,12 @@ public sealed class Patch : MelonMod
            __instance.mSeedType == SeedType.Cattail ||
            __instance.mSeedType == SeedType.Spikerock ||
            __instance.mSeedType == SeedType.GoldMagnet ||
-           __instance.mSeedType == SeedType.Cobcannon) && __instance.mController != null)
+           __instance.mSeedType == SeedType.Cobcannon ||
+           __instance.mSeedType == SeedType.Imitater) && __instance.mController != null)
            {
                UnityEngine.Vector3 currentOffset = __instance.mController.m_visualOffset;
     
-               currentOffset.x += 15f;
+               currentOffset.x += 17f;
 
                 __instance.mController.m_visualOffset = currentOffset;
            }
@@ -341,5 +344,25 @@ public sealed class Patch : MelonMod
     }
     
 
-}
 
+
+    [HarmonyPatch(typeof(TMP_Text), nameof(TMP_Text.text), MethodType.Setter)]
+    public static class TMPTextSetterPatch
+    {
+        public static void Prefix(TMP_Text __instance, ref string value)
+        {
+            if (__instance.gameObject.name == "Label_Normal")
+            {
+
+                //value = "Vs+";
+
+            }
+            
+
+        }
+    }
+
+
+
+
+}
