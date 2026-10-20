@@ -59,7 +59,5 @@ namespace VersusPlus.Properties {
                 resourceCulture = value;
             }
         }
-        
-        
     }
 }

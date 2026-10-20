@@ -61,6 +61,8 @@ using static UnityEngine.ParticleSystem.PlaybackState;
 using VersusPlus.Patches;
 
 using Vector2 = UnityEngine.Vector2;
+
+using static VersusPlus.Core.Core;
 public class CoreHelper : ReplantAPI
 {
     internal static class ImpManager
@@ -258,6 +260,24 @@ public class CoreHelper : ReplantAPI
                 MelonLogger.Msg("Moved plant title!!");
             }
         }
+
+        GameObject titleObj2 = Resources.FindObjectsOfTypeAll<GameObject>()
+        .FirstOrDefault(g => g.name == "Title" &&
+                             g.transform.parent != null &&
+                             g.transform.parent.name == "SideZombies");
+
+        if (titleObj2 != null)
+        {
+            RectTransform rect2 = titleObj2.GetComponent<RectTransform>();
+            if (rect2 != null)
+            {
+                // Set custom anchored position (X, Y)
+                rect2.localPosition = new UnityEngine.Vector3(58f, -461.5f, 0f);
+                MelonLogger.Msg("Moved zombie title!!");
+            }
+        }
+
+
     }
 
     public static void CameraZooming(int value){
@@ -286,5 +306,46 @@ public class CoreHelper : ReplantAPI
             }
         }
     }
+
+    public static void MoveChooseYourPlantHeader()
+    {
+        GameObject titleObj = Resources.FindObjectsOfTypeAll<GameObject>()
+        .FirstOrDefault(g => g.name == "Header" &&
+                             g.transform.parent != null &&
+                             g.transform.parent.name == "SeedChooser");
+
+        if (titleObj != null)
+        {
+            RectTransform rect = titleObj.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                // Set custom anchored position (X, Y)
+                rect.localPosition = new UnityEngine.Vector3(0f, 769f, 0);
+                MelonLogger.Msg("Moved ChooseYourPlant header!");
+            }
+        }
+    }
+
+
+    public static void MoveZombiePanel()
+    {
+        GameObject titleObj = Resources.FindObjectsOfTypeAll<GameObject>()
+        .FirstOrDefault(g => g.name == "Background" &&
+                             g.transform.parent != null &&
+                             g.transform.parent.name == "SideZombies");
+
+        if (titleObj != null)
+        {
+            RectTransform rect = titleObj.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                // Set custom anchored position (X, Y)
+                rect.localPosition = new UnityEngine.Vector3(40f, -26f, 0);
+                MelonLogger.Msg("Moved Zombie panel!");
+            }
+        }
+    }
+
+
 
 }

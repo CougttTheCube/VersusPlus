@@ -122,6 +122,18 @@ public class Core : ReplantAPI
 
     internal static class BloomConfig
     {
+        public static StringConfigInput Player1Name { get; } = ConfigService.CreateString(
+            name: "Player 1 Name",
+            defaultValue: "Player 1",
+            description: "Player 1 Name."
+        );
+        public static StringConfigInput Player2Name { get; } = ConfigService.CreateString(
+            name: "Player 2 Name",
+            defaultValue: "Player 2",
+            description: "Player 2 Name."
+        );
+
+
         public static BoolConfigInput TestBoolInput { get; } = ConfigService.CreateBool(
             name: "Seed Recharge Tooltip",
             defaultValue: true,
@@ -202,6 +214,11 @@ public class Core : ReplantAPI
             defaultValue: false,
             description: "Enable this if you play with VS CHAOS mod to fix brain rate logic. Experimental."
         );
+        public static BoolConfigInput TestBoolInput13 { get; } = ConfigService.CreateBool(
+            name: "Camera Zoom [Exp]",
+            defaultValue: false,
+            description: "Zooms in the camera. This also applies outside Versus Mode. Experimental."
+        );
     }
     // Custom DieRow
     
@@ -213,6 +230,8 @@ public class Core : ReplantAPI
         ClassInjector.RegisterTypeInIl2Cpp<Timer>();
         ClassInjector.RegisterTypeInIl2Cpp<Timer2>();
         ClassInjector.RegisterTypeInIl2Cpp<Concede0>();
+        ClassInjector.RegisterTypeInIl2Cpp<VersusNameInField1>();
+        ClassInjector.RegisterTypeInIl2Cpp<VersusNameInField2>();
 
         ModMenuService.CreateEntry(this)
             .AddDisplayName(Name)
@@ -259,16 +278,8 @@ public class Core : ReplantAPI
                     Gamepad p2 = pads[1];
                 }
                 */
-            GameObject subheadingObj = GameObject.Find("GlobalPanels(Clone)/P_PopUpMessage02/Canvas/Layout/Center/Window/SubheadingText");
-
-            if (subheadingObj != null)
-            {
-                var tmpText = subheadingObj.GetComponent<TextMeshProUGUI>();
-                if (tmpText != null)
-                {
-                    tmpText.text = "quandale dingle";
-                }
-            }
+            MelonLogger.Msg(BloomConfig.Player1Name.Value);
+            MelonLogger.Msg(BloomConfig.Player2Name.Value);
         }
         
 
@@ -334,7 +345,8 @@ public class Core : ReplantAPI
         {
             if (!Core.activateonce)
             {
-                AdviceManager.ShowAdvice("Player 1 CONCEDED!", MessageStyle.HugeWave, AdviceType.None);
+
+                AdviceManager.ShowAdvice(BloomConfig.Player1Name.Value + " CONCEDED!", MessageStyle.HugeWave, AdviceType.None);
                 AdviceManager.SetDuration(500);
 
                 hasPlayedEnd = true;
@@ -360,7 +372,7 @@ public class Core : ReplantAPI
         {
             if (!Core.activateonce)
             {
-                AdviceManager.ShowAdvice("Player 2 CONCEDED!", MessageStyle.HugeWave, AdviceType.None);
+                AdviceManager.ShowAdvice(BloomConfig.Player2Name.Value + " CONCEDED!", MessageStyle.HugeWave, AdviceType.None);
                 AdviceManager.SetDuration(500);
 
                 hasPlayedEnd = true;
@@ -652,6 +664,7 @@ public class Core : ReplantAPI
     // RaptorRush
     private static void GameplayStarted(GameplayActivity gameplayActivity)
     {
+
         foreach (var (@override, definition) in SeedPacketToolTipApi.ToolTipsOverrides
             .Where(t => t.Definition.SeedType != SeedType.Imitater))
         {
@@ -697,8 +710,10 @@ public class Core : ReplantAPI
 
         }
         MovePlantTitle(-44f, -472.5f);
-        CameraZooming(1000);
+        if (BloomConfig.TestBoolInput13.Value) CameraZooming(1000);
         FlipZombieAvatar();
+        MoveChooseYourPlantHeader();
+        MoveZombiePanel();
         /*
          * Not related to Vs Mode
         foreach (var obj in allDefs){
@@ -854,6 +869,12 @@ public class Core : ReplantAPI
 
                 GameObject timerObj3 = new GameObject("ConcedeTimer");
                 timerObj3.AddComponent<Concede0>();
+
+                GameObject timerObj4 = new GameObject("VersusName1");
+                timerObj4.AddComponent<VersusNameInField1>();
+
+                GameObject timerObj5 = new GameObject("VersusName2");
+                timerObj5.AddComponent<VersusNameInField2>();
             }
 
         }

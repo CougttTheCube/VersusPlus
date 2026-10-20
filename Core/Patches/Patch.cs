@@ -7,6 +7,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Runtime.CompilerServices;
 
@@ -345,21 +346,122 @@ public sealed class Patch : MelonMod
     
 
 
-
+    // Changes text and its properties of sth
     [HarmonyPatch(typeof(TMP_Text), nameof(TMP_Text.text), MethodType.Setter)]
     public static class TMPTextSetterPatch
     {
         public static void Prefix(TMP_Text __instance, ref string value)
         {
-            if (__instance.gameObject.name == "Label_Normal")
+            if (__instance.gameObject.name == "Header"  &&
+                __instance.gameObject.transform.parent != null &&
+                __instance.gameObject.transform.parent.name == "SeedChooser_Player2")
             {
-
-                //value = "Vs+";
-
+                value = "pik ur zombeez";
+                __instance.color = new UnityEngine.Color(0f, 0.9f, 0f, 1f);
             }
-            
 
+            // Change P1 name in picking side screen to Player 1 name
+            if (__instance.gameObject.name == "PlayerNumber1" &&
+                __instance.gameObject.transform.parent != null &&
+                __instance.gameObject.transform.parent.name == "Selected" &&
+                __instance.gameObject.transform.parent.parent != null &&
+                __instance.gameObject.transform.parent.parent.name == "SidePlants")
+            {
+                value = BloomConfig.Player1Name.Value;
+
+                __instance.enableAutoSizing = true;
+
+                __instance.fontSizeMin = 100;
+                __instance.fontSizeMax = 100;
+
+                __instance.rectTransform.sizeDelta = new UnityEngine.Vector2(383.8374f, 175.8698f);
+            
+                __instance.rectTransform.localPosition = new UnityEngine.Vector3(-60f, 530f, 0f);
+            }
+
+            if (__instance.gameObject.name == "PlayerNumber1" &&
+                __instance.gameObject.transform.parent != null &&
+                __instance.gameObject.transform.parent.name == "Selected" &&
+                __instance.gameObject.transform.parent.parent != null &&
+                __instance.gameObject.transform.parent.parent.name == "SideZombies")
+            {
+                value = BloomConfig.Player1Name.Value;
+
+                __instance.enableAutoSizing = true;
+
+                __instance.fontSizeMin = 100;
+                __instance.fontSizeMax = 100;
+
+                __instance.rectTransform.sizeDelta = new UnityEngine.Vector2(383.8374f, 175.8698f);
+
+                __instance.rectTransform.localPosition = new UnityEngine.Vector3(90f, 530f, 0f);
+            }
+
+
+
+
+            // Change P2 name in picking side screen to Player 2 name
+            if (__instance.gameObject.name == "PlayerNumber2" &&
+                __instance.gameObject.transform.parent != null &&
+                __instance.gameObject.transform.parent.name == "Selected" &&
+                __instance.gameObject.transform.parent.parent != null &&
+                __instance.gameObject.transform.parent.parent.name == "SidePlants")
+            {
+                value = BloomConfig.Player2Name.Value;
+
+                __instance.enableAutoSizing = true;
+
+                __instance.fontSizeMin = 100;
+                __instance.fontSizeMax = 100;
+
+                __instance.rectTransform.sizeDelta = new UnityEngine.Vector2(383.8374f, 175.8698f);
+
+                __instance.rectTransform.localPosition = new UnityEngine.Vector3(-60f, 530f, 0f);
+            }
+
+            if (__instance.gameObject.name == "PlayerNumber2" &&
+                __instance.gameObject.transform.parent != null &&
+                __instance.gameObject.transform.parent.name == "Selected" &&
+                __instance.gameObject.transform.parent.parent != null &&
+                __instance.gameObject.transform.parent.parent.name == "SideZombies")
+            {
+                value = BloomConfig.Player2Name.Value;
+
+                __instance.enableAutoSizing = true;
+
+                __instance.fontSizeMin = 100;
+                __instance.fontSizeMax = 100;
+
+                __instance.rectTransform.sizeDelta = new UnityEngine.Vector2(383.8374f, 175.8698f);
+
+                __instance.rectTransform.localPosition = new UnityEngine.Vector3(90f, 530f, 0f);
+            }
+
+
+
+            // Change player name in winning screen
+            if (__instance.gameObject.name == "HeaderLabel" &&
+                __instance.gameObject.transform.parent != null &&
+                __instance.gameObject.transform.parent.name == "Player1" &&
+                __instance.gameObject.transform.parent.parent != null &&
+                __instance.gameObject.transform.parent.parent.name == "NamePlates")
+            {
+                value = BloomConfig.Player1Name.Value;
+            }
+
+            if (__instance.gameObject.name == "HeaderLabel" &&
+                __instance.gameObject.transform.parent != null &&
+                __instance.gameObject.transform.parent.name == "Player2" &&
+                __instance.gameObject.transform.parent.parent != null &&
+                __instance.gameObject.transform.parent.parent.name == "NamePlates")
+            {
+                value = BloomConfig.Player2Name.Value;
+            }
+
+
+            return;
         }
+        
     }
 
 
