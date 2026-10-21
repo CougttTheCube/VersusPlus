@@ -255,9 +255,8 @@ public class CoreHelper : ReplantAPI
             RectTransform rect = titleObj.GetComponent<RectTransform>();
             if (rect != null)
             {
-                // Set custom anchored position (X, Y)
                 rect.localPosition = new UnityEngine.Vector3(xOffset, yOffset, 0);
-                MelonLogger.Msg("Moved plant title!!");
+                //MelonLogger.Msg("Moved plant title!!");
             }
         }
 
@@ -271,9 +270,8 @@ public class CoreHelper : ReplantAPI
             RectTransform rect2 = titleObj2.GetComponent<RectTransform>();
             if (rect2 != null)
             {
-                // Set custom anchored position (X, Y)
-                rect2.localPosition = new UnityEngine.Vector3(58f, -461.5f, 0f);
-                MelonLogger.Msg("Moved zombie title!!");
+                rect2.localPosition = new UnityEngine.Vector3(90f, -461.5f, 0f);
+                //MelonLogger.Msg("Moved zombie title!!");
             }
         }
 
@@ -281,7 +279,7 @@ public class CoreHelper : ReplantAPI
     }
 
     public static void CameraZooming(int value){
-        if (Camera.main != null)
+        if (Camera.main != null && BoardManager.Board.mApp.IsVersusMode())
         {
             Camera.main.orthographicSize = value;
         }
@@ -299,10 +297,9 @@ public class CoreHelper : ReplantAPI
             RectTransform rect = titleObj.GetComponent<RectTransform>();
             if (rect != null)
             {
-                // Set custom anchored position (X, Y)
                 rect.localScale = new UnityEngine.Vector3(-1, 1, 1);
                 rect.localPosition = new UnityEngine.Vector3(4f, 7.2f, 0);
-                MelonLogger.Msg("Flipped zombie avatar!");
+                //MelonLogger.Msg("Flipped zombie avatar!");
             }
         }
     }
@@ -319,9 +316,8 @@ public class CoreHelper : ReplantAPI
             RectTransform rect = titleObj.GetComponent<RectTransform>();
             if (rect != null)
             {
-                // Set custom anchored position (X, Y)
                 rect.localPosition = new UnityEngine.Vector3(0f, 769f, 0);
-                MelonLogger.Msg("Moved ChooseYourPlant header!");
+                //MelonLogger.Msg("Moved ChooseYourPlant header!");
             }
         }
     }
@@ -339,9 +335,8 @@ public class CoreHelper : ReplantAPI
             RectTransform rect = titleObj.GetComponent<RectTransform>();
             if (rect != null)
             {
-                // Set custom anchored position (X, Y)
                 rect.localPosition = new UnityEngine.Vector3(40f, -26f, 0);
-                MelonLogger.Msg("Moved Zombie panel!");
+                //MelonLogger.Msg("Moved Zombie panel!");
             }
         }
     }

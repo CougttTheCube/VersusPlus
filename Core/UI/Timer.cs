@@ -50,7 +50,7 @@ internal class Timer : MonoBehaviour
     bool checkEnd = false;
 
     private float nextTriggerTime = 19f;
-    private const float Interval = 19f; // Repeats every 19s
+    private float Interval = 19f; // Repeats every 19s
     int random;
     void Start()
     {
@@ -102,7 +102,7 @@ internal class Timer : MonoBehaviour
             rect.anchorMax = new Vector2(0.5f, 0.5f);
             rect.pivot = new Vector2(0.5f, 0.5f);
             rect.sizeDelta = new Vector2(300, 60);
-
+            
             if (BloomConfig.TestEnum.Value == TimerPos.BottomMiddle)
             {
                 rect.localPosition = new Vector2(0, -1030);
@@ -180,6 +180,7 @@ internal class Timer : MonoBehaviour
                 if ((minutes >= 5 && minutes < 10))
                 {
                     timerText.color = Color.yellow;
+                    Interval = 13f;
                 }
                 if (minutes >= 10)
                 {

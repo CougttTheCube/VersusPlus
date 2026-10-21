@@ -44,13 +44,25 @@ using static VersusPlus.Core.Core;
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 using UnityEngine.UIElements;
+using UnityEngine.InputSystem;
 
 internal class VersusNameInField1 : MonoBehaviour
 {
     Transform cursorSprite;
+    //RectTransform rect;
+    Vector3 mousePos;
+
     RectTransform rect;
+
     Camera cam;
+
     void Start(){
+        GameObject cursorObj = GameObject.Find("Cursor/TreeOfWisdomVisibilityLayer/VersusVisibilityLayer/Sprite");
+        if (cursorObj != null)
+        {
+            cursorSprite = cursorObj.transform;
+        }
+
         Canvas customCanvas = gameObject.AddComponent<Canvas>();
         customCanvas.renderMode = RenderMode.ScreenSpaceOverlay;
         customCanvas.sortingOrder = 0;
@@ -69,6 +81,10 @@ internal class VersusNameInField1 : MonoBehaviour
 
         GameObject textObj = new GameObject("VersusName1");
         //textObj.layer = versusCursorTwo.layer;
+
+
+
+
         textObj.transform.SetParent(slotTransform, false);
         textObj.transform.SetAsLastSibling();
 
@@ -82,11 +98,19 @@ internal class VersusNameInField1 : MonoBehaviour
         VersusText2.characterSpacing = 1f;
 
         rect = VersusText2.GetComponent<RectTransform>();
+        if (cursorSprite != null){
+            rect.anchorMin = new Vector2(1f, 1f);
+            rect.anchorMax = new Vector2(1f, 1f);
+            // Set center in the text
+            rect.pivot = new Vector2(0.5f, 0.5f);
+        } else {
+            rect.anchorMin = new Vector2(0.5f, 0.5f);
+            rect.anchorMax = new Vector2(0.5f, 0.5f);
+            // Set center in the text
+            rect.pivot = new Vector2(0.5f, 0.5f);
+        }
         //Set center which is the middle of the screen
-        rect.anchorMin = new Vector2(1f, 1f);
-        rect.anchorMax = new Vector2(1f, 1f);
-        // Set center in the text
-        rect.pivot = new Vector2(0.5f, 0.5f);
+        
         // Move
         rect.localPosition = new Vector2(0, 0);
         rect.sizeDelta = new Vector2(1000f, 50f);
@@ -116,19 +140,24 @@ internal class VersusNameInField1 : MonoBehaviour
         VersusText2.fontMaterial.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0f);
         VersusText2.fontMaterial.SetColor(ShaderUtilities.ID_UnderlayColor, Color.black);
 
-        cursorSprite = GameObject.Find("Cursor/TreeOfWisdomVisibilityLayer/VersusVisibilityLayer/Sprite").transform;
-        cam = Camera.main;
+
+        cam = GameObject.Find("Main Camera").GetComponent<Camera>();
+
     }
 
 
 
     void LateUpdate()
     {
-        if (cursorSprite == null || rect == null) { 
-        // follow mouse
-            rect.localPosition = new Vector2(11110f, 111110f);
+        if (rect == null) return;
 
-            return; 
+        if (cursorSprite == null) {
+            Vector3 screenPos = Input.mousePosition + new Vector3(10f, 25f, 0f);
+            mousePos = cam.ScreenToWorldPoint(screenPos);
+
+            rect.position = Vector2.Lerp(rect.position, mousePos, 1f);
+
+            return;
         }
         // follow cursor controller
         Vector3 local = rect.parent.InverseTransformPoint(cursorSprite.position);

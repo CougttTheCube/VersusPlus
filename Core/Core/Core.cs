@@ -185,7 +185,7 @@ public class Core : ReplantAPI
             description: "This option is created solely for credits only. Do not enable, or else...\n" +
             "\n" +
             "Seed Recharge Tooltip - by RaptorRush, inspired by PvZ DLC Mod\n" +
-            "Instant Death, Seed Recharge Timer, Conceding feature, Better Sudden Death, Music Player - inspired by PvZ DLC Mod\n" +
+            "Instant Death, Seed Recharge Timer, Conceding feature, Better Sudden Death, Music Player, Name Input - inspired by PvZ DLC Mod\n" +
             "Initial Recharge - partially helped by D1GQ\n" +
             "New Brain Rate Logic - by D1GQ\n" +
             "Most of the patches - by D1GQ and RaptorRush\n" +
@@ -217,7 +217,7 @@ public class Core : ReplantAPI
         public static BoolConfigInput TestBoolInput13 { get; } = ConfigService.CreateBool(
             name: "Camera Zoom [Exp]",
             defaultValue: false,
-            description: "Zooms in the camera. This also applies outside Versus Mode. Experimental."
+            description: "Zooms in the camera in Versus Mode. Experimental."
         );
     }
     // Custom DieRow
@@ -243,6 +243,28 @@ public class Core : ReplantAPI
         ModMenuService.CreateEntry(this)
             .AddIcon(AssetHelper.LoadSprite<Core>("VersusPlus.Resources.icon.png"));
 
+       
+
+        
+
+        // Add health to Wall-nut and Tall-nut Zombie in Versus Mode
+        var allDefsZ = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<ZombieDefinition>());
+        foreach (var obj in allDefsZ)
+        {
+            var def = obj.Cast<ZombieDefinition>();
+            if (def.m_zombieType == ZombieType.WallnutHead)
+            {
+                def.m_versusBodyHealth = 270;
+                def.m_versusArmorHealth = 1100;
+            }
+            if (def.m_zombieType == ZombieType.TallnutHead)
+            {
+                def.m_versusBodyHealth = 270;
+                def.m_versusArmorHealth = 2400;
+            }
+
+
+        }
 
 
     }
@@ -396,6 +418,7 @@ public class Core : ReplantAPI
 
 
         // Toggle: Sets initial recharge time
+        // todo: maybe move to somewhere that initializes once every vs mode scene loading
         if (BoardManager.Board.mApp != null && BoardManager.Board.mApp.VersusMode != null
             && BoardManager.Board.mApp.VersusMode.m_gameplayInitialized)
         {
@@ -637,9 +660,6 @@ public class Core : ReplantAPI
         }
 
 
-
-        
-
     }
 
     public override void OnSceneWasInitialized(int buildIndex, string sceneName)
@@ -651,11 +671,8 @@ public class Core : ReplantAPI
         TenMinute = false;
         StartMatch = false;
         hasChaos = false;
-
         activateonce = false;
-
         InitializeMatch = false;
-
         key = false;
 
     }
@@ -710,10 +727,14 @@ public class Core : ReplantAPI
 
         }
         MovePlantTitle(-44f, -472.5f);
-        if (BloomConfig.TestBoolInput13.Value) CameraZooming(1000);
+
         FlipZombieAvatar();
         MoveChooseYourPlantHeader();
         MoveZombiePanel();
+        if (BloomConfig.TestBoolInput13.Value) { CameraZooming(1000); }
+        else { CameraZooming(1080); }
+        
+
         /*
          * Not related to Vs Mode
         foreach (var obj in allDefs){
@@ -735,24 +756,7 @@ public class Core : ReplantAPI
         }
         */
 
-        // Add health to Wall-nut and Tall-nut Zombie in Versus Mode
-        var allDefsZ = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<ZombieDefinition>());
-        foreach (var obj in allDefsZ)
-        {
-            var def = obj.Cast<ZombieDefinition>();
-            if (def.m_zombieType == ZombieType.WallnutHead)
-            {
-                def.m_versusBodyHealth = 270;
-                def.m_versusArmorHealth = 1100;
-            }
-            if (def.m_zombieType == ZombieType.TallnutHead)
-            {
-                def.m_versusBodyHealth = 270;
-                def.m_versusArmorHealth = 2400;
-            }
 
-
-        }
 
     }
 
