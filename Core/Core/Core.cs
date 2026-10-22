@@ -5,12 +5,6 @@
 // D1GQ - SeedChooserDataModel Reload [Removed custom functions]
 // https://github.com/D1GQ/ReplantedOnline/blob/3f1fe17378ec0c98ab9866aa74bb775a3fd71ff6/src/Patches/Reloaded/Gameplay/UI/SeedChooserPatch.cs#L38
 
-using static VersusPlus.Helper.CoreHelper;
-using VersusPlus.UI;
-using UnityEngine.UI;
-using static VersusPlus.UI.Concede0;
-using static VersusPlus.UI.Timer;
-using static VersusPlus.UI.Timer2;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -26,6 +20,7 @@ using Il2CppGoogle.Protobuf.WellKnownTypes;
 
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 using Il2CppMono.Security.Authenticode;
 
@@ -65,14 +60,21 @@ using UnityEngine.InputSystem.DualShock;
 using UnityEngine.InputSystem.Switch;
 using UnityEngine.InputSystem.XInput;
 using UnityEngine.Rendering.RenderGraphModule.NativeRenderPassCompiler;
+using UnityEngine.UI;
+
+using VersusPlus.Helper;
+using VersusPlus.Patches;
+using VersusPlus.UI;
 
 using static Il2CppSystem.Net.Http.Headers.Parser;
 using static UnityEngine.ParticleSystem.PlaybackState;
-using VersusPlus.Patches;
-using VersusPlus.Helper;
+using static VersusPlus.Helper.CoreHelper;
+using static VersusPlus.UI.Concede0;
+using static VersusPlus.UI.SpriteSwapper;
+using static VersusPlus.UI.Timer;
+using static VersusPlus.UI.Timer2;
 
 using Vector2 = UnityEngine.Vector2;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 public class Core : ReplantAPI
 {
@@ -89,7 +91,7 @@ public class Core : ReplantAPI
     public bool InitializeMatch = false;
     public static bool activateonce = false;
     public const string Name = "VersusPlus";
-    public const string Version = "1.3.2.2";
+    public const string Version = "1.4";
     public const string Author = "Cougtt and many more";
     public static float holdDuration = 0f;
     public static float holdDuration2 = 0f;
@@ -106,7 +108,15 @@ public class Core : ReplantAPI
         Loonboon,
         Conveyer,
         BrainiacManiac,
-        Default
+        Cerebrawl,
+        Grasswalk,
+        Moongrains
+    }
+
+    public enum Stage
+    {
+        Day,
+        Night
     }
 
     public static bool key = false;
@@ -120,6 +130,10 @@ public class Core : ReplantAPI
     public static bool isp0Gamepad = false;
     public static bool isp1Gamepad = false;
 
+    public static bool isNightTime = false;
+
+    public static bool runOnceMushroom = false;
+    public static bool runOncedayMushroom = false;
     internal static class BloomConfig
     {
         public static StringConfigInput Player1Name { get; } = ConfigService.CreateString(
@@ -133,22 +147,18 @@ public class Core : ReplantAPI
             description: "Player 2 Name."
         );
 
+        public static EnumConfigInput<Stage> TestEnum3 { get; } = ConfigService.CreateEnum<Stage>(
+            name: "Stage [Exp]",
+            defaultValue: Stage.Day,
+            description: "Changes map. Experimental."
+        );
+        public static EnumConfigInput<Music> TestEnum2 { get; } = ConfigService.CreateEnum<Music>(
+            name: "Music Player",
+            defaultValue: Music.Grasswalk,
+            description: "Changes music."
+        );
 
-        public static BoolConfigInput TestBoolInput { get; } = ConfigService.CreateBool(
-            name: "Seed Recharge Tooltip",
-            defaultValue: true,
-            description: "Shows recharge of units in the tooltip box."
-        );
-        public static BoolConfigInput TestBoolInput2 { get; } = ConfigService.CreateBool(
-            name: "Seed Recharge Timer",
-            defaultValue: true,
-            description: "Shows live recharge time of units."
-        );
-        public static BoolConfigInput TestBoolInput3 { get; } = ConfigService.CreateBool(
-            name: "Instant Death",
-            defaultValue: true,
-            description: "Enables Instant Death Phase - A row of Peashooter is spawned at the back (if grid is empty) and all remaining lawnmowers are destroyed."
-        );
+
         public static BoolConfigInput TestBoolInput4 { get; } = ConfigService.CreateBool(
             name: "Timer",
             defaultValue: true,
@@ -158,6 +168,25 @@ public class Core : ReplantAPI
             name: "Timer Position",
             defaultValue: TimerPos.BottomMiddle,
             description: "Changes the timer's position."
+        );
+
+        // QoL
+        public static BoolConfigInput TestBoolInput { get; } = ConfigService.CreateBool(
+            name: "Seed Recharge Tooltip",
+            defaultValue: true,
+            description: "Shows recharge of units in the tooltip box."
+        );
+
+
+        public static BoolConfigInput TestBoolInput2 { get; } = ConfigService.CreateBool(
+            name: "Seed Recharge Timer",
+            defaultValue: true,
+            description: "Shows live recharge time of units."
+        );
+        public static BoolConfigInput TestBoolInput3 { get; } = ConfigService.CreateBool(
+            name: "Instant Death",
+            defaultValue: true,
+            description: "Enables Instant Death Phase - A row of Peashooter is spawned at the back (if grid is empty) and all remaining lawnmowers are destroyed."
         );
         public static BoolConfigInput TestBoolInput5 { get; } = ConfigService.CreateBool(
             name: "Initial Recharge",
@@ -169,6 +198,10 @@ public class Core : ReplantAPI
             defaultValue: false,
             description: "Sudden Death recharge time is the same as Versus Base recharge time. Enable this if you don't like instant plants spamming."
         );
+
+        
+
+        
         public static BoolConfigInput TestBoolInput6 { get; } = ConfigService.CreateBool(
             name: "New Brain Rate Logic",
             defaultValue: true,
@@ -179,31 +212,13 @@ public class Core : ReplantAPI
             defaultValue: true,
             description: "Targets and Gravestones take no more than 35 damage per hit. Disable this if you are not afraid of Melon-pult."
         );
-        public static BoolConfigInput TestBoolInput8 { get; } = ConfigService.CreateBool(
-            name: "???",
-            defaultValue: false,
-            description: "This option is created solely for credits only. Do not enable, or else...\n" +
-            "\n" +
-            "Seed Recharge Tooltip - by RaptorRush, inspired by PvZ DLC Mod\n" +
-            "Instant Death, Seed Recharge Timer, Conceding feature, Better Sudden Death, Music Player, Name Input - inspired by PvZ DLC Mod\n" +
-            "Initial Recharge - partially helped by D1GQ\n" +
-            "New Brain Rate Logic - by D1GQ\n" +
-            "Most of the patches - by D1GQ and RaptorRush\n" +
-            "\n" +
-            "Thank you very much :) You 2 are the goat. I wouldn't have tried my best if it hadn't been for these two.\n" +
-            "Also thank you HenHen for ReplantAPI, " +
-            "and thank you PalmForest for BloomEngine."
-        );
+
         public static BoolConfigInput TestBoolInput9 { get; } = ConfigService.CreateBool(
             name: "Random Events",
             defaultValue: false,
             description: "Enables random events."
         );
-        public static EnumConfigInput<Music> TestEnum2 { get; } = ConfigService.CreateEnum<Music>(
-            name: "Music Player",
-            defaultValue: Music.Default,
-            description: "Changes music."
-        );
+        
         public static BoolConfigInput TestBoolInput11 { get; } = ConfigService.CreateBool(
             name: "Slower Recharge [Exp]",
             defaultValue: false,
@@ -219,6 +234,23 @@ public class Core : ReplantAPI
             defaultValue: false,
             description: "Zooms in the camera in Versus Mode. Experimental."
         );
+        public static BoolConfigInput TestBoolInput8 { get; } = ConfigService.CreateBool(
+        name: "???",
+        defaultValue: false,
+        description: "This option is created solely for credits only. Do not enable, or else...\n" +
+        "\n" +
+        "Seed Recharge Tooltip - by RaptorRush, inspired by PvZ DLC Mod\n" +
+        "Instant Death, Seed Recharge Timer, Conceding feature, Better Sudden Death, Music Player, Name Input - inspired by PvZ DLC Mod\n" +
+        "Initial Recharge - partially helped by D1GQ\n" +
+        "New Brain Rate Logic - by D1GQ\n" +
+        "Most of the patches - by D1GQ and RaptorRush\n" +
+        "\n" +
+        "Thank you very much :) You 2 are the goat. I wouldn't have tried my best if it hadn't been for these two.\n" +
+        "Also thank you HenHen for ReplantAPI, " +
+        "and thank you PalmForest for BloomEngine."
+        );
+
+
     }
     // Custom DieRow
     
@@ -243,28 +275,12 @@ public class Core : ReplantAPI
         ModMenuService.CreateEntry(this)
             .AddIcon(AssetHelper.LoadSprite<Core>("VersusPlus.Resources.icon.png"));
 
-       
-
-        
-
-        // Add health to Wall-nut and Tall-nut Zombie in Versus Mode
-        var allDefsZ = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<ZombieDefinition>());
-        foreach (var obj in allDefsZ)
-        {
-            var def = obj.Cast<ZombieDefinition>();
-            if (def.m_zombieType == ZombieType.WallnutHead)
-            {
-                def.m_versusBodyHealth = 270;
-                def.m_versusArmorHealth = 1100;
-            }
-            if (def.m_zombieType == ZombieType.TallnutHead)
-            {
-                def.m_versusBodyHealth = 270;
-                def.m_versusArmorHealth = 2400;
-            }
 
 
-        }
+        if (BloomConfig.TestEnum3.Value == Stage.Night) BloomConfig.TestEnum3.Value = Stage.Day;
+
+
+
 
 
     }
@@ -300,8 +316,8 @@ public class Core : ReplantAPI
                     Gamepad p2 = pads[1];
                 }
                 */
-            MelonLogger.Msg(BloomConfig.Player1Name.Value);
-            MelonLogger.Msg(BloomConfig.Player2Name.Value);
+            //MelonLogger.Msg(BloomConfig.Player1Name.Value);
+            //MelonLogger.Msg(BloomConfig.Player2Name.Value);
         }
         
 
@@ -523,9 +539,11 @@ public class Core : ReplantAPI
                         if (random == 1) { 
                             activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_LOSE);
                             activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_LOSE);
+                            activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_LOSE);
                         }
                         else if (random == 2)
                         {
+                            activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_PLANT_KILL_1);
                             activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_PLANT_KILL_1);
                             activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_PLANT_KILL_1);
                         }
@@ -533,9 +551,11 @@ public class Core : ReplantAPI
                         {
                             activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_PLANT_KILL_2);
                             activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_PLANT_KILL_2);
+                            activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_PLANT_KILL_2);
                         }
                         else if (random == 4)
                         {
+                            activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_PLANT_KILL_3);
                             activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_PLANT_KILL_3);
                             activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_PLANT_KILL_3);
                         }
@@ -675,6 +695,15 @@ public class Core : ReplantAPI
         InitializeMatch = false;
         key = false;
 
+        if (BloomConfig.TestBoolInput13.Value && sceneName == "Gameplay")
+        {
+            CameraZooming(1000);
+        }
+        else
+        {
+            CameraZooming(1080);
+        }
+
     }
 
     // Toggle: Seed recharge tooltip
@@ -715,25 +744,55 @@ public class Core : ReplantAPI
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
         base.OnSceneWasLoaded(buildIndex, sceneName);
+        // Add health to Wall-nut and Tall-nut Zombie in Versus Mode
+        var allDefsZ = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<ZombieDefinition>());
+        foreach (var obj in allDefsZ)
+        {
+            var def = obj.Cast<ZombieDefinition>();
+            if (def.m_zombieType == ZombieType.WallnutHead)
+            {
+                def.m_versusBodyHealth = 270;
+                def.m_versusArmorHealth = 1100;
+            }
+            if (def.m_zombieType == ZombieType.TallnutHead)
+            {
+                def.m_versusBodyHealth = 270;
+                def.m_versusArmorHealth = 2400;
+            }
 
+        }
+
+        // Apply stage swapping when loading scene
+        Patch3.ApplyStageToLevelDataModel();
         // Toggle: Better Sudden Death
-        var allDefs = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<PlantDefinition>());
+        var allDefs = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppType.Of<PlantDefinition>());
         foreach (var obj in allDefs)
         {
             if (!BloomConfig.TestBoolInput10.Value) break;
             var def = obj.Cast<PlantDefinition>();
-
             def.m_versusSuddenDeathRefreshTime = def.m_versusBaseRefreshTime;
 
         }
-        MovePlantTitle(-44f, -472.5f);
 
+        // Make mushrooms cost 25 more sun when in Night/Fog Vs
+        if (BloomConfig.TestEnum3.Value == Stage.Night)
+        {
+            ApplyIncreasedMushroomCost();
+        }
+        else 
+        {
+            ApplyDecrasedMushroomCost();
+        }
+
+
+        // Misc
+        MovePlantTitle(-44f, -472.5f);
         FlipZombieAvatar();
         MoveChooseYourPlantHeader();
         MoveZombiePanel();
-        if (BloomConfig.TestBoolInput13.Value) { CameraZooming(1000); }
-        else { CameraZooming(1080); }
-        
+
+        VersusSideTracker.ActivePlantInput = null;
+        VersusSideTracker.ActiveZombieInput = null;
 
         /*
          * Not related to Vs Mode

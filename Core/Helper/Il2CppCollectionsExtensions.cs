@@ -1,6 +1,6 @@
 ﻿using CppCollections = Il2CppSystem.Collections.Generic;
 namespace VersusPlus.Helper;
-
+// RaptorRush
 public static class Il2CppCollectionsExtensions
 {
     public static IEnumerable<T> AsEnumerable<T>(

@@ -152,7 +152,7 @@ internal class VersusNameInField1 : MonoBehaviour
         if (rect == null) return;
 
         if (cursorSprite == null) {
-            Vector3 screenPos = Input.mousePosition + new Vector3(10f, 25f, 0f);
+            Vector3 screenPos = Input.mousePosition + new Vector3(10f, 20f, 0f);
             mousePos = cam.ScreenToWorldPoint(screenPos);
 
             rect.position = Vector2.Lerp(rect.position, mousePos, 1f);

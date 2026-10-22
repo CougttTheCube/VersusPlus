@@ -151,7 +151,7 @@ public sealed class Patch2 : MelonMod
     }
 
 
-    // Initial brain production ranging from 3.6 - 7.2 seconds 
+    // Initial brain production ranging from 4.8 - 11 seconds 
     // D1GQ
     [HarmonyPatch]
     internal static class Gravestone_InitBrainRate_Patch
@@ -166,7 +166,7 @@ public sealed class Patch2 : MelonMod
             if (__instance.mZombiePhase == ZombiePhase.ZombieNormal)
             {
                 __instance.mZombiePhase = (ZombiePhase)100;
-                __instance.mPhaseCounter = UnityEngine.Random.Range(900, 1800);
+                __instance.mPhaseCounter = UnityEngine.Random.Range(1200, 2750);
             }
         }
     }

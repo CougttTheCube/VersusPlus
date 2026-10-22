@@ -1,5 +1,5 @@
 ﻿namespace VersusPlus.Helper;
-
+// RaptorRush
 using System.Diagnostics.Contracts;
 
 using Il2CppReloaded;

@@ -83,6 +83,8 @@ public class Events : ReplantAPI
 
         }
 
+        // _____________Plants_______________
+
         temp = UnityEngine.Random.Range(1, 4);
 
         for (int i = 0; i < temp; i++){
@@ -98,7 +100,8 @@ public class Events : ReplantAPI
             {
                 theSeedType = (SeedType)UnityEngine.Random.Range(0, 48);
             }
-            while (GridItemManager.GetAt(GridItemType.Crater, random1, random2) != null)
+            while (GridItemManager.GetAt(GridItemType.Crater, random1, random2) != null &&
+            GridItemManager.GetAt(GridItemType.Gravestone, random1, random2) != null)
             {
                 random1 = UnityEngine.Random.Range(0, 6);
                 random2 = UnityEngine.Random.Range(0, 5);
@@ -114,13 +117,16 @@ public class Events : ReplantAPI
             theSeedType == SeedType.Iceshroom ||
             theSeedType == SeedType.Doomshroom ||
             theSeedType == SeedType.Magnetshroom ||
-            theSeedType == SeedType.Gloomshroom)
+            theSeedType == SeedType.Gloomshroom )
             {
-                PlantManager.Spawn(random1, random2, SeedType.InstantCoffee);
+                // if night vs then no need to spawn
+                if (BloomConfig.TestEnum3.Value != Stage.Night) PlantManager.Spawn(random1, random2, SeedType.InstantCoffee);
             }
 
 
 
+
+            // _____________Zombies_______________
 
             // Reselecting zombies if invalid
             random3 = UnityEngine.Random.Range(0, 5);
@@ -131,7 +137,8 @@ public class Events : ReplantAPI
                    theZombieType == ZombieType.Zombatar ||
                    theZombieType == ZombieType.NumZombieTypes ||
                    theZombieType == ZombieType.NumCachedZombieTypes ||
-                   theZombieType == ZombieType.Invalid)
+                   theZombieType == ZombieType.Invalid ||
+                   theZombieType == ZombieType.Gravestone)
             {
                 theZombieType = (ZombieType)UnityEngine.Random.Range(0, 37);
             }
@@ -160,13 +167,14 @@ public class Events : ReplantAPI
                     {
                         fallbackType = (ZombieType)UnityEngine.Random.Range(0, 37);
                     }
-                    while (fallbackType == ZombieType.Boss || theZombieType == ZombieType.Snorkel ||
-                            theZombieType == ZombieType.DolphinRider ||
-                            theZombieType == ZombieType.ZombieCachedPolevaulterWithPole ||
-                            theZombieType == ZombieType.Zombatar ||
-                            theZombieType == ZombieType.NumZombieTypes ||
-                            theZombieType == ZombieType.NumCachedZombieTypes ||
-                            theZombieType == ZombieType.Invalid);
+                    while (fallbackType == ZombieType.Boss || fallbackType == ZombieType.Snorkel ||
+                            fallbackType == ZombieType.DolphinRider ||
+                            fallbackType == ZombieType.ZombieCachedPolevaulterWithPole ||
+                            fallbackType == ZombieType.Zombatar ||
+                            fallbackType == ZombieType.NumZombieTypes ||
+                            fallbackType == ZombieType.NumCachedZombieTypes ||
+                            fallbackType == ZombieType.Invalid ||
+                            fallbackType == ZombieType.Gravestone);
 
                     ZombieManager.SpawnInRow(fallbackType, random3);
                 }
@@ -183,6 +191,7 @@ public class Events : ReplantAPI
                 }
                 
             }
+
             // Giga gargantuar
             else if (theZombieType == ZombieType.RedeyeGargantuar)
             {
@@ -194,13 +203,14 @@ public class Events : ReplantAPI
                     {
                         fallbackType = (ZombieType)UnityEngine.Random.Range(0, 37);
                     }
-                    while (fallbackType == ZombieType.RedeyeGargantuar || theZombieType == ZombieType.Snorkel ||
-                            theZombieType == ZombieType.DolphinRider ||
-                            theZombieType == ZombieType.ZombieCachedPolevaulterWithPole ||
-                            theZombieType == ZombieType.Zombatar ||
-                            theZombieType == ZombieType.NumZombieTypes ||
-                            theZombieType == ZombieType.NumCachedZombieTypes ||
-                            theZombieType == ZombieType.Invalid);
+                    while (fallbackType == ZombieType.RedeyeGargantuar || fallbackType == ZombieType.Snorkel ||
+                            fallbackType == ZombieType.DolphinRider ||
+                            fallbackType == ZombieType.ZombieCachedPolevaulterWithPole ||
+                            fallbackType == ZombieType.Zombatar ||
+                            fallbackType == ZombieType.NumZombieTypes ||
+                            fallbackType == ZombieType.NumCachedZombieTypes ||
+                            fallbackType == ZombieType.Invalid ||
+                            fallbackType == ZombieType.Gravestone);
 
                     ZombieManager.SpawnInRow(fallbackType, random3);
                 }
@@ -216,13 +226,14 @@ public class Events : ReplantAPI
                     {
                         fallbackType = (ZombieType)UnityEngine.Random.Range(0, 37);
                     }
-                    while (fallbackType == ZombieType.Target || theZombieType == ZombieType.Snorkel ||
-                                            theZombieType == ZombieType.DolphinRider ||
-                                            theZombieType == ZombieType.ZombieCachedPolevaulterWithPole ||
-                                            theZombieType == ZombieType.Zombatar ||
-                                            theZombieType == ZombieType.NumZombieTypes ||
-                                            theZombieType == ZombieType.NumCachedZombieTypes ||
-                                            theZombieType == ZombieType.Invalid);
+                    while (fallbackType == ZombieType.Target || fallbackType == ZombieType.Snorkel ||
+                                            fallbackType == ZombieType.DolphinRider ||
+                                            fallbackType == ZombieType.ZombieCachedPolevaulterWithPole ||
+                                            fallbackType == ZombieType.Zombatar ||
+                                            fallbackType == ZombieType.NumZombieTypes ||
+                                            fallbackType == ZombieType.NumCachedZombieTypes ||
+                                            fallbackType == ZombieType.Invalid ||
+                                            fallbackType == ZombieType.Gravestone);
 
                     ZombieManager.SpawnInRow(fallbackType, random3);
                 } else {
@@ -237,6 +248,33 @@ public class Events : ReplantAPI
 
                 
             }
+
+            else if (theZombieType == ZombieType.Flag)
+            {
+                if (Timer.elapsedTime < 120f)
+                {
+                    // Re-roll to pick any regular zombie except the flag
+                    ZombieType fallbackType;
+                    do
+                    {
+                        fallbackType = (ZombieType)UnityEngine.Random.Range(0, 37);
+                    }
+                    while (fallbackType == ZombieType.Flag || fallbackType == ZombieType.Snorkel ||
+                            fallbackType == ZombieType.DolphinRider ||
+                            fallbackType == ZombieType.ZombieCachedPolevaulterWithPole ||
+                            fallbackType == ZombieType.Zombatar ||
+                            fallbackType == ZombieType.NumZombieTypes ||
+                            fallbackType == ZombieType.NumCachedZombieTypes ||
+                            fallbackType == ZombieType.Invalid ||
+                            fallbackType == ZombieType.Gravestone);
+
+                    ZombieManager.SpawnInRow(fallbackType, random3);
+                }
+                else ZombieManager.SpawnInRow(ZombieType.Flag, random3);
+
+
+            }
+
             else
             {
                 ZombieManager.SpawnInRow(theZombieType, random3);
@@ -281,11 +319,23 @@ public class Events : ReplantAPI
         }
         int Sun1 = BoardManager.Board.mSunMoney[0];
         int Sun2 = BoardManager.Board.mSunMoney[1];
-        int moneytake = 150;
-        int moneytake2 = 150;
+        int moneytake;
+        int moneytake2;
 
-        if (Sun1 < 150) moneytake = Sun1;
-        if (Sun2 < 150) moneytake2 = Sun2;
+        if (BloomConfig.TestEnum3.Value == Stage.Night){ // if night, 150 -> 75
+            moneytake = 75;
+            moneytake2 = 75;
+
+            if (Sun1 < 75) moneytake = Sun1;
+            if (Sun2 < 75) moneytake2 = Sun2;
+        } else {
+            moneytake = 150;
+            moneytake2 = 150;
+
+            if (Sun1 < 150) moneytake = Sun1;
+            if (Sun2 < 150) moneytake2 = Sun2;
+        }
+
 
         BoardManager.AddSun(-moneytake, 0);
         BoardManager.AddSun(-moneytake2, 1);

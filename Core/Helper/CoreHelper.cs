@@ -279,7 +279,7 @@ public class CoreHelper : ReplantAPI
     }
 
     public static void CameraZooming(int value){
-        if (Camera.main != null && BoardManager.Board.mApp.IsVersusMode())
+        if (Camera.main != null)
         {
             Camera.main.orthographicSize = value;
         }
@@ -342,5 +342,73 @@ public class CoreHelper : ReplantAPI
     }
 
 
+    public static void ApplyIncreasedMushroomCost(){
+        if (runOnceMushroom) return;
 
+        var allDefs = UnityEngine.Resources.FindObjectsOfTypeAll(Il2CppType.Of<PlantDefinition>());
+
+        if (allDefs == null || allDefs.Length == 0) return;
+
+        bool isUpdated = false;
+        foreach (var obj in allDefs)
+        {
+            var def = obj.Cast<PlantDefinition>();
+            if (def.SeedType == SeedType.Puffshroom
+            || def.SeedType == SeedType.Sunshroom
+            || def.SeedType == SeedType.Fumeshroom
+            || def.SeedType == SeedType.Gravebuster
+            || def.SeedType == SeedType.Hypnoshroom
+            || def.SeedType == SeedType.Scaredyshroom
+            || def.SeedType == SeedType.Iceshroom
+            || def.SeedType == SeedType.Doomshroom
+            || def.SeedType == SeedType.Magnetshroom
+            || def.SeedType == SeedType.Gloomshroom
+            || def.SeedType == SeedType.Twinsunflower) { 
+                def.m_versusCost += 25;
+                isUpdated = true;
+            }
+        }
+
+        if (isUpdated)
+        {
+            runOnceMushroom = true;
+            runOncedayMushroom = false;
+            //MelonLogger.Msg("Increased mushroom costs for Night Vs");
+        }
+    }
+
+    public static void ApplyDecrasedMushroomCost()
+    {
+        if (runOncedayMushroom) return;
+
+        var allDefs = UnityEngine.Resources.FindObjectsOfTypeAll(Il2CppType.Of<PlantDefinition>());
+
+        if (allDefs == null || allDefs.Length == 0) return;
+
+        bool isUpdated = false;
+        foreach (var obj in allDefs)
+        {
+            var def = obj.Cast<PlantDefinition>();
+            if (def.SeedType == SeedType.Puffshroom
+            || def.SeedType == SeedType.Sunshroom
+            || def.SeedType == SeedType.Fumeshroom
+            || def.SeedType == SeedType.Gravebuster
+            || def.SeedType == SeedType.Hypnoshroom
+            || def.SeedType == SeedType.Scaredyshroom
+            || def.SeedType == SeedType.Iceshroom
+            || def.SeedType == SeedType.Doomshroom
+            || def.SeedType == SeedType.Magnetshroom
+            || def.SeedType == SeedType.Gloomshroom
+            || def.SeedType == SeedType.Twinsunflower) { 
+                def.m_versusCost -= 25; 
+                isUpdated = true;
+            }
+        }
+        if (isUpdated)
+        {
+            runOnceMushroom = false;
+            runOncedayMushroom = true;
+            //MelonLogger.Msg("Normal mushroom costs for Day Vs");
+        }
+    }
 }

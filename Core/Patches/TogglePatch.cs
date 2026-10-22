@@ -1,9 +1,8 @@
 ﻿namespace VersusPlus.Patches;
 #pragma warning disable
-using VersusPlus.Core;
-using static VersusPlus.Core.Core;
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Runtime.CompilerServices;
 
 using HarmonyLib;
@@ -34,31 +33,32 @@ using ReplantAPI.Managers;
 using UnityEngine;
 using UnityEngine.UI;
 
-using static Il2CppReloaded.Constants;
+using VersusPlus.Core;
 
+using static Il2CppReloaded.Constants;
+using static VersusPlus.Core.Core;
 
 using Common = Il2CppReloaded.Gameplay.Common;
 using Vector2 = UnityEngine.Vector2;
 using Zombie = Il2CppReloaded.Gameplay.Zombie;
 
-using System.Runtime.CompilerServices;
+using Il2CppInterop.Runtime; 
+
 
 
 public sealed class Patch3 : MelonMod
 {
 
+    // pause music when game pauses
     [HarmonyPatch(typeof(AudioService), nameof(AudioService.GamePause))]
     public static class ForceMusicPausePatch
     {
         public static void Postfix(AudioService __instance, bool theEnteringPause)
         {
-            // Force the music to pause/resume alongside the game pause state
             __instance.GameMusicPause(theEnteringPause);
         }
     }
 
-
-    // pause music when game pauses
     [HarmonyPatch(typeof(GameplayActivity), nameof(GameplayActivity.StartPlaying))]
     public static class GameplayActivityTracker
     {
@@ -69,7 +69,6 @@ public sealed class Patch3 : MelonMod
             CurrentInstance = __instance;
         }
     }
-
 
     // music doesnt switch + music player
     [HarmonyPatch(typeof(MusicActivity), nameof(MusicActivity.TriggerAudio))]
@@ -86,8 +85,10 @@ public sealed class Patch3 : MelonMod
         {
             if (key == false)
             {
-                if (BloomConfig.TestEnum2.Value == Music.Default) TargetTune = MusicTune.DayGrasswalk;
+                if (BloomConfig.TestEnum2.Value == Music.Grasswalk) TargetTune = MusicTune.DayGrasswalk;
+                if (BloomConfig.TestEnum2.Value == Music.Moongrains) TargetTune = MusicTune.NightMoongrains;
                 if (BloomConfig.TestEnum2.Value == Music.BrainiacManiac) TargetTune = MusicTune.FinalBossBrainiacManiac;
+                if (BloomConfig.TestEnum2.Value == Music.Cerebrawl) TargetTune = MusicTune.PuzzleCerebrawl;
                 if (BloomConfig.TestEnum2.Value == Music.Loonboon) TargetTune = MusicTune.MinigameLoonboon;
                 if (BloomConfig.TestEnum2.Value == Music.Conveyer) TargetTune = MusicTune.Conveyer;
             }
@@ -108,7 +109,6 @@ public sealed class Patch3 : MelonMod
 
 
 
-
     // Seed recharge slow
     [HarmonyPatch(typeof(SeedPacket), nameof(SeedPacket.Update))]
     public static class SeedPacketRechargeRatePatch
@@ -119,9 +119,9 @@ public sealed class Patch3 : MelonMod
             if (__instance == null || __instance.mRefreshCounter <= 0)
                 return true;
             if (!BloomConfig.TestBoolInput11.Value) return true;
-            // Uses the packet's own internal counter as the clock
-            // Skips one update every 6 ticks without storing any variables
-            var board = __instance.mBoard; // or BoardManager.Board
+
+            // Skips one update every 6 ticks 
+            var board = __instance.mBoard;
             if (board != null)
             {
                 if ((board.mMainCounter + __instance.mIndex) % 6 == 0)
@@ -153,6 +153,90 @@ public sealed class Patch3 : MelonMod
             // but vs chaos multiplies ts value to 10297
             // so add a toggle that divides back to 6865
             // workaround to make the 100% brain production perk work
+        }
+    }
+
+
+    // Toggle: Stage
+    public static void ApplyStageToLevelDataModel()
+    {
+
+        var allDefs = Resources.FindObjectsOfTypeAll(Il2CppType.Of<LevelEntryData>());
+
+        foreach (var obj in allDefs)
+        {
+            if (obj == null) continue;
+            var entry = obj.Cast<LevelEntryData>();
+
+            if (entry.m_gameMode == GameMode.Versus || entry.name.Contains("Versus"))
+            {
+                if (BloomConfig.TestEnum3.Value == Stage.Night)
+                {
+                    entry.m_gameArea = GameArea.Night;
+                    if (entry.m_backgroundPrefab != null)
+                    {
+                        entry.m_backgroundPrefab.m_AssetGUID = "3e831435e93959f40b51dfac058dec5f";
+                    }
+                    //MelonLogger.Msg("Night stage!");
+                }
+                else if (BloomConfig.TestEnum3.Value == Stage.Day)
+                {
+                    entry.m_gameArea = GameArea.Day;
+                    if (entry.m_backgroundPrefab != null)
+                    {
+                        entry.m_backgroundPrefab.m_AssetGUID = "45d8eb3daa42e2e4ba4e8c9c6bd295ac";
+                    }
+                    //MelonLogger.Msg("Day stage!");
+                }
+            }
+        }
+    }
+
+
+
+
+
+    // Stop gravestones from being added in Night Vs
+    [HarmonyPatch(typeof(Board), nameof(Board.AddGraveStones))]
+    public static class StopAddingGravestoneInVSNight
+    {
+        public static bool Prefix(Board __instance)
+        {
+            if (__instance != null && __instance.mLevelEntryData.m_gameMode == GameMode.Versus &&
+            BloomConfig.TestEnum3.Value == Stage.Night)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    // Spawn a column of graves in Night Vs
+    [HarmonyPatch(typeof(Board), nameof(Board.StartLevel))]
+    public static class StartLevelVSNight
+    {
+        public static void Postfix(Board __instance)
+        {
+            if (__instance != null && __instance.mLevelEntryData.m_gameMode == GameMode.Versus &&
+            BloomConfig.TestEnum3.Value == Stage.Night)
+            {
+
+                //PlantManager.Spawn(0, 0, SeedType.Sunflower);
+                //PlantManager.Spawn(0, 2, SeedType.Sunflower);
+                //PlantManager.Spawn(0, 4, SeedType.Sunflower);
+
+                //ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 0);
+                //ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 2);
+                //ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 4);
+
+                BoardManager.Board.AddAGraveStone(5, 0);
+                BoardManager.Board.AddAGraveStone(5, 1);
+                BoardManager.Board.AddAGraveStone(5, 2);
+                BoardManager.Board.AddAGraveStone(5, 3);
+                BoardManager.Board.AddAGraveStone(5, 4);
+
+            }
+
         }
     }
 

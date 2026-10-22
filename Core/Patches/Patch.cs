@@ -46,6 +46,8 @@ using UnityEngine.UI;
 using VersusPlus.Core;
 using VersusPlus.UI;
 
+
+
 using static Il2CppReloaded.Constants;
 using static MelonLoader.MelonLogger;
 using static VersusPlus.Core.Core;
@@ -226,7 +228,7 @@ public sealed class Patch : MelonMod
            {
                UnityEngine.Vector3 currentOffset = __instance.mController.m_visualOffset;
     
-               currentOffset.x += 17f;
+               currentOffset.x += 15f;
 
                 __instance.mController.m_visualOffset = currentOffset;
            }
@@ -296,7 +298,11 @@ public sealed class Patch : MelonMod
             {
                 //__instance.VisualOffset = new UnityEngine.Vector3(-25f, -100f, 0f);
             }
-            
+            else if (__instance.gameObject.name.Contains("P_GraveStoneRise(Clone)"))
+            {
+                __instance.VisualOffset = new UnityEngine.Vector3(20f, -10f, 0f);
+            }
+
         }
     }
 
@@ -311,7 +317,7 @@ public sealed class Patch : MelonMod
             }
             else if (__instance.gameObject.name.Contains("Projectile-Star"))
             {
-                __instance.ObjectOffset = new Unity.Mathematics.float2(-5f, 3f);
+                //__instance.gameObject. = new Unity.Mathematics.float2(-50f, 3f);
             }
         }
     }

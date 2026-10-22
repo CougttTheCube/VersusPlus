@@ -4,7 +4,7 @@ using Il2CppTekly.Localizations;
 
 using CppCollections = Il2CppSystem.Collections.Generic;
 namespace VersusPlus.Helper;
-
+// RaptorRush
 internal sealed class LocalizationDictionary
 {
     private readonly CppCollections.Dictionary<string, LocalizationString> dictionary;

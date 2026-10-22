@@ -1,5 +1,5 @@
 ﻿namespace VersusPlus.Helper;
-
+// RaptorRush
 internal sealed class LocalizationOverride
 {
     private readonly LocalizationDictionary dictionary;

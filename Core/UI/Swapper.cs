@@ -83,6 +83,7 @@ public class SpriteSwapper : MonoBehaviour
 
             string nameUpper = controllerName?.ToUpperInvariant() ?? "";
 
+
             if (nameUpper.Contains("XBOX") || nameUpper.Contains("XINPUT"))
                 { spritePlant = Resources.FindObjectsOfTypeAll<Sprite>().FirstOrDefault(s => s.name == "SPR_Vs_Side_XboxOne_Plant"); }
 
@@ -253,14 +254,14 @@ public class SpriteSwapper : MonoBehaviour
 
                 if (!isp1Gamepad)
                 {
-                    if (inputName == "input1")
-                    {
+                    //if (inputName == "input1")
+                    //{
                         string displayName = p0Pad.displayName ?? "";
                         MelonLogger.Msg($"Pad 1: {displayName}");
 
                         SpriteSwapper.SwapSprite(displayName, inputIndex);
 
-                    }
+                    //}
                 }
                 else 
                 {
@@ -349,14 +350,14 @@ public class SpriteSwapper : MonoBehaviour
             else if (isp0Gamepad)
             {
                 if (!isp1Gamepad){
-                    if (inputName == "input1")
-                    {
+                    //if (inputName == "input1")
+                    //{
                         string displayName = p0Pad.displayName ?? "";
                         MelonLogger.Msg($"Pad 1: {displayName}");
 
                         SpriteSwapper.SwapSprite(displayName, inputIndex, false);
 
-                    }
+                    //}
                 }
                 else 
                 {
