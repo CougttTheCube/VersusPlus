@@ -148,9 +148,9 @@ public class Core : ReplantAPI
         );
 
         public static EnumConfigInput<Stage> TestEnum3 { get; } = ConfigService.CreateEnum<Stage>(
-            name: "Stage [Exp]",
+            name: "Stage",
             defaultValue: Stage.Day,
-            description: "Changes map. Experimental."
+            description: "Changes stage."
         );
         public static EnumConfigInput<Music> TestEnum2 { get; } = ConfigService.CreateEnum<Music>(
             name: "Music Player",

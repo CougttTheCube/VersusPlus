@@ -366,6 +366,9 @@ public sealed class Patch : MelonMod
                 __instance.color = new UnityEngine.Color(0f, 0.9f, 0f, 1f);
             }
 
+
+
+
             // Change P1 name in picking side screen to Player 1 name
             if (__instance.gameObject.name == "PlayerNumber1" &&
                 __instance.gameObject.transform.parent != null &&
