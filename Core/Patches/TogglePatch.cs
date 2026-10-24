@@ -6,7 +6,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.CompilerServices;
 
 using HarmonyLib;
-
+using HarmonyPatch = HarmonyLib.HarmonyPatch;
+using HarmonyPrefix = HarmonyLib.HarmonyPrefix;
+using HarmonyPostfix = HarmonyLib.HarmonyPostfix;
 using Il2Cpp;
 
 using Il2CppBest.HTTP.SecureProtocol.Org.BouncyCastle.Bcpg;
@@ -42,9 +44,11 @@ using Common = Il2CppReloaded.Gameplay.Common;
 using Vector2 = UnityEngine.Vector2;
 using Zombie = Il2CppReloaded.Gameplay.Zombie;
 
-using Il2CppInterop.Runtime; 
-
-
+using Il2CppInterop.Runtime;
+using Il2CppSystem.Collections.Generic;
+using Harmony;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using UnityEngine.InputSystem.Utilities;
 
 public sealed class Patch3 : MelonMod
 {
@@ -177,7 +181,7 @@ public sealed class Patch3 : MelonMod
                     {
                         entry.m_backgroundPrefab.m_AssetGUID = "3e831435e93959f40b51dfac058dec5f";
                     }
-                    //MelonLogger.Msg("Night stage!");
+
                 }
                 else if (BloomConfig.TestEnum3.Value == Stage.Day)
                 {
@@ -186,7 +190,7 @@ public sealed class Patch3 : MelonMod
                     {
                         entry.m_backgroundPrefab.m_AssetGUID = "45d8eb3daa42e2e4ba4e8c9c6bd295ac";
                     }
-                    //MelonLogger.Msg("Day stage!");
+
                 }
             }
         }
@@ -206,6 +210,7 @@ public sealed class Patch3 : MelonMod
             BloomConfig.TestEnum3.Value == Stage.Night)
             {
                 return false;
+                //return true;
             }
             return true;
         }
@@ -215,7 +220,7 @@ public sealed class Patch3 : MelonMod
     [HarmonyPatch(typeof(Board), nameof(Board.StartLevel))]
     public static class StartLevelVSNight
     {
-        public static void Postfix(Board __instance)
+        public static void Postfix(ref Board __instance)
         {
             if (__instance != null && __instance.mLevelEntryData.m_gameMode == GameMode.Versus &&
             BloomConfig.TestEnum3.Value == Stage.Night)
@@ -227,7 +232,7 @@ public sealed class Patch3 : MelonMod
 
                 //ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 0);
                 //ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 2);
-                //ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 4);
+                //ZombieManager.SpawnAtCell(ZombieType.Gravestone, 2, 4);
 
                 BoardManager.Board.AddAGraveStone(5, 0);
                 BoardManager.Board.AddAGraveStone(5, 1);
@@ -235,9 +240,19 @@ public sealed class Patch3 : MelonMod
                 BoardManager.Board.AddAGraveStone(5, 3);
                 BoardManager.Board.AddAGraveStone(5, 4);
 
+
+                
+                __instance.mEnableGraveStones = true;
+                
+                //MelonLogger.Msg("GRAVESTONE COUNT: " + BoardManager.Board.GetGraveStoneCount());
             }
 
         }
     }
+
+
+    
+
+
 
 }

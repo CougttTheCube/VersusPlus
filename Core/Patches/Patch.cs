@@ -80,7 +80,12 @@ public sealed class Patch : MelonMod
             theSeedType == SeedType.Flowerpot ||
             theSeedType == SeedType.Blover ||
             theSeedType == SeedType.Plantern ||
-            theSeedType == SeedType.Marigold
+            theSeedType == SeedType.Marigold ||
+            theSeedType == SeedType.Gloomshroom ||
+            theSeedType == SeedType.GoldMagnet ||
+            theSeedType == SeedType.Spikerock ||
+            theSeedType == SeedType.Cattail ||
+            theSeedType == SeedType.Cobcannon || theSeedType == SeedType.Lilypad
             ))
             {
                 __result = false;
@@ -93,13 +98,14 @@ public sealed class Patch : MelonMod
     }
 
     // Flag Flower Pot as Recommended
+
     [HarmonyPatch(typeof(SeedChooserScreen), nameof(SeedChooserScreen.SeedNotRecommendedToPick))]
     internal static class SeedChooserScreen_FlowerPot_Recommended
     {
         [HarmonyPrefix]
         private static bool Prefix(SeedChooserScreen __instance, ref RecommentedFlags __result, SeedType theSeedType)
         {
-            if (__instance.mApp.IsVersusMode() && theSeedType == SeedType.Flowerpot)
+            if (__instance.mApp.IsVersusMode() && (theSeedType == SeedType.Flowerpot || theSeedType == SeedType.Lilypad || theSeedType == SeedType.Cattail))
             {
                 __result = RecommentedFlags.None;
                 return false;
@@ -174,6 +180,10 @@ public sealed class Patch : MelonMod
                 rect2.x += 14f;
                 __instance.mZombieRect = rect2;
                 */
+                __instance.mZombieRect = new(50f, 50f, __instance.mZombieRect.width, __instance.mZombieRect.height);
+            }
+
+            if (__instance.mZombieType == ZombieType.Target){
                 __instance.mZombieRect = new(50f, 50f, __instance.mZombieRect.width, __instance.mZombieRect.height);
             }
             //var rect = __instance.mZombieRect;
@@ -475,5 +485,6 @@ public sealed class Patch : MelonMod
 
 
 
+    //[HarmonyPatch(typeof(AudioService), nameof(AudioService.UpdateMusicBurst))]
 
 }

@@ -316,8 +316,128 @@ public class CoreHelper : ReplantAPI
             RectTransform rect = titleObj.GetComponent<RectTransform>();
             if (rect != null)
             {
-                rect.localPosition = new UnityEngine.Vector3(0f, 769f, 0);
+                //rect.localPosition = new UnityEngine.Vector3(0f, 769f, 0);
+                // New header pos
+                rect.localPosition = new UnityEngine.Vector3(0f, 910f, 0);
                 //MelonLogger.Msg("Moved ChooseYourPlant header!");
+            }
+        }
+
+        GameObject titleObj2 = Resources.FindObjectsOfTypeAll<GameObject>()
+        .FirstOrDefault(g => g.name == "Header" &&
+                             g.transform.parent != null &&
+                             g.transform.parent.name == "SeedChooser_Player2");
+
+        if (titleObj2 != null)
+        {
+            RectTransform rect2 = titleObj2.GetComponent<RectTransform>();
+            if (rect2 != null)
+            {
+                //rect.localPosition = new UnityEngine.Vector3(0f, 769f, 0);
+                // New header pos
+                rect2.localPosition = new UnityEngine.Vector3(0f, 900f, 0);
+                //MelonLogger.Msg("Moved ChooseYourPlant header!");
+            }
+        }
+    }
+
+    public static void MovePlantGrids()
+    {
+
+
+        GameObject titleObj = Resources.FindObjectsOfTypeAll<GameObject>()
+        .FirstOrDefault(g => g.name == "SeedChooser" &&
+                             g.transform.parent != null &&
+                             g.transform.parent.name == "Panel");
+
+        Transform gridTransform = titleObj.transform.Find("Grid");
+        if (gridTransform != null)
+        {
+            RectTransform rect = gridTransform.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                rect.localPosition = new UnityEngine.Vector3(0f, 758.6f ,0f);
+            }
+            MelonLogger.Msg("Moved grids!");
+        }
+
+
+        Transform backgroundTrans = titleObj.transform.Find("Background");
+
+        if (backgroundTrans != null)
+        {
+            RectTransform rect2 = backgroundTrans.GetComponent<RectTransform>();
+            if (rect2 != null)
+            {
+                // New header pos
+                rect2.localPosition = new UnityEngine.Vector3(0f, 20f, 0f);
+                rect2.sizeDelta = new UnityEngine.Vector2(0f, 250f);
+                MelonLogger.Msg("adjusted background size!");
+            }
+        }
+
+        Transform scrimTrans = titleObj.transform.Find("Scrim");
+
+        if (scrimTrans != null)
+        {
+            RectTransform rect2 = scrimTrans.GetComponent<RectTransform>();
+            if (rect2 != null)
+            {
+                // New header pos
+                rect2.localPosition = new UnityEngine.Vector3(0f, 20f, 0f);
+                rect2.sizeDelta = new UnityEngine.Vector2(0f, 250f);
+                MelonLogger.Msg("adjusted scrim");
+            }
+        }
+    }
+
+
+    public static void MoveZombieGrids()
+    {
+
+
+        GameObject titleObj = Resources.FindObjectsOfTypeAll<GameObject>()
+        .FirstOrDefault(g => g.name == "SeedChooser_Player2" &&
+                             g.transform.parent != null &&
+                             g.transform.parent.name == "Panel");
+
+        Transform gridTransform = titleObj.transform.Find("Grid");
+        if (gridTransform != null)
+        {
+            RectTransform rect = gridTransform.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                rect.localPosition = new UnityEngine.Vector3(0f, 748.7f, 0f);
+            }
+            MelonLogger.Msg("Moved grids!");
+        }
+
+
+        Transform backgroundTrans = titleObj.transform.Find("Background");
+
+        if (backgroundTrans != null)
+        {
+            RectTransform rect2 = backgroundTrans.GetComponent<RectTransform>();
+            if (rect2 != null)
+            {
+                // New header pos
+                rect2.localPosition = new UnityEngine.Vector3(0f, 20f, 0f);
+                rect2.sizeDelta = new UnityEngine.Vector2(0f, 250f);
+                MelonLogger.Msg("adjusted background size!");
+            }
+        }
+
+        Transform scrimTrans = titleObj.transform.Find("Scrim");
+
+        if (scrimTrans != null)
+        {
+            RectTransform rect2 = scrimTrans.GetComponent<RectTransform>();
+            if (rect2 != null)
+            {
+                // New header pos
+                rect2.localPosition = new UnityEngine.Vector3(0f, 20f, 0f);
+                rect2.sizeDelta = new UnityEngine.Vector2(0f, 250f);
+                MelonLogger.Msg("adjusted scrim");
             }
         }
     }

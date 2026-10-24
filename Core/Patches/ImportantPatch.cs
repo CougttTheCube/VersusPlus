@@ -184,10 +184,19 @@ public sealed class Patch2 : MelonMod
             __instance.mProjectileType != ProjectileType.Wintermelon) return;
 
             // Prevent target zombies and gravestones from taking splash damage
-            if (theZombie.mZombieType == ZombieType.Gravestone || theZombie.mZombieType == ZombieType.Target)
+            if (theZombie.mZombieType == ZombieType.Target || theZombie.mZombieType == ZombieType.Gravestone)
             {
-                if (__instance.mRow != theZombie.mRow)
-                {
+                Zombie theRealZombie = getBestRealZombieInRow(__instance.mBoard, __instance.mRow);
+                if (theRealZombie != null && theRealZombie != theZombie){
+                    __result = false;
+                    return;
+                }
+                
+                int projectileCol = __instance.mBoard.PixelToGridX((int)__instance.mPosX, (int)__instance.mPosY);
+                int theZombieCol = __instance.mBoard.PixelToGridX((int)theZombie.mPosX, (int)theZombie.mPosY);
+
+                if (__instance.mRow != theZombie.mRow || projectileCol != theZombieCol)
+                {             
                     __result = false;
                     return;
                 }
@@ -413,6 +422,91 @@ public sealed class Patch2 : MelonMod
         }
     }
 
-    
+    public static bool isGravestoneOnGrid(Board board, int theGridX, int theGridY){
+        if (board == null) return false;
+        foreach (var theZombie in board.GetZombies())
+        {
+            if (theZombie == null || theZombie.mDead) continue;
+            if (!(theZombie.mZombieType == ZombieType.Gravestone)) continue;
+            // i have no idea why but the grid offsets by 1 on the left col
+            int zombieCol = BoardManager.PixelToGridX((int)theZombie.mPosX, (int)theZombie.mPosY) + 1;
+            if (theZombie.mRow == theGridY && zombieCol == theGridX)
+            {
+                return true;
+            }
 
+        }
+        return false;
+    }
+
+
+    // Patch: Grave Buster destroys grave ???
+    [HarmonyPatch(typeof(Board), nameof(Board.CanPlantAt))]
+    public static class gravebusterpatch
+    {
+        public static void Postfix(Board __instance, int theGridX, int theGridY, SeedType theType, ref PlantingReason __result)
+        {
+            if (__instance == null) return;
+
+            if (theType == SeedType.Gravebuster && GridItemManager.GetAt(GridItemType.Gravestone, theGridX, theGridY) != null)
+            {
+                __result = PlantingReason.Ok;
+            }
+            
+
+            // if tile is occupied -> not ok to plant lily pad
+            /*
+            if (theType == SeedType.Lilypad && 
+                PlantManager.GetTopAt(theGridX, theGridY) == null && 
+                !isGravestoneOnGrid(__instance, theGridX, theGridY)) { 
+
+                __result = PlantingReason.Ok;
+
+            }
+            */
+            
+            if (theType == SeedType.Sunshroom || theType == SeedType.Twinsunflower){
+                if (BoardManager.Board.mApp.VersusMode.Phase == VersusPhase.SuddenDeath) {
+                    if (__instance.mApp?.VersusMode != null &&
+                        __instance.mApp.VersusMode.Phase == VersusPhase.SuddenDeath)
+                    {
+                        __result = PlantingReason.VSSuddenDeath;
+                    }
+                }
+            }
+
+            /*
+            if (theType == SeedType.ZombieGravestone)
+            {
+                Plant plan = PlantManager.GetTopAt(theGridX, theGridY);
+
+                if (plan != null &&  plan.mSeedType == SeedType.Lilypad) { 
+                    __result = PlantingReason.NotHere; 
+                }
+            }
+            */
+            
+            return;
+        } 
+
+    }
+
+
+    [HarmonyPatch(typeof(Plant), nameof(Plant.Die))]
+    public static class gravebusterpatch2
+    {
+        public static void Prefix(Plant __instance)
+        {
+            if (__instance != null && __instance.mSeedType == SeedType.Gravebuster)
+            {
+                int theGridX = __instance.mPlantCol;
+                int theGridY = __instance.mRow;
+                GridItem grave = GridItemManager.GetAt(GridItemType.Gravestone, theGridX, theGridY);
+                if (grave != null)
+                {
+                    grave.GridItemDie();
+                }
+            }
+        }
+    }
 }

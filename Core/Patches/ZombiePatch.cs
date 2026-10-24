@@ -215,12 +215,14 @@ public sealed class Patch4 : MelonMod
 
 
         // Block zombie side from placing on craters (except zombies that spawns on the back)
+        /*
         [HarmonyPrefix]
         private static bool Prefix(Board __instance, ref ZombieType theZombieType, int theRow)
         {
             if (!__instance.mApp.IsVersusMode()) return true;
 
             SeedType plantCursor = CursorManager.GetSeedTypeInCursor(0);
+
             // Check if holding seed packet
             bool holdingZombieSeed = ((int)plantCursor >= 60 && (int)plantCursor <= 80);
 
@@ -298,7 +300,7 @@ public sealed class Patch4 : MelonMod
 
             return true;
         }
-
+        */
 
         // Plays huge wave sound when Flag Zombie is spawned
         [HarmonyPrefix]
@@ -324,11 +326,10 @@ public sealed class Patch4 : MelonMod
     [HarmonyPatch(typeof(Board), nameof(Board.CanPlantAt))]
     internal static class ZombieNotPlantingonGraves
     {
-        [HarmonyPrefix]
-        private static bool Prefix(int theGridX, int theGridY, SeedType theType, ref PlantingReason __result)
+        private static void Postfix(int theGridX, int theGridY, SeedType theType, ref PlantingReason __result)
         {
             if (((int)theType >= 60 && (int)theType <= 80) &&
-            GridItemManager.GetAt(GridItemType.Crater, theGridX, theGridY) != null)
+            (GridItemManager.GetAt(GridItemType.Crater, theGridX, theGridY) != null))
             {
                 if ((int)theType == 65 ||
                 (int)theType == 68 ||
@@ -337,12 +338,13 @@ public sealed class Patch4 : MelonMod
                 (int)theType == 73 ||
                 (int)theType == 75 ||
                 (int)theType == 78 ||
-                (int)theType == 79) return true;
-                __result = PlantingReason.NotOnCrater;
-                return false;
-            }
+                (int)theType == 79) return;
 
-            return true;
+                __result = PlantingReason.NotHere;
+
+            }
+            return;
         }
     }
+
 }

@@ -61,13 +61,17 @@ using UnityEngine.InputSystem.Switch;
 using UnityEngine.InputSystem.XInput;
 using UnityEngine.Rendering.RenderGraphModule.NativeRenderPassCompiler;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 using VersusPlus.Helper;
 using VersusPlus.Patches;
 using VersusPlus.UI;
 
+using CursorManager = ReplantAPI.Managers.CursorManager;
+
 using static Il2CppSystem.Net.Http.Headers.Parser;
 using static UnityEngine.ParticleSystem.PlaybackState;
+using static VersusPlus.Gameplay.Events;
 using static VersusPlus.Helper.CoreHelper;
 using static VersusPlus.UI.Concede0;
 using static VersusPlus.UI.SpriteSwapper;
@@ -75,6 +79,11 @@ using static VersusPlus.UI.Timer;
 using static VersusPlus.UI.Timer2;
 
 using Vector2 = UnityEngine.Vector2;
+
+
+// awesome bug
+// target can sometimes be hit when zombie at the back (todo: adjust target hitbox just like gravestone)
+// crater issue
 
 public class Core : ReplantAPI
 {
@@ -295,33 +304,20 @@ public class Core : ReplantAPI
         
         if (Input.GetKeyDown(KeyCode.L))
         {
-            /*
-                foreach (var device in InputSystem.devices)
-                    MelonLogger.Msg($"{device.name} | {device.displayName} | {device.layout}");
+            //PlantManager.Spawn(4, 2, SeedType.Gravebuster);
 
-                var pads = Gamepad.all;   // all connected gamepads, in connection order
+            //MelonLogger.Msg("GRAVESTONE COUNT: " + BoardManager.Board.GetGraveStoneCount());
 
-                for (int i = 0; i < pads.Count; i++)
-                {
-                    var pad = pads[i];
-                    MelonLogger.Msg($"Pad {i}: {pad.displayName} | id {pad.deviceId} | name {pad.name}");
-                }
-                if (pads.Count == 1)
-                {
-                    p2Only = pads[0];
-                }
-                if (pads.Count >= 2)
-                {
-                    Gamepad p1 = pads[0];
-                    Gamepad p2 = pads[1];
-                }
-                */
-            //MelonLogger.Msg(BloomConfig.Player1Name.Value);
-            //MelonLogger.Msg(BloomConfig.Player2Name.Value);
         }
-        
 
-        
+        if (Input.GetKeyDown(KeyCode.K))
+        {
+            //BoardManager.Board.AddAGraveStone(4, 2);
+
+
+            
+        }
+
 
 
         // Detect input for both players
@@ -685,6 +681,7 @@ public class Core : ReplantAPI
     public override void OnSceneWasInitialized(int buildIndex, string sceneName)
     {
         base.OnSceneWasInitialized(buildIndex, sceneName);
+        MelonLogger.Msg(sceneName);
         hasPlayedSuddenDeath = false;
         hasPlayedEnd = false;
         hasPlayedTen = false;
@@ -699,7 +696,11 @@ public class Core : ReplantAPI
         {
             CameraZooming(1000);
         }
-        else
+        else if (sceneName == "ZenGarden")
+        {
+            CameraZooming(900);
+        } 
+        else 
         {
             CameraZooming(1080);
         }
@@ -790,6 +791,8 @@ public class Core : ReplantAPI
         FlipZombieAvatar();
         MoveChooseYourPlantHeader();
         MoveZombiePanel();
+        MovePlantGrids();
+        MoveZombieGrids();
 
         VersusSideTracker.ActivePlantInput = null;
         VersusSideTracker.ActiveZombieInput = null;
