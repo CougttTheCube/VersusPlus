@@ -68,6 +68,7 @@ public sealed class Patch2 : MelonMod
     public static class isFumeshroomAttacking
     {
         public static bool IsFumeshroomAttacking = false;
+        public static bool IsMelonAttacking = false;
     }
 
 
@@ -82,6 +83,11 @@ public sealed class Patch2 : MelonMod
                 isFumeshroomAttacking.IsFumeshroomAttacking = true;
                 //MelonLogger.Msg("Fume-shroom fires!");
             }
+            if (__instance.mSeedType == SeedType.Melonpult)
+            {
+                isFumeshroomAttacking.IsMelonAttacking = true;
+                //MelonLogger.Msg("Fume-shroom fires!");
+            }
 
         }
 
@@ -89,6 +95,7 @@ public sealed class Patch2 : MelonMod
         public static void Postfix()
         {
             isFumeshroomAttacking.IsFumeshroomAttacking = false;
+            isFumeshroomAttacking.IsMelonAttacking = false;
             //MelonLogger.Msg("Fume-shroom stops firing!");
         }
     }
@@ -186,16 +193,15 @@ public sealed class Patch2 : MelonMod
             // Prevent target zombies and gravestones from taking splash damage
             if (theZombie.mZombieType == ZombieType.Target || theZombie.mZombieType == ZombieType.Gravestone)
             {
+                // Get best real zombie in row, ignore splash damage if zombie about to be hit by splash isnt the same as BRZ
                 Zombie theRealZombie = getBestRealZombieInRow(__instance.mBoard, __instance.mRow);
                 if (theRealZombie != null && theRealZombie != theZombie){
-                    __result = false;
+                   __result = false;
                     return;
                 }
-                
-                int projectileCol = __instance.mBoard.PixelToGridX((int)__instance.mPosX, (int)__instance.mPosY);
-                int theZombieCol = __instance.mBoard.PixelToGridX((int)theZombie.mPosX, (int)theZombie.mPosY);
 
-                if (__instance.mRow != theZombie.mRow || projectileCol != theZombieCol)
+                // No splash damage if gravestone and target is on different row
+                if (__instance.mRow != theZombie.mRow)
                 {             
                     __result = false;
                     return;
@@ -365,20 +371,7 @@ public sealed class Patch2 : MelonMod
         }
 
     }
-    /*
-    [HarmonyPatch(typeof(VersusMode), nameof(VersusMode.Initialize))]
-    internal static class UpdatePickSide
-    {
-        [HarmonyPostfix]
-        private static void Postfix(VersusMode __instance)
-        {
-            if (__instance.m_app != null)
-            {
-                __instance.m_app.VersusMode.Phase = VersusPhase.ChooseZombiePacket;
-            }
-        }
-    }
-    */
+
 
 
     // Select Sunflower to swap

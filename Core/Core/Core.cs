@@ -79,11 +79,7 @@ using static VersusPlus.UI.Timer;
 using static VersusPlus.UI.Timer2;
 
 using Vector2 = UnityEngine.Vector2;
-
-
-// awesome bug
-// target can sometimes be hit when zombie at the back (todo: adjust target hitbox just like gravestone)
-// crater issue
+using VersusPlus.Gameplay;
 
 public class Core : ReplantAPI
 {
@@ -243,6 +239,11 @@ public class Core : ReplantAPI
             defaultValue: false,
             description: "Zooms in the camera in Versus Mode. Experimental."
         );
+        public static BoolConfigInput TestBoolInput14 { get; } = ConfigService.CreateBool(
+            name: "Starfruit Nerf [Exp]",
+            defaultValue: true,
+            description: "Disables Starfruit dealing huge damage to zombie eating it closely. Experimental."
+        );
         public static BoolConfigInput TestBoolInput8 { get; } = ConfigService.CreateBool(
         name: "???",
         defaultValue: false,
@@ -307,13 +308,13 @@ public class Core : ReplantAPI
             //PlantManager.Spawn(4, 2, SeedType.Gravebuster);
 
             //MelonLogger.Msg("GRAVESTONE COUNT: " + BoardManager.Board.GetGraveStoneCount());
-
+            MelonLogger.Msg("zombie COUNT: " + BoardManager.Board.CountZombiesOnScreen());
         }
 
         if (Input.GetKeyDown(KeyCode.K))
         {
             //BoardManager.Board.AddAGraveStone(4, 2);
-
+            PlaySFX(Constants.Sound.SOUND_WINMUSIC);
 
             
         }
@@ -430,7 +431,6 @@ public class Core : ReplantAPI
 
 
         // Toggle: Sets initial recharge time
-        // todo: maybe move to somewhere that initializes once every vs mode scene loading
         if (BoardManager.Board.mApp != null && BoardManager.Board.mApp.VersusMode != null
             && BoardManager.Board.mApp.VersusMode.m_gameplayInitialized)
         {
@@ -497,6 +497,7 @@ public class Core : ReplantAPI
                 }
             }
         }
+        
 
 
 
@@ -517,6 +518,9 @@ public class Core : ReplantAPI
                 }
             }
         }
+
+
+
 
         // Plays death sounds when game ends
         if (BoardManager.App != null && BoardManager.App.VersusMode != null)
@@ -691,6 +695,7 @@ public class Core : ReplantAPI
         activateonce = false;
         InitializeMatch = false;
         key = false;
+        Events.isZombossSpawned = false;
 
         if (BloomConfig.TestBoolInput13.Value && sceneName == "Gameplay")
         {
@@ -726,6 +731,11 @@ public class Core : ReplantAPI
                     @override.Set(
                     $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nImps are tiny zombies that can sprint to your house.");
                 }
+                else if (definition.m_seedType == SeedType.Sunflower)
+                {
+                    @override.Set(
+                    $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nGives you additional sun.\n <color=#ff0000>Select this seed packet to proceed.");
+                }
                 else
                 {
                     @override.Set(
@@ -746,7 +756,7 @@ public class Core : ReplantAPI
     {
         base.OnSceneWasLoaded(buildIndex, sceneName);
         // Add health to Wall-nut and Tall-nut Zombie in Versus Mode
-        var allDefsZ = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppInterop.Runtime.Il2CppType.Of<ZombieDefinition>());
+        var allDefsZ = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppType.Of<ZombieDefinition>());
         foreach (var obj in allDefsZ)
         {
             var def = obj.Cast<ZombieDefinition>();
@@ -765,6 +775,7 @@ public class Core : ReplantAPI
 
         // Apply stage swapping when loading scene
         Patch3.ApplyStageToLevelDataModel();
+
         // Toggle: Better Sudden Death
         var allDefs = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppType.Of<PlantDefinition>());
         foreach (var obj in allDefs)
@@ -774,6 +785,7 @@ public class Core : ReplantAPI
             def.m_versusSuddenDeathRefreshTime = def.m_versusBaseRefreshTime;
 
         }
+
 
         // Make mushrooms cost 25 more sun when in Night/Fog Vs
         if (BloomConfig.TestEnum3.Value == Stage.Night)
@@ -793,10 +805,16 @@ public class Core : ReplantAPI
         MoveZombiePanel();
         MovePlantGrids();
         MoveZombieGrids();
+        IncreaseTopControllerSize();
+        IncreaseBottomControllerSize();
 
+        // reset active inputs
         VersusSideTracker.ActivePlantInput = null;
         VersusSideTracker.ActiveZombieInput = null;
 
+
+
+        
         /*
          * Not related to Vs Mode
         foreach (var obj in allDefs){

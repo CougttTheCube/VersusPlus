@@ -11,6 +11,8 @@ using BloomEngine.ModMenu;
 
 using HarmonyLib;
 
+using Il2Cpp;
+
 using Il2CppGoogle.Protobuf.WellKnownTypes;
 
 using Il2CppInterop.Runtime;
@@ -56,13 +58,15 @@ using UnityEngine.InputSystem.Switch;
 using UnityEngine.InputSystem.XInput;
 using UnityEngine.Rendering.RenderGraphModule.NativeRenderPassCompiler;
 
+using VersusPlus.Patches;
+
+using static Il2CppReloaded.Constants;
 using static Il2CppSystem.Net.Http.Headers.Parser;
 using static UnityEngine.ParticleSystem.PlaybackState;
-using VersusPlus.Patches;
+using static VersusPlus.Core.Core;
 
 using Vector2 = UnityEngine.Vector2;
 
-using static VersusPlus.Core.Core;
 public class CoreHelper : ReplantAPI
 {
     internal static class ImpManager
@@ -442,6 +446,42 @@ public class CoreHelper : ReplantAPI
         }
     }
 
+    public static void IncreaseTopControllerSize(){
+        GameObject titleObj = Resources.FindObjectsOfTypeAll<GameObject>()
+        .FirstOrDefault(g => g.name == "Graphic" &&
+                         g.transform.parent != null &&
+                         g.transform.parent.name == "ControllerTop");
+
+        if (titleObj != null)
+        {
+            RectTransform rect = titleObj.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                rect.localScale = new UnityEngine.Vector3(1.14f, 1.14f, 0);
+                //MelonLogger.Msg("Moved Zombie panel!");
+            }
+        }
+    }
+    public static void IncreaseBottomControllerSize()
+    {
+        GameObject titleObj = Resources.FindObjectsOfTypeAll<GameObject>()
+        .FirstOrDefault(g => g.name == "Graphic" &&
+                         g.transform.parent != null &&
+                         g.transform.parent.name == "ControllerBottom");
+
+        if (titleObj != null)
+        {
+            RectTransform rect = titleObj.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                rect.localScale = new UnityEngine.Vector3(1.14f, 1.14f, 0);
+                rect.localPosition = new UnityEngine.Vector3(0f, 20f, 0);
+                //MelonLogger.Msg("Moved Zombie panel!");
+            }
+        }
+    }
+
+
 
     public static void MoveZombiePanel()
     {
@@ -519,8 +559,8 @@ public class CoreHelper : ReplantAPI
             || def.SeedType == SeedType.Doomshroom
             || def.SeedType == SeedType.Magnetshroom
             || def.SeedType == SeedType.Gloomshroom
-            || def.SeedType == SeedType.Twinsunflower) { 
-                def.m_versusCost -= 25; 
+            || def.SeedType == SeedType.Twinsunflower) {
+                def.m_versusCost -= 25;
                 isUpdated = true;
             }
         }
@@ -529,6 +569,15 @@ public class CoreHelper : ReplantAPI
             runOnceMushroom = false;
             runOncedayMushroom = true;
             //MelonLogger.Msg("Normal mushroom costs for Day Vs");
+        }
+    }
+
+
+    public static void PlaySFX(Sound sound, bool skipIfPlaying = false){
+        var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
+        if (activity != null)
+        {
+            activity.m_audioService.PlaySample(sound, skipIfPlaying);
         }
     }
 }

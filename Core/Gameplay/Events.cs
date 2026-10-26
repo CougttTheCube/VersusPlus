@@ -69,6 +69,8 @@ public class Events : ReplantAPI
     static int pixelRow;
     static int pixelRow2;
 
+    public static bool isZombossSpawned = false;
+
     static int temp;
 
     public static System.Collections.IEnumerator Event1()
@@ -177,16 +179,38 @@ public class Events : ReplantAPI
                             fallbackType == ZombieType.Gravestone);
 
                     ZombieManager.SpawnInRow(fallbackType, random3);
+
                 }
                 else {
-                    ZombieManager.SpawnInRow(ZombieType.Boss, 2);
-                    if (activity != null)
-                    {
-                        // Switch soundtrack to Brainiac Maniac
-                        // Activate key
-                        activity.m_audioService.PlayMusic(MusicTune.FinalBossBrainiacManiac, 0, 0);
-                        CustomMusicPatch.TargetTune = MusicTune.FinalBossBrainiacManiac;
-                        Core.key = true;
+                    // Zomboss only spawns once
+                
+                    if (!isZombossSpawned){
+                        ZombieManager.SpawnInRow(ZombieType.Boss, 2);
+                        if (activity != null)
+                        {
+                            // Switch soundtrack to Brainiac Maniac
+                            // Activate key
+                            activity.m_audioService.PlayMusic(MusicTune.FinalBossBrainiacManiac, 0, 0);
+                            CustomMusicPatch.TargetTune = MusicTune.FinalBossBrainiacManiac;
+                            Core.key = true;
+                        }
+                        isZombossSpawned = true;
+                    } else {
+                        ZombieType fallbackType;
+                        do
+                        {
+                            fallbackType = (ZombieType)UnityEngine.Random.Range(0, 37);
+                        }
+                        while (fallbackType == ZombieType.Boss || fallbackType == ZombieType.Snorkel ||
+                                fallbackType == ZombieType.DolphinRider ||
+                                fallbackType == ZombieType.ZombieCachedPolevaulterWithPole ||
+                                fallbackType == ZombieType.Zombatar ||
+                                fallbackType == ZombieType.NumZombieTypes ||
+                                fallbackType == ZombieType.NumCachedZombieTypes ||
+                                fallbackType == ZombieType.Invalid ||
+                                fallbackType == ZombieType.Gravestone);
+
+                        ZombieManager.SpawnInRow(fallbackType, random3);
                     }
                 }
                 

@@ -1,9 +1,11 @@
 ﻿namespace VersusPlus.Patches;
 #pragma warning disable
 
-// Gravestone Size Fix:
+// D1GQ - Gravestone Size Fix
 // https://github.com/D1GQ/ReplantedOnline/blob/main/src/Network/Reloaded/Client/Object/Gameplay/ZombieComponents/GravestoneNetworkComponent.cs
 
+// D1GQ - Music Horde Fix
+// https://github.com/D1GQ/ReplantedOnline/blob/c5f30dd28cd59929a9513178ca8a6ec8103c0c3e/src/Patches/Reloaded/Gameplay/Versus/BoardPatch.cs
 
 using System;
 using System.Collections.Generic;
@@ -85,7 +87,7 @@ public sealed class Patch : MelonMod
             theSeedType == SeedType.GoldMagnet ||
             theSeedType == SeedType.Spikerock ||
             theSeedType == SeedType.Cattail ||
-            theSeedType == SeedType.Cobcannon || theSeedType == SeedType.Lilypad
+            theSeedType == SeedType.Cobcannon
             ))
             {
                 __result = false;
@@ -105,7 +107,7 @@ public sealed class Patch : MelonMod
         [HarmonyPrefix]
         private static bool Prefix(SeedChooserScreen __instance, ref RecommentedFlags __result, SeedType theSeedType)
         {
-            if (__instance.mApp.IsVersusMode() && (theSeedType == SeedType.Flowerpot || theSeedType == SeedType.Lilypad || theSeedType == SeedType.Cattail))
+            if (__instance.mApp.IsVersusMode() && (theSeedType == SeedType.Flowerpot))
             {
                 __result = RecommentedFlags.None;
                 return false;
@@ -300,6 +302,15 @@ public sealed class Patch : MelonMod
                 float random = UnityEngine.Random.Range(32, 39);
                 __instance.VisualOffset = new UnityEngine.Vector3(-34f, -random, 0f);
             }
+            else if (__instance.gameObject.name.Contains("P_SnowPeaSplat"))
+            {
+                float random = UnityEngine.Random.Range(32, 39);
+                __instance.VisualOffset = new UnityEngine.Vector3(-34f, -random, 0f);
+            }
+            else if (__instance.gameObject.name.Contains("P_SnowPeaPuff"))
+            {
+                __instance.VisualOffset = new UnityEngine.Vector3(0f, -15f, 0f);
+            }
             else if (__instance.gameObject.name.Contains("P_Wintermelon"))
             {
                 //__instance.VisualOffset = new UnityEngine.Vector3(-25f, -100f, 0f);
@@ -311,6 +322,10 @@ public sealed class Patch : MelonMod
             else if (__instance.gameObject.name.Contains("P_GraveStoneRise(Clone)"))
             {
                 __instance.VisualOffset = new UnityEngine.Vector3(20f, -10f, 0f);
+            }
+            else if (__instance.gameObject.name.Contains("P_ZombieRise(Clone)"))
+            {
+                __instance.m_scale = new Unity.Mathematics.float2(1.1f, 1.1f);
             }
 
         }
@@ -325,13 +340,70 @@ public sealed class Patch : MelonMod
             {
                 __instance.VisualOffset = new UnityEngine.Vector3(0f, -15f, 0f);
             }
+            else if (__instance.gameObject.name.Contains("Projectile-Snowpea"))
+            {
+                __instance.VisualOffset = new UnityEngine.Vector3(0f, -15f, 0f);
+            }
+            else if (__instance.gameObject.name.Contains("Projectile-Fireball"))
+            {
+                __instance.VisualOffset = new UnityEngine.Vector3(100f, -115f, 0f);
+                //__instance.m_projectile.mShadowOffsetX
+            }
             else if (__instance.gameObject.name.Contains("Projectile-Star"))
             {
                 //__instance.gameObject. = new Unity.Mathematics.float2(-50f, 3f);
+                //__instance.m_projectile.GetProjectileRect();
+
+            }
+
+            //P_Reanim_JalapenoFire_FirePea
+            //P_Reanim_JalapenoFire
+        }
+    }
+
+
+    // Nerf starfruit shotgun behaviour
+    [HarmonyPatch(typeof(Projectile), nameof(Projectile.GetProjectileRect))]
+    public static class ProjectileRectPatch
+    {
+        public static void Postfix(Projectile __instance, ref Rect __result)
+        {
+            if (__instance.mProjectileType == ProjectileType.Star)
+            {
+                if (!BloomConfig.TestBoolInput14.Value) return;
+                float scale = 0.9f; // shrink to 0.9x size
+
+                float newWidth = __result.width * scale;
+                float newHeight = __result.height * scale;
+
+                float offsetX = (__result.width - newWidth) / 2f;
+                float offsetY = (__result.height - newHeight) / 2f;
+
+                __result = new Rect(__result.x + offsetX,
+                                    __result.y + offsetY,
+                                    newWidth,
+                                    newHeight);
             }
         }
     }
 
+
+
+
+    [HarmonyPatch(typeof(ReanimationController), nameof(ReanimationController.OnInit))]
+    public static class ReanimationControllerOffsetPatch
+    {
+        public static void Postfix(ProjectileController __instance)
+        {
+            if (__instance.gameObject.name.Contains("P_Reanim_JalapenoFire"))
+            {
+                __instance.VisualOffset = new UnityEngine.Vector3(210f, -285f, 0f);
+            }
+
+            //P_Reanim_JalapenoFire_FirePea
+            //P_Reanim_JalapenoFire
+        }
+    }
 
     // Camera doesn't pan when zombie walk into house anymore
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.WalkIntoHouse))]
@@ -484,7 +556,38 @@ public sealed class Patch : MelonMod
     }
 
 
+    // Fix music horde
+    // D1GQ
+    [HarmonyPatch(typeof(Board), nameof(Board.CountZombiesOnScreen))]
+    public static class CountZombies{
+        [HarmonyPrefix]
+        public static bool Board_CountZombiesOnScreen_Prefix(Board __instance, ref int __result)
+        {
+            if (__instance == null) return true;
+            if (!__instance.mApp.IsVersusMode()) return true;
 
-    //[HarmonyPatch(typeof(AudioService), nameof(AudioService.UpdateMusicBurst))]
+            int count = 0;
+            if (__instance.mApp.VersusMode.Phase == VersusPhase.SuddenDeath) count = 10; // Force to play horde after sudden death
+
+            foreach (var zombie in __instance.GetZombies())
+            {
+                if (zombie.mZombieType == ZombieType.Gravestone || zombie.mZombieType == ZombieType.Target)
+                    continue;
+
+                if (!zombie.IsDeadOrDying() && zombie.IsOnBoard())
+                {
+                    count++;
+                }
+            }
+
+            __result = count;
+
+            return false;
+        }
+    }
+    
+
+
+
 
 }

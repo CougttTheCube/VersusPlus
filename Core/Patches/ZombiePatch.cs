@@ -131,6 +131,7 @@ public sealed class Patch4 : MelonMod
         }
 
         // Skip rise from grave phase for zombotanies
+        /*
         [HarmonyPrefix]
         private static bool Prefix3(Zombie __instance)
         {
@@ -149,6 +150,9 @@ public sealed class Patch4 : MelonMod
             return false;
 
         }
+        */
+
+
     }
 
     // Remove from list if Imp die
@@ -188,9 +192,6 @@ public sealed class Patch4 : MelonMod
 
 
 
-
-
-
     [HarmonyPatch(typeof(Board), nameof(Board.AddZombieInRow))]
     internal static class SpawnPlant
     {
@@ -213,95 +214,6 @@ public sealed class Patch4 : MelonMod
             return true;
         }
 
-
-        // Block zombie side from placing on craters (except zombies that spawns on the back)
-        /*
-        [HarmonyPrefix]
-        private static bool Prefix(Board __instance, ref ZombieType theZombieType, int theRow)
-        {
-            if (!__instance.mApp.IsVersusMode()) return true;
-
-            SeedType plantCursor = CursorManager.GetSeedTypeInCursor(0);
-
-            // Check if holding seed packet
-            bool holdingZombieSeed = ((int)plantCursor >= 60 && (int)plantCursor <= 80);
-
-            if ((int)plantCursor == 65 ||
-            (int)plantCursor == 68 ||
-            (int)plantCursor == 70 ||
-            (int)plantCursor == 72 ||
-            (int)plantCursor == 73 ||
-            (int)plantCursor == 75 ||
-            (int)plantCursor == 78 ||
-            (int)plantCursor == 79) holdingZombieSeed = false;
-
-
-            if (holdingZombieSeed)
-            {
-
-                int targetCol = __instance.PixelToGridX(
-                    __instance.mApp.m_widgetManager.LastMouseX[0],
-                    __instance.mApp.m_widgetManager.LastMouseY[0]
-                );
-
-
-                if (GridItemManager.GetAt(GridItemType.Crater, targetCol, theRow) != null)
-                {
-                    var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
-                    if (activity != null)
-                    {
-                        activity.m_audioService.PlaySample(Constants.Sound.SOUND_BUZZER);
-                    }
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        [HarmonyPrefix]
-        private static bool Prefix67(Board __instance, ref ZombieType theZombieType, int theRow)
-        {
-            if (!__instance.mApp.IsVersusMode()) return true;
-
-            SeedType zombieCursor = CursorManager.GetSeedTypeInCursor(1);
-
-            // Check if holding seed packet
-            bool holdingZombieSeed = ((int)zombieCursor >= 60 && (int)zombieCursor <= 80);
-
-            if ((int)zombieCursor == 65 ||
-            (int)zombieCursor == 68 ||
-            (int)zombieCursor == 70 ||
-            (int)zombieCursor == 72 ||
-            (int)zombieCursor == 73 ||
-            (int)zombieCursor == 75 ||
-            (int)zombieCursor == 78 ||
-            (int)zombieCursor == 79) holdingZombieSeed = false;
-
-            if (holdingZombieSeed)
-            {
-
-                int targetCol2 = __instance.PixelToGridX(
-                    __instance.mApp.m_widgetManager.LastMouseX[1],
-                    __instance.mApp.m_widgetManager.LastMouseY[1]
-                );
-
-                if (GridItemManager.GetAt(GridItemType.Crater, targetCol2, theRow) != null)
-                {
-                    var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
-                    if (activity != null)
-                    {
-                        activity.m_audioService.PlaySample(Constants.Sound.SOUND_BUZZER);
-                    }
-                    return false;
-                }
-
-            }
-
-            return true;
-        }
-        */
-
         // Plays huge wave sound when Flag Zombie is spawned
         [HarmonyPrefix]
         private static bool Prefix2(Board __instance, ZombieType theZombieType)
@@ -315,6 +227,11 @@ public sealed class Patch4 : MelonMod
                     activity.m_audioService.PlaySample(Constants.Sound.SOUND_HUGE_WAVE);
 
                 }
+                // Buff Flag Zombie: Add 2 more zombies
+                int random = UnityEngine.Random.Range(0, 5);
+                ZombieManager.SpawnInRow(ZombieType.Pail, random);
+                random = UnityEngine.Random.Range(0, 5);
+                ZombieManager.SpawnInRow(ZombieType.Normal, random);
             }
 
             return true;
@@ -340,10 +257,57 @@ public sealed class Patch4 : MelonMod
                 (int)theType == 78 ||
                 (int)theType == 79) return;
 
-                __result = PlantingReason.NotHere;
+                __result = PlantingReason.NotOnCrater;
 
             }
             return;
+        }
+    }
+
+    // Not allowing zombie to be place on crater rework
+    [HarmonyPatch(typeof(Challenge), nameof(Challenge.IZombieMouseDownWithZombie))]
+    internal static class BlockZombiePlacementOnCraterPatch
+    {
+        [HarmonyPrefix]
+        private static bool Prefix(Challenge __instance, int x, int y, int theClickCount, int playerIndex)
+        {
+            if (__instance == null || __instance.mBoard == null) return true;
+
+            SeedType cursorSeed = CursorManager.GetSeedTypeInCursor(playerIndex);
+
+            // Check if holding seed packet
+            bool holdingZombieSeed = ((int)cursorSeed >= 60 && (int)cursorSeed <= 80);
+
+            if ((int)cursorSeed == 65 ||
+                (int)cursorSeed == 68 ||
+                (int)cursorSeed == 70 ||
+                (int)cursorSeed == 72 ||
+                (int)cursorSeed == 73 ||
+                (int)cursorSeed == 75 ||
+                (int)cursorSeed == 78 ||
+                (int)cursorSeed == 79)
+            {
+                holdingZombieSeed = false;
+            }
+
+            if (holdingZombieSeed)
+            {
+                int targetCol = __instance.mBoard.PixelToGridX(x, y);
+                int targetRow = __instance.mBoard.PixelToGridY(x, y);
+
+                if (GridItemManager.GetAt(GridItemType.Crater, targetCol, targetRow) != null)
+                {
+                    var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
+                    if (activity != null)
+                    {
+                        activity.m_audioService.PlaySample(Constants.Sound.SOUND_BUZZER);
+                    }
+
+                    return false; 
+                }
+            }
+
+            return true;
         }
     }
 

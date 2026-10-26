@@ -5,13 +5,16 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Runtime.CompilerServices;
 
+using Harmony;
+
 using HarmonyLib;
-using HarmonyPatch = HarmonyLib.HarmonyPatch;
-using HarmonyPrefix = HarmonyLib.HarmonyPrefix;
-using HarmonyPostfix = HarmonyLib.HarmonyPostfix;
+
 using Il2Cpp;
 
 using Il2CppBest.HTTP.SecureProtocol.Org.BouncyCastle.Bcpg;
+
+using Il2CppInterop.Runtime;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 using Il2CppReloaded;
 using Il2CppReloaded.Data;
@@ -24,6 +27,7 @@ using Il2CppSource.Binders;
 using Il2CppSource.Controllers;
 using Il2CppSource.DataModels;
 
+using Il2CppSystem.Collections.Generic;
 using Il2CppSystem.Numerics;
 
 using Il2CppTMPro;
@@ -33,7 +37,9 @@ using MelonLoader;
 using ReplantAPI.Managers;
 
 using UnityEngine;
+using UnityEngine.InputSystem.Utilities;
 using UnityEngine.UI;
+using UnityEngine.UIElements;
 
 using VersusPlus.Core;
 
@@ -41,14 +47,11 @@ using static Il2CppReloaded.Constants;
 using static VersusPlus.Core.Core;
 
 using Common = Il2CppReloaded.Gameplay.Common;
+using HarmonyPatch = HarmonyLib.HarmonyPatch;
+using HarmonyPostfix = HarmonyLib.HarmonyPostfix;
+using HarmonyPrefix = HarmonyLib.HarmonyPrefix;
 using Vector2 = UnityEngine.Vector2;
 using Zombie = Il2CppReloaded.Gameplay.Zombie;
-
-using Il2CppInterop.Runtime;
-using Il2CppSystem.Collections.Generic;
-using Harmony;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using UnityEngine.InputSystem.Utilities;
 
 public sealed class Patch3 : MelonMod
 {
@@ -78,9 +81,9 @@ public sealed class Patch3 : MelonMod
     [HarmonyPatch(typeof(MusicActivity), nameof(MusicActivity.TriggerAudio))]
     public static class CustomMusicPatch
     {
-        // Define the tune you want to force (e.g., Loonboon / Minigame)
 
         public static bool EnableCustomMusic = true;
+        // value placeholder
         public static MusicTune TargetTune = MusicTune.Conveyer;
 
 
@@ -96,7 +99,7 @@ public sealed class Patch3 : MelonMod
                 if (BloomConfig.TestEnum2.Value == Music.Loonboon) TargetTune = MusicTune.MinigameLoonboon;
                 if (BloomConfig.TestEnum2.Value == Music.Conveyer) TargetTune = MusicTune.Conveyer;
             }
-
+            
             var current = GameplayActivityTracker.CurrentInstance;
 
             if (EnableCustomMusic &&
@@ -210,7 +213,6 @@ public sealed class Patch3 : MelonMod
             BloomConfig.TestEnum3.Value == Stage.Night)
             {
                 return false;
-                //return true;
             }
             return true;
         }
@@ -229,18 +231,24 @@ public sealed class Patch3 : MelonMod
                 //PlantManager.Spawn(0, 0, SeedType.Sunflower);
                 //PlantManager.Spawn(0, 2, SeedType.Sunflower);
                 //PlantManager.Spawn(0, 4, SeedType.Sunflower);
+                
+                //Zombie newGravestone = ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 0);
+                
+                //newGravestone.mZombiePhase = ZombiePhase.RisingFromGrave;
+                //newGravestone.mPosX = 8 * 75 + 55;
+                //newGravestone.mPosY += 300f;
+                //newGravestone.mGraveX = 8; newGravestone.mGraveY = 0;
+                //newGravestone.mX = newGravestone.mPosX;// newGravestone.mY = newGravestone.mPosY;
+                //newGravestone.mPosY = __instance.GridToPixelY(8, 0);
 
-                //ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 0);
-                //ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 2);
-                //ZombieManager.SpawnAtCell(ZombieType.Gravestone, 2, 4);
+                //.mPosX = 8; newGravestone.mY = 0;
+
 
                 BoardManager.Board.AddAGraveStone(5, 0);
                 BoardManager.Board.AddAGraveStone(5, 1);
                 BoardManager.Board.AddAGraveStone(5, 2);
                 BoardManager.Board.AddAGraveStone(5, 3);
                 BoardManager.Board.AddAGraveStone(5, 4);
-
-
                 
                 __instance.mEnableGraveStones = true;
                 
