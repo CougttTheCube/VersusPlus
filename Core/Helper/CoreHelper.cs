@@ -573,11 +573,11 @@ public class CoreHelper : ReplantAPI
     }
 
 
-    public static void PlaySFX(Sound sound, bool skipIfPlaying = false){
+    public static void PlaySFX(Sound sound){
         var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
         if (activity != null)
         {
-            activity.m_audioService.PlaySample(sound, skipIfPlaying);
+            activity.m_audioService.PlaySample(sound);
         }
     }
 }

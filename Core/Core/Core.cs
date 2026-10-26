@@ -560,6 +560,9 @@ public class Core : ReplantAPI
                             activity.m_audioService.PlaySample(Constants.Sound.SOUND_RIP_PLANT_KILL_3);
                         }
                     }
+
+                    SeedBankManager.RefreshAllPackets(0); SeedBankManager.RefreshAllPackets(1);
+
                 }
             }
         }
@@ -577,6 +580,7 @@ public class Core : ReplantAPI
                 {
                     activity.m_audioService.PlaySample(Constants.Sound.SOUND_FINALWAVE, false);
                 }
+
                 BoardManager.ShakeBoard(5, 5);
 
                 // Spawn Peashooters at the back
@@ -724,6 +728,7 @@ public class Core : ReplantAPI
                 ? definition.m_versusBaseRefreshTime
                 : definition.m_refreshTime;
             if (!BloomConfig.TestBoolInput.Value) break;
+            //if (!gameplayActivity.IsVersusMode()) break;
             if (gameplayActivity.IsVersusMode() && BloomConfig.TestBoolInput.Value)
             {
                 if (definition.m_seedType == SeedType.ZombieImp)
@@ -735,6 +740,17 @@ public class Core : ReplantAPI
                 {
                     @override.Set(
                     $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nGives you additional sun.\n <color=#ff0000>Select this seed packet to proceed.");
+                }
+                else if (definition.m_seedType == SeedType.Lilypad)
+                {
+                    @override.Set(
+                    $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\n<color=#008000>Can be planted on land.\n<color=#000000>Lets you block off gravestones.");
+                }
+                else if (definition.m_seedType == SeedType.Cattail)
+                {
+                    @override.Set(
+                    $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\n" +
+                        $"<color=#008000>Can be planted on land.\n<color=#000000>Attacks any lane and shoots down balloon zombies\n(requires lily pad)");
                 }
                 else
                 {

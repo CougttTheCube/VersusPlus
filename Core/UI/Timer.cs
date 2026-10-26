@@ -202,7 +202,7 @@ internal class Timer : MonoBehaviour
     private void OnTimerMilestoneReached(float time)
     {
         random = UnityEngine.Random.Range(1, 101);
-        if (BoardManager.Board.mApp.VersusMode.Phase != VersusPhase.SuddenDeath)
+        if (BoardManager.Board.mApp.VersusMode.Phase != VersusPhase.SuddenDeath && !BloomConfig.TestBoolInput8.Value)
         {
             // 
             if (1 <= random && random <= 30) MelonLoader.MelonCoroutines.Start(Events.Event1()); //      30
@@ -217,7 +217,7 @@ internal class Timer : MonoBehaviour
             {
                 MelonLoader.MelonCoroutines.Start(Events.Event5()); // 25
             }
-        } else {
+        } else if (BloomConfig.TestBoolInput8.Value || BoardManager.Board.mApp.VersusMode.Phase == VersusPhase.SuddenDeath) {
             if (1 <= random && random <= 40) MelonLoader.MelonCoroutines.Start(Events.Event1()); //40
             else if (40 < random && random <= 70)
             {

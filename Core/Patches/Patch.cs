@@ -87,7 +87,7 @@ public sealed class Patch : MelonMod
             theSeedType == SeedType.GoldMagnet ||
             theSeedType == SeedType.Spikerock ||
             theSeedType == SeedType.Cattail ||
-            theSeedType == SeedType.Cobcannon
+            theSeedType == SeedType.Cobcannon || theSeedType == SeedType.Lilypad
             ))
             {
                 __result = false;
@@ -107,7 +107,7 @@ public sealed class Patch : MelonMod
         [HarmonyPrefix]
         private static bool Prefix(SeedChooserScreen __instance, ref RecommentedFlags __result, SeedType theSeedType)
         {
-            if (__instance.mApp.IsVersusMode() && (theSeedType == SeedType.Flowerpot))
+            if (__instance.mApp.IsVersusMode() && (theSeedType == SeedType.Flowerpot || theSeedType == SeedType.Lilypad || theSeedType == SeedType.Cattail))
             {
                 __result = RecommentedFlags.None;
                 return false;

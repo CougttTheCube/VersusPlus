@@ -101,7 +101,7 @@ public sealed class Patch3 : MelonMod
             }
             
             var current = GameplayActivityTracker.CurrentInstance;
-
+            
             if (EnableCustomMusic &&
             current != null &&
             current.IsVersusMode() &&
@@ -231,16 +231,20 @@ public sealed class Patch3 : MelonMod
                 //PlantManager.Spawn(0, 0, SeedType.Sunflower);
                 //PlantManager.Spawn(0, 2, SeedType.Sunflower);
                 //PlantManager.Spawn(0, 4, SeedType.Sunflower);
-                
-                //Zombie newGravestone = ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 0);
+                /*
+                Zombie newGravestone = ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 0);
                 
                 //newGravestone.mZombiePhase = ZombiePhase.RisingFromGrave;
-                //newGravestone.mPosX = 8 * 75 + 55;
+                newGravestone.mPosX = 8 * 75 + 55;
                 //newGravestone.mPosY += 300f;
-                //newGravestone.mGraveX = 8; newGravestone.mGraveY = 0;
-                //newGravestone.mX = newGravestone.mPosX;// newGravestone.mY = newGravestone.mPosY;
-                //newGravestone.mPosY = __instance.GridToPixelY(8, 0);
+                newGravestone.mGraveX = 8; newGravestone.mGraveY = 0;
 
+                newGravestone.mX = newGravestone.mPosX;// newGravestone.mY = newGravestone.mPosY;
+
+                newGravestone.mTargetRow = 0;
+                newGravestone.mTargetCol = 8;
+                //newGravestone.mPosY = __instance.GridToPixelY(8, 0);
+                */
                 //.mPosX = 8; newGravestone.mY = 0;
 
 

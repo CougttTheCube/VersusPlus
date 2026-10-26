@@ -295,6 +295,8 @@ public sealed class Patch4 : MelonMod
                 int targetCol = __instance.mBoard.PixelToGridX(x, y);
                 int targetRow = __instance.mBoard.PixelToGridY(x, y);
 
+                Plant plan = PlantManager.GetTopAt(targetCol, targetRow);
+
                 if (GridItemManager.GetAt(GridItemType.Crater, targetCol, targetRow) != null)
                 {
                     var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
@@ -306,6 +308,39 @@ public sealed class Patch4 : MelonMod
                     return false; 
                 }
             }
+
+            return true;
+        }
+
+
+
+        [HarmonyPrefix]
+        private static bool Prefix2(Challenge __instance, int x, int y, int theClickCount, int playerIndex)
+        {
+            if (__instance == null || __instance.mBoard == null) return true;
+
+            SeedType cursorSeed = CursorManager.GetSeedTypeInCursor(playerIndex);
+
+            // Check if holding gravestone seed packet
+            bool holdingZombieSeed = (cursorSeed == SeedType.ZombieGravestone);
+            if (!holdingZombieSeed) return true;
+
+            int targetCol = __instance.mBoard.PixelToGridX(x, y);
+            int targetRow = __instance.mBoard.PixelToGridY(x, y);
+
+            Plant plan = PlantManager.GetTopAt(targetCol, targetRow);
+
+            if (plan != null && plan.mSeedType == SeedType.Lilypad)
+            {
+                var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
+                if (activity != null)
+                {
+                    activity.m_audioService.PlaySample(Constants.Sound.SOUND_BUZZER);
+                }
+
+                return false;
+            }
+            
 
             return true;
         }

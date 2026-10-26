@@ -439,7 +439,9 @@ public sealed class Patch2 : MelonMod
     {
         public static void Postfix(Board __instance, int theGridX, int theGridY, SeedType theType, ref PlantingReason __result)
         {
+
             if (__instance == null) return;
+            if (!__instance.mApp.IsVersusMode()) return;
 
             if (theType == SeedType.Gravebuster && GridItemManager.GetAt(GridItemType.Gravestone, theGridX, theGridY) != null)
             {
@@ -448,15 +450,14 @@ public sealed class Patch2 : MelonMod
             
 
             // if tile is occupied -> not ok to plant lily pad
-            /*
-            if (theType == SeedType.Lilypad && 
-                PlantManager.GetTopAt(theGridX, theGridY) == null && 
-                !isGravestoneOnGrid(__instance, theGridX, theGridY)) { 
-
-                __result = PlantingReason.Ok;
-
+            
+            if (theType == SeedType.Lilypad) { 
+                if (PlantManager.GetTopAt(theGridX, theGridY) == null && !isGravestoneOnGrid(__instance, theGridX, theGridY))
+                    __result = PlantingReason.Ok;
+                if (PlantManager.GetTopAt(theGridX, theGridY) != null && PlantManager.GetTopAt(theGridX, theGridY).mSeedType == SeedType.Flowerpot)
+                    __result = PlantingReason.Ok;
             }
-            */
+            
             
             if (theType == SeedType.Sunshroom || theType == SeedType.Twinsunflower){
                 if (BoardManager.Board.mApp.VersusMode.Phase == VersusPhase.SuddenDeath) {
@@ -468,7 +469,7 @@ public sealed class Patch2 : MelonMod
                 }
             }
 
-            /*
+            
             if (theType == SeedType.ZombieGravestone)
             {
                 Plant plan = PlantManager.GetTopAt(theGridX, theGridY);
@@ -477,7 +478,7 @@ public sealed class Patch2 : MelonMod
                     __result = PlantingReason.NotHere; 
                 }
             }
-            */
+            
             
             return;
         } 

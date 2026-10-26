@@ -56,7 +56,7 @@ using static VersusPlus.Patches.Patch4;
 
 using VersusPlus.Core;
 using static VersusPlus.Core.Core;
-
+using static VersusPlus.Helper.CoreHelper;
 using VersusPlus.UI;
 
 
@@ -78,12 +78,9 @@ public class Events : ReplantAPI
         yield return new WaitForSecondsRealtime(0f);
         AdviceManager.ShowAdvice("AMBUSH!", MessageStyle.HugeWave, AdviceType.None);
         AdviceManager.SetDuration(500);
-        var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
-        if (activity != null)
-        {
-            activity.m_audioService.PlaySample(Constants.Sound.SOUND_HUGE_WAVE);
+        PlaySFX(Constants.Sound.SOUND_HUGE_WAVE);
 
-        }
+        var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
 
         // _____________Plants_______________
 
@@ -102,7 +99,7 @@ public class Events : ReplantAPI
             {
                 theSeedType = (SeedType)UnityEngine.Random.Range(0, 48);
             }
-            while (GridItemManager.GetAt(GridItemType.Crater, random1, random2) != null &&
+            while (GridItemManager.GetAt(GridItemType.Crater, random1, random2) != null ||
             GridItemManager.GetAt(GridItemType.Gravestone, random1, random2) != null)
             {
                 random1 = UnityEngine.Random.Range(0, 6);
@@ -150,7 +147,8 @@ public class Events : ReplantAPI
             {
                 random1 = UnityEngine.Random.Range(0, 6);
                 random2 = UnityEngine.Random.Range(0, 5);
-                while (GridItemManager.GetAt(GridItemType.Crater, random1, random2) != null)
+                while (GridItemManager.GetAt(GridItemType.Crater, random1, random2) != null ||
+                GridItemManager.GetAt(GridItemType.Gravestone, random1, random2) != null)
                 {
                     random1 = UnityEngine.Random.Range(0, 6);
                     random2 = UnityEngine.Random.Range(0, 5);
@@ -186,6 +184,7 @@ public class Events : ReplantAPI
                 
                     if (!isZombossSpawned){
                         ZombieManager.SpawnInRow(ZombieType.Boss, 2);
+
                         if (activity != null)
                         {
                             // Switch soundtrack to Brainiac Maniac
@@ -263,11 +262,8 @@ public class Events : ReplantAPI
                 } else {
                     ZombieManager.SpawnAtCell(ZombieType.Target, 8, random3);
                     BoardManager.Board.mApp.VersusMode.ZombieLife++;
-                    if (activity != null)
-                    {
-                        activity.m_audioService.PlaySample(Constants.Sound.SOUND_GROAN);
 
-                    }
+                    PlaySFX(Constants.Sound.SOUND_GROAN);
                 }
 
                 
@@ -317,12 +313,8 @@ public class Events : ReplantAPI
         yield return new WaitForSecondsRealtime(0f);
         AdviceManager.ShowAdvice("FLOURISHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
         AdviceManager.SetDuration(500);
-        var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
-        if (activity != null)
-        {
-            activity.m_audioService.PlaySample(Constants.Sound.SOUND_PRIZE);
+        PlaySFX(Constants.Sound.SOUND_PRIZE);
 
-        }
         BoardManager.AddSun(250, 0);
         BoardManager.AddSun(250, 1);
     }
@@ -335,12 +327,8 @@ public class Events : ReplantAPI
         yield return new WaitForSecondsRealtime(0f);
         AdviceManager.ShowAdvice("CRASHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
         AdviceManager.SetDuration(500);
-        var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
-        if (activity != null)
-        {
-            activity.m_audioService.PlaySample(Constants.Sound.SOUND_CRAZYDAVESCREAM);
+        PlaySFX(Constants.Sound.SOUND_CRAZYDAVESCREAM);
 
-        }
         int Sun1 = BoardManager.Board.mSunMoney[0];
         int Sun2 = BoardManager.Board.mSunMoney[1];
         int moneytake;
@@ -380,12 +368,8 @@ public class Events : ReplantAPI
 
         AdviceManager.ShowAdvice("SHOCKWAVE!", MessageStyle.HugeWave, AdviceType.None);
         AdviceManager.SetDuration(300);
-        var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
-        if (activity != null)
-        {
-            activity.m_audioService.PlaySample(Constants.Sound.SOUND_EXPLOSION);
+        PlaySFX(Constants.Sound.SOUND_EXPLOSION);
 
-        }
         // Destroy a plant
         // todo: check stacked plants (flower pot, pumpkin)
         for (int i = 510; i >= 0; i -= 50){
@@ -398,10 +382,8 @@ public class Events : ReplantAPI
             Plant getPlant = PlantManager.GetTopAt(gridX, gridY);
             if (getPlant != null){
                 EffectsManager.Spawn(i, pixelRow - 25, ParticleEffect.PotatoMine);
-                if (activity != null)
-                {
-                    activity.m_audioService.PlaySample(Constants.Sound.SOUND_POTATO_MINE);
-                }
+                PlaySFX(Constants.Sound.SOUND_POTATO_MINE);
+
                 PlantManager.Kill(getPlant);
                 break;
             }
@@ -443,12 +425,8 @@ public class Events : ReplantAPI
                     if (gridX == 5) EffectsManager.Spawn(i+50, pixelRow2 - 25, ParticleEffect.PotatoMine);
                     else EffectsManager.Spawn(i + 100, pixelRow2 - 25, ParticleEffect.PotatoMine);
 
+                    PlaySFX(Constants.Sound.SOUND_POTATO_MINE);
 
-
-                    if (activity != null)
-                    {
-                        activity.m_audioService.PlaySample(Constants.Sound.SOUND_POTATO_MINE);
-                    }
                     ZombieManager.KillNoLoot(theZombie);
                     checkBreak = true;
                     break;
@@ -466,17 +444,14 @@ public class Events : ReplantAPI
         AdviceManager.ShowAdvice("THUNDERSTORM!", MessageStyle.HugeWave, AdviceType.None);
         AdviceManager.SetDuration(500);
         var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
-        if (activity != null)
-        {
-            activity.m_audioService.PlaySample(Constants.Sound.SOUND_HUGE_WAVE);
-            activity.m_audioService.PlaySample(Constants.Sound.SOUND_CLOUDY_THUNDER_1);
 
-        }
+        PlaySFX(Constants.Sound.SOUND_HUGE_WAVE);
+        PlaySFX(Constants.Sound.SOUND_CLOUDY_THUNDER_1);
 
         yield return new WaitForSecondsRealtime(3f);
         var board = activity?.m_board;
 
-        random3 = UnityEngine.Random.Range(2, 6);
+        random3 = UnityEngine.Random.Range(2, 7);
 
         for (int i  = 0; i < random3; i++){
             random1 = UnityEngine.Random.Range(0, 9);
@@ -501,19 +476,19 @@ public class Events : ReplantAPI
                 }
             }
 
+
+
+
             int gridX = BoardManager.GridToPixelX(random1, random2);
             int gridY = BoardManager.GridToPixelY(random1, random2);
 
             EffectsManager.Spawn(410, 355, ParticleEffect.ScreenFlash);
             EffectsManager.Spawn(gridX + 35, gridY + 35, ParticleEffect.PotatoMine);
-            
 
-            if (activity != null)
-            {
-                activity.m_audioService.PlaySample(Constants.Sound.SOUND_THUNDER);
-                activity.m_audioService.PlaySample(Constants.Sound.SOUND_POTATO_MINE);
-                activity.m_audioService.PlaySample(Constants.Sound.SOUND_THUNDER);
-            }
+            PlaySFX(Constants.Sound.SOUND_THUNDER);
+            PlaySFX(Constants.Sound.SOUND_THUNDER);
+            PlaySFX(Constants.Sound.SOUND_POTATO_MINE);
+
 
 
             yield return new WaitForSecondsRealtime(0.2f);
