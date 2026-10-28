@@ -49,10 +49,13 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using VersusPlus.Core;
+using VersusPlus.UI;
 
 using static Il2CppReloaded.Constants;
 using static MelonLoader.MelonLogger;
 using static VersusPlus.Core.Core;
+using static VersusPlus.Helper.CoreHelper;
+using static VersusPlus.UI.Timer;
 
 using Common = Il2CppReloaded.Gameplay.Common;
 using Vector2 = UnityEngine.Vector2;
@@ -68,7 +71,6 @@ public sealed class Patch2 : MelonMod
     public static class isFumeshroomAttacking
     {
         public static bool IsFumeshroomAttacking = false;
-        public static bool IsMelonAttacking = false;
     }
 
 
@@ -83,11 +85,6 @@ public sealed class Patch2 : MelonMod
                 isFumeshroomAttacking.IsFumeshroomAttacking = true;
                 //MelonLogger.Msg("Fume-shroom fires!");
             }
-            if (__instance.mSeedType == SeedType.Melonpult)
-            {
-                isFumeshroomAttacking.IsMelonAttacking = true;
-                //MelonLogger.Msg("Fume-shroom fires!");
-            }
 
         }
 
@@ -95,7 +92,6 @@ public sealed class Patch2 : MelonMod
         public static void Postfix()
         {
             isFumeshroomAttacking.IsFumeshroomAttacking = false;
-            isFumeshroomAttacking.IsMelonAttacking = false;
             //MelonLogger.Msg("Fume-shroom stops firing!");
         }
     }
@@ -314,13 +310,9 @@ public sealed class Patch2 : MelonMod
                         __result = bestRealZombie;
                         //MelonLogger.Msg("Zombie collided with projectile:" + bestRealZombie.mZombieType);
 
-
-
                     }
                 }
-            }
-
-            
+            }        
         }
     }
     
@@ -339,7 +331,8 @@ public sealed class Patch2 : MelonMod
 
             if (zombie.mZombieType == ZombieType.Gravestone ||
                 zombie.mZombieType == ZombieType.Target ||
-                zombie.mZombieType == ZombieType.Balloon)
+                zombie.mZombieType == ZombieType.Balloon ||
+                zombie.mMindControlled)
                 continue;
 
             // Make sure the zombie is actually in front of the plant
@@ -357,7 +350,7 @@ public sealed class Patch2 : MelonMod
     }
 
 
-
+    // Prevents clearing board at end of game
     [HarmonyPatch(typeof(VersusMode), nameof(VersusMode.ClearBoard))]
     internal static class clearboard
     {
@@ -366,13 +359,22 @@ public sealed class Patch2 : MelonMod
         private static bool Prefix()
         {
             return false;
-
-
         }
-
     }
 
 
+    [HarmonyPatch(typeof(VersusMode), nameof(VersusMode.Update))]
+    internal static class SuddenDeathForcePatch
+    {
+        [HarmonyPostfix]
+        private static void Postfix(VersusMode __instance)
+        {
+            if (__instance == null) return;
+            if (BoardManager.Board == null) return;
+
+            if (Timer.elapsedTime == 0) __instance.m_versusTime = 0;
+        }
+    }
 
     // Select Sunflower to swap
     // ts just mumbo jumbo code, need to fix

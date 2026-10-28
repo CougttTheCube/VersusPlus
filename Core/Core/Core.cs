@@ -175,6 +175,12 @@ public class Core : ReplantAPI
             description: "Changes the timer's position."
         );
 
+        public static BoolConfigInput TestBoolInput3 { get; } = ConfigService.CreateBool(
+            name: "Instant Death",
+            defaultValue: true,
+            description: "Enables Instant Death Phase - A row of Peashooter is spawned at the back (if grid is empty) and all remaining lawnmowers are destroyed."
+        );
+
         // QoL
         public static BoolConfigInput TestBoolInput { get; } = ConfigService.CreateBool(
             name: "Seed Recharge Tooltip",
@@ -188,11 +194,7 @@ public class Core : ReplantAPI
             defaultValue: true,
             description: "Shows live recharge time of units."
         );
-        public static BoolConfigInput TestBoolInput3 { get; } = ConfigService.CreateBool(
-            name: "Instant Death",
-            defaultValue: true,
-            description: "Enables Instant Death Phase - A row of Peashooter is spawned at the back (if grid is empty) and all remaining lawnmowers are destroyed."
-        );
+
         public static BoolConfigInput TestBoolInput5 { get; } = ConfigService.CreateBool(
             name: "Initial Recharge",
             defaultValue: true,
@@ -242,7 +244,7 @@ public class Core : ReplantAPI
         public static BoolConfigInput TestBoolInput14 { get; } = ConfigService.CreateBool(
             name: "Starfruit Nerf [Exp]",
             defaultValue: true,
-            description: "Disables Starfruit dealing huge damage to zombie eating it closely. Experimental."
+            description: "Disables Starfruit dealing huge damage to zombie eating it closely from the left. Experimental."
         );
         public static BoolConfigInput TestBoolInput8 { get; } = ConfigService.CreateBool(
         name: "???",
@@ -308,15 +310,14 @@ public class Core : ReplantAPI
             //PlantManager.Spawn(4, 2, SeedType.Gravebuster);
 
             //MelonLogger.Msg("GRAVESTONE COUNT: " + BoardManager.Board.GetGraveStoneCount());
-            MelonLogger.Msg("zombie COUNT: " + BoardManager.Board.CountZombiesOnScreen());
+            //MelonLogger.Msg("sudden death start time " + VersusMode.k_suddenDeathStartTime);
         }
 
         if (Input.GetKeyDown(KeyCode.K))
         {
             //BoardManager.Board.AddAGraveStone(4, 2);
-            PlaySFX(Constants.Sound.SOUND_WINMUSIC);
-
-            
+            //PlaySFX(Constants.Sound.SOUND_WINMUSIC);
+            //VersusMode.k_suddenDeathStartTime = 10f;
         }
 
 
@@ -574,12 +575,8 @@ public class Core : ReplantAPI
             if (!hasPlayedTen)
             {
                 hasPlayedTen = true;
-                // Play explosion sound
-                var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
-                if (activity != null)
-                {
-                    activity.m_audioService.PlaySample(Constants.Sound.SOUND_FINALWAVE, false);
-                }
+                // Play final wave sound
+                PlaySFX(Constants.Sound.SOUND_FINALWAVE);
 
                 BoardManager.ShakeBoard(5, 5);
 
@@ -625,7 +622,7 @@ public class Core : ReplantAPI
                 DieRow(random);
                 DieRow(random2);
 
-                // Set units to 9990 cost
+                // Set sun/brain to 9990
                 BoardManager.AddSun(9990, 0);
                 BoardManager.AddSun(9990, 1);
 
@@ -634,12 +631,9 @@ public class Core : ReplantAPI
                 AdviceManager.SetDuration(500);
                 BoardManager.ShakeBoard(10, 10);
 
-                var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
-                if (activity != null)
-                {
-                    activity.m_audioService.PlaySample(Constants.Sound.SOUND_EXPLOSION, false);
-                    activity.m_audioService.PlaySample(Constants.Sound.SOUND_SCREAM, false);
-                }
+                PlaySFX(Constants.Sound.SOUND_EXPLOSION);
+                PlaySFX(Constants.Sound.SOUND_SCREAM);
+
                 if (!hasDisplayedChaosMessage)
                 {
                     hasDisplayedChaosMessage = true;
@@ -671,13 +665,7 @@ public class Core : ReplantAPI
                     CursorManager.ClearCursor(false, 0);
                     CursorManager.SetCursorType(CursorType.Shovel, 0);
                     
-
-                    var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
-                    if (activity != null)
-                    {
-                        activity.m_audioService.PlaySample(Constants.Sound.SOUND_SHOVEL);
-
-                    }
+                    PlaySFX(Constants.Sound.SOUND_SHOVEL);
                 }
             }
             
@@ -739,18 +727,18 @@ public class Core : ReplantAPI
                 else if (definition.m_seedType == SeedType.Sunflower)
                 {
                     @override.Set(
-                    $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nGives you additional sun.\n <color=#ff0000>Select this seed packet to proceed.");
+                    $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nGives you additional sun\n <color=#ff0000>Select this seed packet to proceed");
                 }
                 else if (definition.m_seedType == SeedType.Lilypad)
                 {
                     @override.Set(
-                    $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\n<color=#008000>Can be planted on land.\n<color=#000000>Lets you block off gravestones.");
+                    $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\n<color=#008000>Can be planted on land\n<color=#000000>Lets you block off gravestones");
                 }
                 else if (definition.m_seedType == SeedType.Cattail)
                 {
                     @override.Set(
                     $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\n" +
-                        $"<color=#008000>Can be planted on land.\n<color=#000000>Attacks any lane and shoots down balloon zombies\n(requires lily pad)");
+                        $"<color=#008000>Can be planted on land\n<color=#000000>Attacks any lane and shoots down balloon zombies\n(requires lily pad)");
                 }
                 else
                 {
@@ -823,6 +811,7 @@ public class Core : ReplantAPI
         MoveZombieGrids();
         IncreaseTopControllerSize();
         IncreaseBottomControllerSize();
+
 
         // reset active inputs
         VersusSideTracker.ActivePlantInput = null;

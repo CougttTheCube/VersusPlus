@@ -29,6 +29,7 @@ using Il2CppReloaded.TreeStateActivities;
 using Il2CppSource.Binders;
 using Il2CppSource.Controllers;
 using Il2CppSource.DataModels;
+using Il2CppSource.UI;
 
 using Il2CppSpine.Unity;
 
@@ -147,7 +148,6 @@ public sealed class Patch : MelonMod
         {
             if (Core.activateonce)
             {
-                // Find "Canvas/Black Background" under the FocusCircleController root
                 var bgTransform = __instance.transform.Find("Canvas/Black Background");
                 if (bgTransform != null)
                 {
@@ -585,9 +585,25 @@ public sealed class Patch : MelonMod
             return false;
         }
     }
-    
 
 
 
+    [HarmonyPatch(typeof(ToolTipPositionSetter), nameof(ToolTipPositionSetter.OnEnable))]
+    public static class ToolTipContainerSizePatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(ToolTipPositionSetter __instance)
+        {
+            if (__instance == null) return;
+
+            RectTransform rect = __instance.GetComponent<RectTransform>();
+            if (rect != null)
+            {
+                rect.sizeDelta = new UnityEngine.Vector2(500f, 317.64f);
+                //rect.localPosition = new UnityEngine.Vector3(0f, 145f, 0f);
+                //rect.pivot = new UnityEngine.Vector2(0.5f, 0f);
+            }
+        }
+    }
 
 }

@@ -188,6 +188,8 @@ public class CoreHelper : ReplantAPI
     }
 
 
+
+
     // Doom-shroom spawn enumerator
     public static System.Collections.IEnumerator SpawnDoomShroom()
     {
@@ -204,41 +206,36 @@ public class CoreHelper : ReplantAPI
 
             if (i <= 5)
             {
+                if (i == 5 && BloomConfig.TestEnum3.Value == Stage.Night) continue; //skip spawning on gravestone column
                 if (i % 2 == 0)
                 {
                     PlantManager.Spawn(i, random, SeedType.Doomshroom);
                     PlantManager.Spawn(i, random2, SeedType.Doomshroom);
 
-                    PlantManager.Spawn(i, random, SeedType.InstantCoffee);
-                    PlantManager.Spawn(i, random2, SeedType.InstantCoffee);
+                    if (BloomConfig.TestEnum3.Value != Stage.Night){
+                        PlantManager.Spawn(i, random, SeedType.InstantCoffee);
+                        PlantManager.Spawn(i, random2, SeedType.InstantCoffee);
+                    }
                 }
                 else
                 {
                     PlantManager.Spawn(i, random, SeedType.Doomshroom);
-
-                    PlantManager.Spawn(i, random, SeedType.InstantCoffee);
-
-                    //BoardManager.Board.mEnableGraveStones = true;
-                    //BoardManager.Board.AddAGraveStone(i, random);
-
+                    if (BloomConfig.TestEnum3.Value != Stage.Night) PlantManager.Spawn(i, random, SeedType.InstantCoffee);
                 }
-
-                //BoardManager.Board.AddAGraveStone(i, random2);
-
             }
             else
             {
+                
+
                 PlantManager.Spawn(i, random, SeedType.Doomshroom);
                 PlantManager.Spawn(i, random2, SeedType.Doomshroom);
 
-                PlantManager.Spawn(i, random, SeedType.InstantCoffee);
-                PlantManager.Spawn(i, random2, SeedType.InstantCoffee);
+                if (BloomConfig.TestEnum3.Value != Stage.Night)
+                {
+                    PlantManager.Spawn(i, random, SeedType.InstantCoffee);
+                    PlantManager.Spawn(i, random2, SeedType.InstantCoffee);
+                }
             }
-
-            //BoardManager.Board.mEnableGraveStones = true;
-            //BoardManager.Board.AddAGraveStone(i, random);
-            //BoardManager.Board.AddAGraveStone(i, random2);
-
             yield return new WaitForSecondsRealtime(0.15f);
         }
 
@@ -500,6 +497,7 @@ public class CoreHelper : ReplantAPI
             }
         }
     }
+
 
 
     public static void ApplyIncreasedMushroomCost(){
