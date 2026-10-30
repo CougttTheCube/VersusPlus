@@ -58,7 +58,7 @@ using VersusPlus.Core;
 using static VersusPlus.Core.Core;
 using static VersusPlus.Helper.CoreHelper;
 using VersusPlus.UI;
-
+using Il2CppTekly.TreeState.StandardActivities;
 
 public class Events : ReplantAPI
 {
@@ -69,6 +69,8 @@ public class Events : ReplantAPI
     static int pixelRow;
     static int pixelRow2;
 
+    public static bool isMultiplierEvent = false;
+    public static int multiplerValue = 1;
     public static bool isZombossSpawned = false;
 
     static int temp;
@@ -76,15 +78,26 @@ public class Events : ReplantAPI
     public static System.Collections.IEnumerator Event1()
     {
         yield return new WaitForSecondsRealtime(0f);
-        AdviceManager.ShowAdvice("AMBUSH!", MessageStyle.HugeWave, AdviceType.None);
+        if (!isMultiplierEvent) AdviceManager.ShowAdvice("AMBUSH!", MessageStyle.HugeWave, AdviceType.None);
+        else AdviceManager.ShowAdvice("MULTIPLIED AMBUSH!", MessageStyle.HugeWave, AdviceType.None);
+
         AdviceManager.SetDuration(500);
         PlaySFX(Constants.Sound.SOUND_HUGE_WAVE);
+
+
 
         var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
 
         // _____________Plants_______________
 
         temp = UnityEngine.Random.Range(1, 4);
+        
+        // if event 6 -> multiply temp, reset flag and mult value
+        if (isMultiplierEvent){
+            isMultiplierEvent = false;
+            temp *= multiplerValue;
+            multiplerValue = 1;
+        }
 
         for (int i = 0; i < temp; i++){
             random1 = UnityEngine.Random.Range(0, 6);
@@ -311,12 +324,20 @@ public class Events : ReplantAPI
     public static System.Collections.IEnumerator Event2()
     {
         yield return new WaitForSecondsRealtime(0f);
-        AdviceManager.ShowAdvice("FLOURISHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
+        if (!isMultiplierEvent) AdviceManager.ShowAdvice("MULTIPLIED FLOURISHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
+        else AdviceManager.ShowAdvice("FLOURISHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
+
         AdviceManager.SetDuration(500);
         PlaySFX(Constants.Sound.SOUND_PRIZE);
 
-        BoardManager.AddSun(250, 0);
-        BoardManager.AddSun(250, 1);
+        int sunGain = 250;
+        if (isMultiplierEvent){
+            sunGain *= multiplerValue;
+            isMultiplierEvent = false;
+            multiplerValue = 1;
+        }
+        BoardManager.AddSun(sunGain, 0);
+        BoardManager.AddSun(sunGain, 1);
     }
 
 
@@ -325,12 +346,14 @@ public class Events : ReplantAPI
     public static System.Collections.IEnumerator Event3()
     {
         yield return new WaitForSecondsRealtime(0f);
-        AdviceManager.ShowAdvice("CRASHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
+        if (!isMultiplierEvent) AdviceManager.ShowAdvice("MULTIPLIED CRASHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
+        else AdviceManager.ShowAdvice("CRASHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
+
         AdviceManager.SetDuration(500);
         PlaySFX(Constants.Sound.SOUND_CRAZYDAVESCREAM);
 
-        int Sun1 = BoardManager.Board.mSunMoney[0];
-        int Sun2 = BoardManager.Board.mSunMoney[1];
+        int SunPlayer1 = BoardManager.Board.mSunMoney[0];
+        int SunPlayer2 = BoardManager.Board.mSunMoney[1];
         int moneytake;
         int moneytake2;
 
@@ -338,14 +361,32 @@ public class Events : ReplantAPI
             moneytake = 75;
             moneytake2 = 75;
 
-            if (Sun1 < 75) moneytake = Sun1;
-            if (Sun2 < 75) moneytake2 = Sun2;
-        } else {
+            if (isMultiplierEvent){
+                moneytake *= multiplerValue;
+                moneytake2 *= multiplerValue;
+                multiplerValue = 1;
+                isMultiplierEvent = false;
+            }
+
+            if (SunPlayer1 < moneytake) moneytake = SunPlayer1;
+            if (SunPlayer2 < moneytake2) moneytake2 = SunPlayer2;
+        } 
+        else 
+        {
+            // setting boundary, if player money is smaller than 150 then only take all of player money -> no negative
             moneytake = 150;
             moneytake2 = 150;
 
-            if (Sun1 < 150) moneytake = Sun1;
-            if (Sun2 < 150) moneytake2 = Sun2;
+            if (isMultiplierEvent)
+            {
+                moneytake *= multiplerValue;
+                moneytake2 *= multiplerValue;
+                multiplerValue = 1;
+                isMultiplierEvent = false;
+
+            }
+            if (SunPlayer1 < moneytake) moneytake = SunPlayer1;
+            if (SunPlayer2 < moneytake2) moneytake2 = SunPlayer2;
         }
 
 
@@ -441,7 +482,9 @@ public class Events : ReplantAPI
     public static System.Collections.IEnumerator Event5()
     {
         yield return new WaitForSecondsRealtime(0f);
-        AdviceManager.ShowAdvice("THUNDERSTORM!", MessageStyle.HugeWave, AdviceType.None);
+        if (!isMultiplierEvent) AdviceManager.ShowAdvice("THUNDERSTORM!", MessageStyle.HugeWave, AdviceType.None);
+        else AdviceManager.ShowAdvice("MULTIPLIED THUNDERSTORM!", MessageStyle.HugeWave, AdviceType.None);
+
         AdviceManager.SetDuration(500);
         var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
 
@@ -452,6 +495,12 @@ public class Events : ReplantAPI
         var board = activity?.m_board;
 
         random3 = UnityEngine.Random.Range(2, 7);
+
+        if (isMultiplierEvent){
+            random3 *= multiplerValue;
+            multiplerValue = 1;
+            isMultiplierEvent = false;
+        }
 
         for (int i  = 0; i < random3; i++){
             random1 = UnityEngine.Random.Range(0, 9);
@@ -495,6 +544,26 @@ public class Events : ReplantAPI
 
         }
 
+    }
+
+    // Multiplier (next event will have 2x effect)
+    // idea: make it so that if next event is also multiplier then it stacks (x4 -> x8....)
+    // idea: change title of all other events to "MADNESS" + ...
+
+    // event 1
+    // event 2
+    // event 3
+    // event 4
+    // event 5
+
+    public static System.Collections.IEnumerator Event6(){
+        yield return new WaitForSecondsRealtime(0f);
+        AdviceManager.ShowAdvice("MULTIPLIER MADNESS!", MessageStyle.HugeWave, AdviceType.None);
+        AdviceManager.SetDuration(500);
+        PlaySFX(Constants.Sound.SOUND_HUGE_WAVE);
+
+        isMultiplierEvent = true;
+        multiplerValue *= 2;
     }
 
 }

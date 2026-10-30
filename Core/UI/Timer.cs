@@ -208,25 +208,34 @@ internal class Timer : MonoBehaviour
             if (1 <= random && random <= 30) MelonLoader.MelonCoroutines.Start(Events.Event1()); //      30
             else if (30 < random && random <= 40) MelonLoader.MelonCoroutines.Start(Events.Event2()); // 10
             else if (40 < random && random <= 50) MelonLoader.MelonCoroutines.Start(Events.Event3()); // 10
-            else if (50 < random && random <= 75)
+            else if (50 < random && random <= 70)
             {
-                MelonLoader.MelonCoroutines.Start(Events.Event4()); // 25
+                MelonLoader.MelonCoroutines.Start(Events.Event4()); // 20
                 MelonLoader.MelonCoroutines.Start(Events.Event42());
             }
-            else if (75 < random && random <= 100)
+            else if (70 < random && random <= 90)
             {
-                MelonLoader.MelonCoroutines.Start(Events.Event5()); // 25
+                MelonLoader.MelonCoroutines.Start(Events.Event5()); // 20
+            } else if (90 < random && random <= 100)
+            {
+                MelonLoader.MelonCoroutines.Start(Events.Event6());
             }
-        } else if (BloomConfig.TestBoolInput8.Value || BoardManager.Board.mApp.VersusMode.Phase == VersusPhase.SuddenDeath) {
-            if (1 <= random && random <= 40) MelonLoader.MelonCoroutines.Start(Events.Event1()); //40
-            else if (40 < random && random <= 70)
+        } 
+        else if (BloomConfig.TestBoolInput8.Value || BoardManager.Board.mApp.VersusMode.Phase == VersusPhase.SuddenDeath) 
+        {
+            if (1 <= random && random <= 30) MelonLoader.MelonCoroutines.Start(Events.Event1()); //30
+            else if (30 < random && random <= 50)
             {
-                MelonLoader.MelonCoroutines.Start(Events.Event4()); // 30
+                MelonLoader.MelonCoroutines.Start(Events.Event4()); // 20
                 MelonLoader.MelonCoroutines.Start(Events.Event42());
             }
-            else if (70 < random && random <= 100)
+            else if (50 < random && random <= 80)
             {
                 MelonLoader.MelonCoroutines.Start(Events.Event5()); // 30
+            } 
+            else if (80 < random && random <= 100)
+            {
+                MelonLoader.MelonCoroutines.Start(Events.Event6()); // 20
             }
         }
         

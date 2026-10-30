@@ -693,8 +693,11 @@ public class Core : ReplantAPI
         hasChaos = false;
         activateonce = false;
         InitializeMatch = false;
+
         key = false;
+
         Events.isZombossSpawned = false;
+        isMultiplierEvent = false;
 
         if (BloomConfig.TestBoolInput13.Value && sceneName == "Gameplay")
         {

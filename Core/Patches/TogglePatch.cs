@@ -82,7 +82,8 @@ public sealed class Patch3 : MelonMod
     public static class CustomMusicPatch
     {
 
-        public static bool EnableCustomMusic = true;
+        // why do i need ts?
+        //public static bool EnableCustomMusic = true;
         // value placeholder
         public static MusicTune TargetTune = MusicTune.Conveyer;
 
@@ -111,7 +112,7 @@ public sealed class Patch3 : MelonMod
             
             var current = GameplayActivityTracker.CurrentInstance;
             
-            if (EnableCustomMusic &&
+            if (//EnableCustomMusic &&
             current != null &&
             current.IsVersusMode() &&
             current.m_versusMode != null &&
