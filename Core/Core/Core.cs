@@ -110,12 +110,17 @@ public class Core : ReplantAPI
 
     public enum Music
     {
+        Default,
+        Grasswalk,
+        Moongrains,
+        WateryGraves,
+        RigorMormist,
+        GrazetheRoof,
         Loonboon,
         Conveyer,
         BrainiacManiac,
-        Cerebrawl,
-        Grasswalk,
-        Moongrains
+        Cerebrawl
+
     }
 
     public enum Stage
@@ -155,12 +160,12 @@ public class Core : ReplantAPI
         public static EnumConfigInput<Stage> TestEnum3 { get; } = ConfigService.CreateEnum<Stage>(
             name: "Stage",
             defaultValue: Stage.Day,
-            description: "Changes stage."
+            description: "Changes stage.\nSpecial:\nNight Stage: All mushrooms (and Grave Buster, Twin Sunflower) cost 25 more sun."
         );
         public static EnumConfigInput<Music> TestEnum2 { get; } = ConfigService.CreateEnum<Music>(
             name: "Music Player",
-            defaultValue: Music.Grasswalk,
-            description: "Changes music."
+            defaultValue: Music.Default,
+            description: "Changes music. Default option means the music will be corresponding to the map."
         );
 
 
@@ -178,8 +183,11 @@ public class Core : ReplantAPI
         public static BoolConfigInput TestBoolInput3 { get; } = ConfigService.CreateBool(
             name: "Instant Death",
             defaultValue: true,
-            description: "Enables Instant Death Phase - A row of Peashooter is spawned at the back (if grid is empty) and all remaining lawnmowers are destroyed."
+            description: "Enables Instant Death Phase - A row of Peashooter is spawned at the back (if grid is empty) and all remaining lawnmowers are destroyed at the 10 minute mark."
         );
+
+
+
 
         // QoL
         public static BoolConfigInput TestBoolInput { get; } = ConfigService.CreateBool(
@@ -187,7 +195,6 @@ public class Core : ReplantAPI
             defaultValue: true,
             description: "Shows recharge of units in the tooltip box."
         );
-
 
         public static BoolConfigInput TestBoolInput2 { get; } = ConfigService.CreateBool(
             name: "Seed Recharge Timer",
@@ -205,14 +212,11 @@ public class Core : ReplantAPI
             defaultValue: false,
             description: "Sudden Death recharge time is the same as Versus Base recharge time. Enable this if you don't like instant plants spamming."
         );
-
-        
-
         
         public static BoolConfigInput TestBoolInput6 { get; } = ConfigService.CreateBool(
             name: "New Brain Rate Logic",
             defaultValue: true,
-            description: "Sets Gravestone's brain rate to around 27.5 seconds, includes initial brain production. Disable this if you have custom brain rate logic (or just wants zombies to win)."
+            description: "Sets Gravestone's brain production rate to around 27.5 seconds, Gravestone's initial brain production rate to around 4.8 - 11 seconds. Disable this if you have custom brain rate logic (or just wants zombies to win)."
         );
         public static BoolConfigInput TestBoolInput7 { get; } = ConfigService.CreateBool(
             name: "Lighter Projectiles",
@@ -226,6 +230,9 @@ public class Core : ReplantAPI
             description: "Enables random events."
         );
         
+
+        // Experimental
+
         public static BoolConfigInput TestBoolInput11 { get; } = ConfigService.CreateBool(
             name: "Slower Recharge [Exp]",
             defaultValue: false,

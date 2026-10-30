@@ -94,10 +94,19 @@ public sealed class Patch3 : MelonMod
             {
                 if (BloomConfig.TestEnum2.Value == Music.Grasswalk) TargetTune = MusicTune.DayGrasswalk;
                 if (BloomConfig.TestEnum2.Value == Music.Moongrains) TargetTune = MusicTune.NightMoongrains;
+                if (BloomConfig.TestEnum2.Value == Music.WateryGraves) TargetTune = MusicTune.PoolWaterygraves;
+                if (BloomConfig.TestEnum2.Value == Music.RigorMormist) TargetTune = MusicTune.FogRigormormist;
+                if (BloomConfig.TestEnum2.Value == Music.GrazetheRoof) TargetTune = MusicTune.RoofGrazetheroof;
+
                 if (BloomConfig.TestEnum2.Value == Music.BrainiacManiac) TargetTune = MusicTune.FinalBossBrainiacManiac;
                 if (BloomConfig.TestEnum2.Value == Music.Cerebrawl) TargetTune = MusicTune.PuzzleCerebrawl;
                 if (BloomConfig.TestEnum2.Value == Music.Loonboon) TargetTune = MusicTune.MinigameLoonboon;
                 if (BloomConfig.TestEnum2.Value == Music.Conveyer) TargetTune = MusicTune.Conveyer;
+
+                if (BloomConfig.TestEnum2.Value == Music.Default){
+                    if (BloomConfig.TestEnum3.Value == Stage.Day) TargetTune = MusicTune.DayGrasswalk;
+                    if (BloomConfig.TestEnum3.Value == Stage.Night) TargetTune = MusicTune.NightMoongrains;
+                }
             }
             
             var current = GameplayActivityTracker.CurrentInstance;
