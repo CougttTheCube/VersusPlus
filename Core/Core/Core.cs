@@ -318,6 +318,7 @@ public class Core : ReplantAPI
 
             //MelonLogger.Msg("GRAVESTONE COUNT: " + BoardManager.Board.GetGraveStoneCount());
             //MelonLogger.Msg("sudden death start time " + VersusMode.k_suddenDeathStartTime);
+            MelonLoader.MelonCoroutines.Start(Events.Event4());
         }
 
         if (Input.GetKeyDown(KeyCode.K))
@@ -325,6 +326,7 @@ public class Core : ReplantAPI
             //BoardManager.Board.AddAGraveStone(4, 2);
             //PlaySFX(Constants.Sound.SOUND_WINMUSIC);
             //VersusMode.k_suddenDeathStartTime = 10f;
+            MelonLoader.MelonCoroutines.Start(Events.Event6());
         }
 
 

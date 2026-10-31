@@ -66,8 +66,7 @@ public class Events : ReplantAPI
     static int random4;
     static SeedType theSeedType;
     static ZombieType theZombieType;
-    static int pixelRow;
-    static int pixelRow2;
+
 
     public static bool isMultiplierEvent = false;
     public static int multiplerValue = 1;
@@ -324,7 +323,7 @@ public class Events : ReplantAPI
     public static System.Collections.IEnumerator Event2()
     {
         yield return new WaitForSecondsRealtime(0f);
-        if (!isMultiplierEvent) AdviceManager.ShowAdvice("MULTIPLIED FLOURISHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
+        if (isMultiplierEvent) AdviceManager.ShowAdvice("MULTIPLIED FLOURISHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
         else AdviceManager.ShowAdvice("FLOURISHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
 
         AdviceManager.SetDuration(500);
@@ -346,7 +345,7 @@ public class Events : ReplantAPI
     public static System.Collections.IEnumerator Event3()
     {
         yield return new WaitForSecondsRealtime(0f);
-        if (!isMultiplierEvent) AdviceManager.ShowAdvice("MULTIPLIED CRASHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
+        if (isMultiplierEvent) AdviceManager.ShowAdvice("MULTIPLIED CRASHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
         else AdviceManager.ShowAdvice("CRASHING ECONOMY!", MessageStyle.HugeWave, AdviceType.None);
 
         AdviceManager.SetDuration(500);
@@ -401,15 +400,17 @@ public class Events : ReplantAPI
 
         yield return new WaitForSecondsRealtime(0f);
         int temp = UnityEngine.Random.Range(0, 5);
+        int pixelRow = 0;
         if (temp == 0) pixelRow = 155;
         else if (temp == 1) pixelRow = 255;
         else if (temp == 2) pixelRow = 355;
         else if (temp == 3) pixelRow = 455;
         else if (temp == 4) pixelRow = 555;
 
-        AdviceManager.ShowAdvice("SHOCKWAVE!", MessageStyle.HugeWave, AdviceType.None);
-        AdviceManager.SetDuration(300);
-        PlaySFX(Constants.Sound.SOUND_EXPLOSION);
+        //if (!isMultiplierEvent) AdviceManager.ShowAdvice("SHOCKWAVE!", MessageStyle.HugeWave, AdviceType.None);
+        //else AdviceManager.ShowAdvice("MULTIPLIED SHOCKWAVE!", MessageStyle.HugeWave, AdviceType.None);
+        //AdviceManager.SetDuration(300);
+        //PlaySFX(Constants.Sound.SOUND_EXPLOSION);
 
         // Destroy a plant
         // todo: check stacked plants (flower pot, pumpkin)
@@ -437,7 +438,7 @@ public class Events : ReplantAPI
         //random4 = UnityEngine.Random.Range(0, 5);
         var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
         int temp = UnityEngine.Random.Range(0, 5);
-
+        int pixelRow2 = 0;
         if (temp == 0) pixelRow2 = 155;
         else if (temp == 1) pixelRow2 = 255;
         else if (temp == 2) pixelRow2 = 355;
@@ -485,7 +486,7 @@ public class Events : ReplantAPI
         if (!isMultiplierEvent) AdviceManager.ShowAdvice("THUNDERSTORM!", MessageStyle.HugeWave, AdviceType.None);
         else AdviceManager.ShowAdvice("MULTIPLIED THUNDERSTORM!", MessageStyle.HugeWave, AdviceType.None);
 
-        AdviceManager.SetDuration(500);
+        AdviceManager.SetDuration(450);
         var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
 
         PlaySFX(Constants.Sound.SOUND_HUGE_WAVE);
@@ -548,19 +549,19 @@ public class Events : ReplantAPI
 
     // Multiplier (next event will have 2x effect)
     // idea: make it so that if next event is also multiplier then it stacks (x4 -> x8....)
-    // idea: change title of all other events to "MADNESS" + ...
+    // idea: change title of all other events to "MULTIPLIED" + ...
 
     // event 1
     // event 2
     // event 3
-    // event 4
+    // event 4 - cant use a loop inside it so it's handled differently
     // event 5
 
     public static System.Collections.IEnumerator Event6(){
         yield return new WaitForSecondsRealtime(0f);
         AdviceManager.ShowAdvice("MULTIPLIER MADNESS!", MessageStyle.HugeWave, AdviceType.None);
-        AdviceManager.SetDuration(500);
-        PlaySFX(Constants.Sound.SOUND_HUGE_WAVE);
+        AdviceManager.SetDuration(300);
+        PlaySFX(Constants.Sound.SOUND_ACHIEVEMENT);
 
         isMultiplierEvent = true;
         multiplerValue *= 2;

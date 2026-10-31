@@ -36,12 +36,13 @@ using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 
 using static MelonLoader.MelonLogger;
-
+using static VersusPlus.Helper.CoreHelper;
 
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
 
 using VersusPlus.Gameplay;
+using UnityEngine.UIElements;
 
 internal class Timer : MonoBehaviour
 {
@@ -210,15 +211,31 @@ internal class Timer : MonoBehaviour
             else if (40 < random && random <= 50) MelonLoader.MelonCoroutines.Start(Events.Event3()); // 10
             else if (50 < random && random <= 70)
             {
-                MelonLoader.MelonCoroutines.Start(Events.Event4()); // 20
-                MelonLoader.MelonCoroutines.Start(Events.Event42());
+                if (!Events.isMultiplierEvent) AdviceManager.ShowAdvice("SHOCKWAVE!", MessageStyle.HugeWave, AdviceType.None);
+                else AdviceManager.ShowAdvice("MULTIPLIED SHOCKWAVE!", MessageStyle.HugeWave, AdviceType.None);
+
+                AdviceManager.SetDuration(300);
+                PlaySFX(Constants.Sound.SOUND_EXPLOSION);
+
+                if (Events.isMultiplierEvent){
+                    for (int i = 0; i < Events.multiplerValue; i++){
+                        MelonLoader.MelonCoroutines.Start(Events.Event4()); // 20
+                        MelonLoader.MelonCoroutines.Start(Events.Event42());
+                    }
+                    Events.isMultiplierEvent = false;
+                    Events.multiplerValue = 1;
+                } else {
+                    MelonLoader.MelonCoroutines.Start(Events.Event4()); // 20
+                    MelonLoader.MelonCoroutines.Start(Events.Event42());
+                }
+
             }
             else if (70 < random && random <= 90)
             {
                 MelonLoader.MelonCoroutines.Start(Events.Event5()); // 20
             } else if (90 < random && random <= 100)
             {
-                MelonLoader.MelonCoroutines.Start(Events.Event6());
+                MelonLoader.MelonCoroutines.Start(Events.Event6()); // 10
             }
         } 
         else if (BloomConfig.TestBoolInput8.Value || BoardManager.Board.mApp.VersusMode.Phase == VersusPhase.SuddenDeath) 
@@ -226,8 +243,27 @@ internal class Timer : MonoBehaviour
             if (1 <= random && random <= 30) MelonLoader.MelonCoroutines.Start(Events.Event1()); //30
             else if (30 < random && random <= 50)
             {
-                MelonLoader.MelonCoroutines.Start(Events.Event4()); // 20
-                MelonLoader.MelonCoroutines.Start(Events.Event42());
+                if (!Events.isMultiplierEvent) AdviceManager.ShowAdvice("SHOCKWAVE!", MessageStyle.HugeWave, AdviceType.None);
+                else AdviceManager.ShowAdvice("MULTIPLIED SHOCKWAVE!", MessageStyle.HugeWave, AdviceType.None);
+
+                AdviceManager.SetDuration(300);
+                PlaySFX(Constants.Sound.SOUND_EXPLOSION);
+
+                if (Events.isMultiplierEvent)
+                {
+                    for (int i = 0; i < Events.multiplerValue; i++)
+                    {
+                        MelonLoader.MelonCoroutines.Start(Events.Event4());  // 20
+                        MelonLoader.MelonCoroutines.Start(Events.Event42());
+                    }
+                    Events.isMultiplierEvent = false;
+                    Events.multiplerValue = 1;
+                }
+                else
+                {
+                    MelonLoader.MelonCoroutines.Start(Events.Event4()); 
+                    MelonLoader.MelonCoroutines.Start(Events.Event42());
+                }
             }
             else if (50 < random && random <= 80)
             {
