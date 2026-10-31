@@ -97,7 +97,7 @@ public sealed class Patch3 : MelonMod
                 if (BloomConfig.TestEnum2.Value == Music.Moongrains) TargetTune = MusicTune.NightMoongrains;
                 if (BloomConfig.TestEnum2.Value == Music.WateryGraves) TargetTune = MusicTune.PoolWaterygraves;
                 if (BloomConfig.TestEnum2.Value == Music.RigorMormist) TargetTune = MusicTune.FogRigormormist;
-                if (BloomConfig.TestEnum2.Value == Music.GrazetheRoof) TargetTune = MusicTune.RoofGrazetheroof;
+                if (BloomConfig.TestEnum2.Value == Music.GrazeTheRoof) TargetTune = MusicTune.RoofGrazetheroof;
 
                 if (BloomConfig.TestEnum2.Value == Music.BrainiacManiac) TargetTune = MusicTune.FinalBossBrainiacManiac;
                 if (BloomConfig.TestEnum2.Value == Music.Cerebrawl) TargetTune = MusicTune.PuzzleCerebrawl;

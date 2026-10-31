@@ -115,7 +115,7 @@ public class Core : ReplantAPI
         Moongrains,
         WateryGraves,
         RigorMormist,
-        GrazetheRoof,
+        GrazeTheRoof,
         Loonboon,
         Conveyer,
         BrainiacManiac,

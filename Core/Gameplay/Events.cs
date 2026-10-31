@@ -11,6 +11,8 @@ using BloomEngine.ModMenu;
 
 using HarmonyLib;
 
+using Il2CppBest.HTTP.Shared.Compression.Zlib;
+
 using Il2CppGoogle.Protobuf.WellKnownTypes;
 
 using Il2CppInterop.Runtime.Injection;
@@ -35,6 +37,7 @@ using Il2CppSystem.Numerics;
 using Il2CppSystem.Reflection;
 
 using Il2CppTekly.Localizations;
+using Il2CppTekly.TreeState.StandardActivities;
 
 using Il2CppTMPro;
 
@@ -43,22 +46,24 @@ using MelonLoader;
 using ReplantAPI;
 using ReplantAPI.Managers;
 
+using Unity.Collections;
+
 using UnityEngine;
 using UnityEngine.Bindings;
 using UnityEngine.InputSystem;
 using UnityEngine.UIElements;
 
+using VersusPlus.Core;
 using VersusPlus.Patches;
+using VersusPlus.UI;
+
+using static Unity.Burst.Intrinsics.X86.Avx;
+using static VersusPlus.Core.Core;
+using static VersusPlus.Helper.CoreHelper;
 using static VersusPlus.Patches.Patch;
 using static VersusPlus.Patches.Patch2;
 using static VersusPlus.Patches.Patch3;
 using static VersusPlus.Patches.Patch4;
-
-using VersusPlus.Core;
-using static VersusPlus.Core.Core;
-using static VersusPlus.Helper.CoreHelper;
-using VersusPlus.UI;
-using Il2CppTekly.TreeState.StandardActivities;
 
 public class Events : ReplantAPI
 {
@@ -73,6 +78,42 @@ public class Events : ReplantAPI
     public static bool isZombossSpawned = false;
 
     static int temp;
+
+    private static readonly ZombieType[] safeFallBackZombie = new ZombieType[]{
+        ZombieType.Normal,
+        ZombieType.TrafficCone,
+        ZombieType.Polevaulter,
+        ZombieType.Pail,
+        ZombieType.Newspaper,
+        ZombieType.Door,
+        ZombieType.Football,
+        ZombieType.Dancer,
+        ZombieType.BackupDancer,
+        ZombieType.DuckyTube,
+        ZombieType.Zamboni,
+        ZombieType.Bobsled,
+        ZombieType.JackInTheBox,
+        ZombieType.Balloon,
+        ZombieType.Digger,
+        ZombieType.Pogo,
+        ZombieType.Yeti,
+        ZombieType.Ladder,
+        ZombieType.Catapult,
+        ZombieType.Imp,
+        ZombieType.PeaHead,
+        ZombieType.WallnutHead,
+        ZombieType.JalapenoHead,
+        ZombieType.GatlingHead,
+        ZombieType.SquashHead,
+        ZombieType.TallnutHead,
+        ZombieType.TrashCan
+    };
+    private static ZombieType GetSafeFallback()
+    {
+        return safeFallBackZombie[UnityEngine.Random.Range(0, safeFallBackZombie.Length)];
+    }
+
+
 
     public static System.Collections.IEnumerator Event1()
     {
@@ -173,27 +214,12 @@ public class Events : ReplantAPI
             {
                 if (Timer.elapsedTime < 300f)
                 {
-                    // Re-roll to pick any regular zombie except the Boss
-                    ZombieType fallbackType;
-                    do
-                    {
-                        fallbackType = (ZombieType)UnityEngine.Random.Range(0, 37);
-                    }
-                    while (fallbackType == ZombieType.Boss || fallbackType == ZombieType.Snorkel ||
-                            fallbackType == ZombieType.DolphinRider ||
-                            fallbackType == ZombieType.ZombieCachedPolevaulterWithPole ||
-                            fallbackType == ZombieType.Zombatar ||
-                            fallbackType == ZombieType.NumZombieTypes ||
-                            fallbackType == ZombieType.NumCachedZombieTypes ||
-                            fallbackType == ZombieType.Invalid ||
-                            fallbackType == ZombieType.Gravestone);
-
-                    ZombieManager.SpawnInRow(fallbackType, random3);
-
+                    // Re-roll to pick any regular zombie except the "special" ones
+                    ZombieManager.SpawnInRow(GetSafeFallback(), random3);
                 }
                 else {
+
                     // Zomboss only spawns once
-                
                     if (!isZombossSpawned){
                         ZombieManager.SpawnInRow(ZombieType.Boss, 2);
 
@@ -205,26 +231,13 @@ public class Events : ReplantAPI
                             CustomMusicPatch.TargetTune = MusicTune.FinalBossBrainiacManiac;
                             Core.key = true;
                         }
-                        isZombossSpawned = true;
-                    } else {
-                        ZombieType fallbackType;
-                        do
-                        {
-                            fallbackType = (ZombieType)UnityEngine.Random.Range(0, 37);
-                        }
-                        while (fallbackType == ZombieType.Boss || fallbackType == ZombieType.Snorkel ||
-                                fallbackType == ZombieType.DolphinRider ||
-                                fallbackType == ZombieType.ZombieCachedPolevaulterWithPole ||
-                                fallbackType == ZombieType.Zombatar ||
-                                fallbackType == ZombieType.NumZombieTypes ||
-                                fallbackType == ZombieType.NumCachedZombieTypes ||
-                                fallbackType == ZombieType.Invalid ||
-                                fallbackType == ZombieType.Gravestone);
 
-                        ZombieManager.SpawnInRow(fallbackType, random3);
+                        isZombossSpawned = true;
+
+                    } else {
+                        ZombieManager.SpawnInRow(GetSafeFallback(), random3);
                     }
                 }
-                
             }
 
             // Giga gargantuar
@@ -232,81 +245,36 @@ public class Events : ReplantAPI
             {
                 if (Timer.elapsedTime < 240f)
                 {
-                    // Re-roll to pick any regular zombie except the Giga gargantuar
-                    ZombieType fallbackType;
-                    do
-                    {
-                        fallbackType = (ZombieType)UnityEngine.Random.Range(0, 37);
-                    }
-                    while (fallbackType == ZombieType.RedeyeGargantuar || fallbackType == ZombieType.Snorkel ||
-                            fallbackType == ZombieType.DolphinRider ||
-                            fallbackType == ZombieType.ZombieCachedPolevaulterWithPole ||
-                            fallbackType == ZombieType.Zombatar ||
-                            fallbackType == ZombieType.NumZombieTypes ||
-                            fallbackType == ZombieType.NumCachedZombieTypes ||
-                            fallbackType == ZombieType.Invalid ||
-                            fallbackType == ZombieType.Gravestone);
-
-                    ZombieManager.SpawnInRow(fallbackType, random3);
+                    // Re-roll to pick any regular zombie except the "special" ones
+                    ZombieManager.SpawnInRow(GetSafeFallback(), random3);
                 }
                 else ZombieManager.SpawnInRow(ZombieType.RedeyeGargantuar, random3);
 
             // Target
-            } else if (theZombieType == ZombieType.Target){
+            } 
+
+            else if (theZombieType == ZombieType.Target){
                 if (BoardManager.Board.mApp.VersusMode.ZombieLife == 3)
                 {
-                    // Re-roll to pick any regular zombie except the Target
-                    ZombieType fallbackType;
-                    do
-                    {
-                        fallbackType = (ZombieType)UnityEngine.Random.Range(0, 37);
-                    }
-                    while (fallbackType == ZombieType.Target || fallbackType == ZombieType.Snorkel ||
-                                            fallbackType == ZombieType.DolphinRider ||
-                                            fallbackType == ZombieType.ZombieCachedPolevaulterWithPole ||
-                                            fallbackType == ZombieType.Zombatar ||
-                                            fallbackType == ZombieType.NumZombieTypes ||
-                                            fallbackType == ZombieType.NumCachedZombieTypes ||
-                                            fallbackType == ZombieType.Invalid ||
-                                            fallbackType == ZombieType.Gravestone);
-
-                    ZombieManager.SpawnInRow(fallbackType, random3);
+                    // Re-roll to pick any regular zombie except the "special" ones
+                    ZombieManager.SpawnInRow(GetSafeFallback(), random3);
                 } else {
                     ZombieManager.SpawnAtCell(ZombieType.Target, 8, random3);
                     BoardManager.Board.mApp.VersusMode.ZombieLife++;
 
                     PlaySFX(Constants.Sound.SOUND_GROAN);
-                }
-
-                
+                }  
             }
 
             else if (theZombieType == ZombieType.Flag)
             {
                 if (Timer.elapsedTime < 120f)
                 {
-                    // Re-roll to pick any regular zombie except the flag
-                    ZombieType fallbackType;
-                    do
-                    {
-                        fallbackType = (ZombieType)UnityEngine.Random.Range(0, 37);
-                    }
-                    while (fallbackType == ZombieType.Flag || fallbackType == ZombieType.Snorkel ||
-                            fallbackType == ZombieType.DolphinRider ||
-                            fallbackType == ZombieType.ZombieCachedPolevaulterWithPole ||
-                            fallbackType == ZombieType.Zombatar ||
-                            fallbackType == ZombieType.NumZombieTypes ||
-                            fallbackType == ZombieType.NumCachedZombieTypes ||
-                            fallbackType == ZombieType.Invalid ||
-                            fallbackType == ZombieType.Gravestone);
-
-                    ZombieManager.SpawnInRow(fallbackType, random3);
+                    // Re-roll to pick any regular zombie except the "special" ones
+                    ZombieManager.SpawnInRow(GetSafeFallback(), random3);
                 }
                 else ZombieManager.SpawnInRow(ZombieType.Flag, random3);
-
-
             }
-
             else
             {
                 ZombieManager.SpawnInRow(theZombieType, random3);
@@ -548,7 +516,8 @@ public class Events : ReplantAPI
     }
 
     // Multiplier (next event will have 2x effect)
-    // idea: make it so that if next event is also multiplier then it stacks (x4 -> x8....)
+    // idea: make it so that if next event is also multiplier then it stacks (x4 -> x8....) up to x8 only
+    // nvm, increase multiplier by 1 so it doesnt go too fast (2, 3, ...)
     // idea: change title of all other events to "MULTIPLIED" + ...
 
     // event 1
@@ -564,7 +533,10 @@ public class Events : ReplantAPI
         PlaySFX(Constants.Sound.SOUND_ACHIEVEMENT);
 
         isMultiplierEvent = true;
-        multiplerValue *= 2;
-    }
+        multiplerValue++;
+
+        // Upper limit so it doesnt lag
+        if (multiplerValue >= 5) multiplerValue = 5;
+    } 
 
 }
