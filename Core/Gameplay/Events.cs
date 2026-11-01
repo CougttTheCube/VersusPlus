@@ -375,10 +375,6 @@ public class Events : ReplantAPI
         else if (temp == 3) pixelRow = 455;
         else if (temp == 4) pixelRow = 555;
 
-        //if (!isMultiplierEvent) AdviceManager.ShowAdvice("SHOCKWAVE!", MessageStyle.HugeWave, AdviceType.None);
-        //else AdviceManager.ShowAdvice("MULTIPLIED SHOCKWAVE!", MessageStyle.HugeWave, AdviceType.None);
-        //AdviceManager.SetDuration(300);
-        //PlaySFX(Constants.Sound.SOUND_EXPLOSION);
 
         // Destroy a plant
         // todo: check stacked plants (flower pot, pumpkin)
@@ -426,7 +422,7 @@ public class Events : ReplantAPI
             int gridY = BoardManager.PixelToGridY(i, pixelRow2);
             foreach (var theZombie in board.GetZombies())
             {
-                //if (!(theZombie.mZombieType == ZombieType.Gravestone)) continue;
+                // maybe make it kill trash can zombie as well 
                 if (theZombie.mDead || theZombie == null) continue;
                 if (!(theZombie.mZombieType == ZombieType.Gravestone)) continue;
                 int zombieCol = BoardManager.PixelToGridX((int)theZombie.mPosX, (int)theZombie.mPosY);

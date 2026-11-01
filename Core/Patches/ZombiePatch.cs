@@ -129,30 +129,6 @@ public sealed class Patch4 : MelonMod
 
 
         }
-
-        // Skip rise from grave phase for zombotanies
-        /*
-        [HarmonyPrefix]
-        private static bool Prefix3(Zombie __instance)
-        {
-            if (__instance.mZombieType != ZombieType.PeaHead) return true;
-            if (__instance.mZombieType != ZombieType.WallnutHead) return true;
-            if (__instance.mZombieType != ZombieType.SquashHead) return true;
-            if (__instance.mZombieType != ZombieType.TallnutHead) return true;
-            if (__instance.mZombieType != ZombieType.GatlingHead) return true;
-            if (__instance.mZombieType != ZombieType.JalapenoHead) return true;
-            if (!__instance.mApp.IsVersusMode()) return true;
-
-
-            __instance.mPosX = 800f;
-            __instance.mZombiePhase = ZombiePhase.ZombieNormal;
-
-            return false;
-
-        }
-        */
-
-
     }
 
     // Remove from list if Imp die
@@ -162,6 +138,7 @@ public sealed class Patch4 : MelonMod
         [HarmonyPostfix]
         private static void Postfix(Zombie __instance)
         {
+
             if (__instance.mZombieType != ZombieType.Imp) return;
 
             System.IntPtr ptr = IL2CPP.Il2CppObjectBaseToPtr(__instance);
@@ -170,14 +147,13 @@ public sealed class Patch4 : MelonMod
     }
 
     // Give normal Imp stats if spawned from gargantuar throw
-    [HarmonyPatch(typeof(Zombie), nameof(Zombie.mZombiePhase))]
+    [HarmonyPatch(typeof(Zombie), "set_mZombiePhase")]
     internal static class GargantuarThrownImpPhasePatch
     {
         [HarmonyPostfix]
         private static void Postfix(Zombie __instance, ZombiePhase theZombiePhase)
         {
             if (__instance.mZombieType != ZombieType.Imp) return;
-            if (!__instance.mApp.IsVersusMode()) return;
 
             // Trigger only when the Imp is actively thrown by a Gargantuar
             if (theZombiePhase == ZombiePhase.ImpGettingThrown)
@@ -343,6 +319,24 @@ public sealed class Patch4 : MelonMod
             
 
             return true;
+        }
+
+    }
+
+
+    // Fix Imp in I-zombie having tuff health
+    [HarmonyPatch(typeof(Zombie), nameof(Zombie.ZombieInitialize))]
+    internal static class ImpDefaultHealthPatch
+    {
+        [HarmonyPostfix]
+        private static void Postfix(Zombie __instance)
+        {
+            if (__instance == null || __instance.mApp == null || __instance.mZombieType != ZombieType.Imp) return;
+            if (!__instance.mApp.IsIZombieLevel()) return;
+
+            __instance.mBodyMaxHealth = 85;
+            __instance.mBodyHealth = 85;
+            
         }
     }
 

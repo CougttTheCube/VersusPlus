@@ -89,6 +89,7 @@ public sealed class Patch : MelonMod
             theSeedType == SeedType.Spikerock ||
             theSeedType == SeedType.Cattail ||
             theSeedType == SeedType.Cobcannon || theSeedType == SeedType.Lilypad
+
             ))
             {
                 __result = false;
