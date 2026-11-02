@@ -11,6 +11,9 @@ using Il2Cpp;
 
 using Il2CppBest.HTTP.SecureProtocol.Org.BouncyCastle.Bcpg;
 
+using Il2CppInterop.Runtime;
+using Il2CppInterop.Runtime.Injection;
+
 using Il2CppReloaded;
 using Il2CppReloaded.Data;
 using Il2CppReloaded.DataModels;
@@ -23,8 +26,7 @@ using Il2CppSource.Controllers;
 using Il2CppSource.DataModels;
 
 using Il2CppSystem.Numerics;
-using Il2CppInterop.Runtime;
-using Il2CppInterop.Runtime.Injection;
+
 using Il2CppTMPro;
 
 using MelonLoader;
@@ -39,6 +41,7 @@ using VersusPlus.Core;
 using static Il2CppReloaded.Constants;
 using static VersusPlus.Core.Core;
 using static VersusPlus.Helper.CoreHelper;
+using static VersusPlus.Patches.Patch3;
 
 using Common = Il2CppReloaded.Gameplay.Common;
 using Vector2 = UnityEngine.Vector2;
@@ -340,4 +343,36 @@ public sealed class Patch4 : MelonMod
         }
     }
 
+
+    // Boss doesn't kill every zombie on the lawn once dead
+    [HarmonyPatch(typeof(Zombie), nameof(Zombie.BossDie))]
+    public static class ZombossDeathPatch
+    {
+        [HarmonyPrefix]
+        public static bool Prefix(Zombie __instance)
+        {
+            if (!__instance.mApp.IsVersusMode()) return true;
+            var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
+            if (activity != null) { 
+                //activity.m_audioService.MusicFadeOut(0.1f);
+                activity.m_audioService.PlayMusic(MusicTune.None, 0, 0);
+                CustomMusicPatch.TargetTune = MusicTune.None;
+            }
+
+            
+            return false;
+        }
+    }
+
+    // Skip the RV throwing phase because it's evil
+    [HarmonyPatch(typeof(Zombie), nameof(Zombie.BossRVAttack))]
+    public static class ZombossRVhPatch
+    {
+        [HarmonyPostfix]
+        public static bool Prefix(Zombie __instance)
+        {
+            if (!__instance.mApp.IsVersusMode()) return true;
+            return false;
+        }
+    }
 }

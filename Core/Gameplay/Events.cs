@@ -57,6 +57,7 @@ using VersusPlus.Core;
 using VersusPlus.Patches;
 using VersusPlus.UI;
 
+using static Il2CppReloaded.Constants;
 using static Unity.Burst.Intrinsics.X86.Avx;
 using static VersusPlus.Core.Core;
 using static VersusPlus.Helper.CoreHelper;
@@ -64,6 +65,8 @@ using static VersusPlus.Patches.Patch;
 using static VersusPlus.Patches.Patch2;
 using static VersusPlus.Patches.Patch3;
 using static VersusPlus.Patches.Patch4;
+
+using Zombie = Il2CppReloaded.Gameplay.Zombie;
 
 public class Events : ReplantAPI
 {
@@ -230,6 +233,7 @@ public class Events : ReplantAPI
                             activity.m_audioService.PlayMusic(MusicTune.FinalBossBrainiacManiac, 0, 0);
                             CustomMusicPatch.TargetTune = MusicTune.FinalBossBrainiacManiac;
                             Core.key = true;
+
                         }
 
                         isZombossSpawned = true;
@@ -420,6 +424,7 @@ public class Events : ReplantAPI
             yield return new WaitForSecondsRealtime(0.2f);
             int gridX = BoardManager.PixelToGridX(i, pixelRow2);
             int gridY = BoardManager.PixelToGridY(i, pixelRow2);
+
             foreach (var theZombie in board.GetZombies())
             {
                 // maybe make it kill trash can zombie as well 
@@ -439,6 +444,20 @@ public class Events : ReplantAPI
                 }
                 if (checkBreak) break;
             }
+
+            if (i >= 860){
+                Zombie zombie = board?.GetBossZombie();
+                if (zombie != null && !zombie.IsDeadOrDying())
+                {
+                    ZombieManager.TakeDamage(zombie, 14000);
+                    ZombieManager.ApplyChill(zombie);
+
+                    EffectsManager.Spawn(i, pixelRow2 - 25, ParticleEffect.PotatoMine);
+                    PlaySFX(Constants.Sound.SOUND_POTATO_MINE);
+                    break;
+                }
+            }
+
             if (checkBreak) break;
 
         }
@@ -486,7 +505,18 @@ public class Events : ReplantAPI
                 int zombieCol = BoardManager.PixelToGridX( (int)(zombie.mPosX + zombie.mWidth / 2), (int)zombie.mPosY );
                 if (zombie.mRow == random2 && zombieCol == random1)
                 {
+                    
                     ZombieManager.KillNoLoot(zombie);
+                }
+            }
+
+            // Thunderstorm will deal 14000 health to Zomboss (5 hits to die)
+            if (random1 == 8){
+                Zombie zombie = board?.GetBossZombie();
+                if (zombie != null && !zombie.IsDeadOrDying())
+                {
+                    ZombieManager.TakeDamage(zombie, 14000);
+                    ZombieManager.ApplyChill(zombie);
                 }
             }
 

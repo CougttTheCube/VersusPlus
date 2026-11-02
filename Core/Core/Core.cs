@@ -52,6 +52,8 @@ using MelonLoader;
 using ReplantAPI;
 using ReplantAPI.Managers;
 
+using Unity.Mathematics;
+
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.InputSystem;
@@ -63,23 +65,23 @@ using UnityEngine.Rendering.RenderGraphModule.NativeRenderPassCompiler;
 using UnityEngine.UI;
 using UnityEngine.UIElements;
 
+using VersusPlus.Gameplay;
 using VersusPlus.Helper;
 using VersusPlus.Patches;
 using VersusPlus.UI;
-
-using CursorManager = ReplantAPI.Managers.CursorManager;
 
 using static Il2CppSystem.Net.Http.Headers.Parser;
 using static UnityEngine.ParticleSystem.PlaybackState;
 using static VersusPlus.Gameplay.Events;
 using static VersusPlus.Helper.CoreHelper;
+using static VersusPlus.Patches.Patch3;
 using static VersusPlus.UI.Concede0;
 using static VersusPlus.UI.SpriteSwapper;
 using static VersusPlus.UI.Timer;
 using static VersusPlus.UI.Timer2;
 
+using CursorManager = ReplantAPI.Managers.CursorManager;
 using Vector2 = UnityEngine.Vector2;
-using VersusPlus.Gameplay;
 
 public class Core : ReplantAPI
 {
@@ -311,14 +313,64 @@ public class Core : ReplantAPI
         base.OnUpdate();
         if (!BoardManager.IsLoaded) return;
 
-        
+        // todo: add this into event thunderstorm and shockwave
+
+
+        /*
         if (Input.GetKeyDown(KeyCode.L))
         {
             //PlantManager.Spawn(4, 2, SeedType.Gravebuster);
 
             //MelonLogger.Msg("GRAVESTONE COUNT: " + BoardManager.Board.GetGraveStoneCount());
             //MelonLogger.Msg("sudden death start time " + VersusMode.k_suddenDeathStartTime);
-            MelonLoader.MelonCoroutines.Start(Events.Event4());
+            Zombie boss = ZombieManager.SpawnInRow(ZombieType.Boss, 2);
+
+            var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
+
+            if (activity != null)
+            {
+                // Switch soundtrack to Brainiac Maniac
+                // Activate key
+                activity.m_audioService.PlayMusic(MusicTune.FinalBossBrainiacManiac, 0, 0);
+                CustomMusicPatch.TargetTune = MusicTune.FinalBossBrainiacManiac;
+                Core.key = true;
+
+            }
+
+        }
+
+
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            //PlantManager.Spawn(4, 2, SeedType.Gravebuster);
+            foreach (var zombie in BoardManager.Board.GetZombies())
+            {
+                if (zombie.mDead || zombie == null) continue;
+                if (zombie.mZombieType == ZombieType.Target) continue;
+                int zombieCol = BoardManager.PixelToGridX((int)(zombie.mPosX + zombie.mWidth / 2), (int)zombie.mPosY);
+
+                if (zombie.mZombieType == ZombieType.Boss)
+                {
+                    ZombieManager.TakeDamage(zombie, 14000);
+                    ZombieManager.ApplyChill(zombie);
+                }
+                else ZombieManager.KillNoLoot(zombie);
+
+                
+            }
+
+
+
+            // spawn effect at (8, 2)
+            int gridX = BoardManager.GridToPixelX(8, 2);
+            int gridY = BoardManager.GridToPixelY(8, 2);
+
+            EffectsManager.Spawn(410, 355, ParticleEffect.ScreenFlash);
+            EffectsManager.Spawn(gridX + 35, gridY + 35, ParticleEffect.PotatoMine);
+
+            PlaySFX(Constants.Sound.SOUND_THUNDER);
+            PlaySFX(Constants.Sound.SOUND_THUNDER);
+            PlaySFX(Constants.Sound.SOUND_POTATO_MINE);
         }
 
         if (Input.GetKeyDown(KeyCode.K))
@@ -326,9 +378,9 @@ public class Core : ReplantAPI
             //BoardManager.Board.AddAGraveStone(4, 2);
             //PlaySFX(Constants.Sound.SOUND_WINMUSIC);
             //VersusMode.k_suddenDeathStartTime = 10f;
-            MelonLoader.MelonCoroutines.Start(Events.Event6());
+            MelonLoader.MelonCoroutines.Start(Events.Event42());
         }
-
+        */
 
 
         // Detect input for both players
