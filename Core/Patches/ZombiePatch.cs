@@ -50,6 +50,7 @@ using Zombie = Il2CppReloaded.Gameplay.Zombie;
 
 public sealed class Patch4 : MelonMod
 {
+
     // Adjust speed for Imp based on how it spawns
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.StopEating))]
     internal static class ImpSpeedFix
@@ -132,6 +133,25 @@ public sealed class Patch4 : MelonMod
 
 
         }
+
+        // Skip rise from grave phase for the zombotanies
+        [HarmonyPrefix]
+        private static bool Prefix3(Zombie __instance)
+        {
+            if (__instance.mZombieType != ZombieType.PeaHead &&
+            __instance.mZombieType != ZombieType.GatlingHead &&
+            __instance.mZombieType != ZombieType.JalapenoHead &&
+            __instance.mZombieType != ZombieType.TallnutHead) return true;
+            if (!__instance.mApp.IsVersusMode()) return true;
+
+
+            __instance.mPosX = 800f;
+
+            return false;
+
+
+
+        }
     }
 
     // Remove from list if Imp die
@@ -182,11 +202,29 @@ public sealed class Patch4 : MelonMod
             SeedType zombieCursor = CursorManager.GetSeedTypeInCursor(1);
             SeedType plantCursor = CursorManager.GetSeedTypeInCursor(0);
 
+            // Swap ZombiquariumSnorkel with Backup Dancer
             if (zombieCursor == SeedType.ZombiquariumSnorkel
             || plantCursor == SeedType.ZombiquariumSnorkel)
             {
                 // Force the translation
+                theZombieType = ZombieType.BackupDancer;
+                return true;
+            }
+
+            // Swap ZombiquariumTrophy with Peashooter Zombie
+            if (zombieCursor == SeedType.ZombiquariumTrophy
+            || plantCursor == SeedType.ZombiquariumTrophy)
+            {
+                // Force the translation
                 theZombieType = ZombieType.PeaHead;
+                return true;
+            }
+
+            if (zombieCursor == SeedType.BeghouledButtonCrater
+            || plantCursor == SeedType.BeghouledButtonCrater)
+            {
+                // Force the translation
+                theZombieType = ZombieType.GatlingHead;
                 return true;
             }
 
@@ -222,8 +260,12 @@ public sealed class Patch4 : MelonMod
     [HarmonyPatch(typeof(Board), nameof(Board.CanPlantAt))]
     internal static class ZombieNotPlantingonGraves
     {
-        private static void Postfix(int theGridX, int theGridY, SeedType theType, ref PlantingReason __result)
+        private static void Postfix(Board __instance, int theGridX, int theGridY, SeedType theType, ref PlantingReason __result)
         {
+
+            if (__instance == null) return;
+            if (!__instance.mApp.IsVersusMode()) return;
+
             if (((int)theType >= 60 && (int)theType <= 80) &&
             (GridItemManager.GetAt(GridItemType.Crater, theGridX, theGridY) != null))
             {
@@ -239,6 +281,21 @@ public sealed class Patch4 : MelonMod
                 __result = PlantingReason.NotOnCrater;
 
             }
+
+            // Too lazy to find out why it's on plant side so brute force custom zombie to be placed on zombie side
+            if (theType == SeedType.ZombiquariumSnorkel || 
+            theType == SeedType.ZombiquariumTrophy || 
+            theType == SeedType.BeghouledButtonCrater)
+            {
+                if (theGridX >= 6 && theGridX <= 8){
+                    __result = PlantingReason.Ok;
+                    return;
+                } else {
+                    __result = PlantingReason.VSNotHere;
+                    return;
+                }
+            }
+
             return;
         }
     }
@@ -375,4 +432,63 @@ public sealed class Patch4 : MelonMod
             return false;
         }
     }
+
+    [HarmonyPatch(typeof(Challenge), nameof(Challenge.IsZombieSeedType))]
+    public static class dih
+    {
+        [HarmonyPostfix]
+        public static void Postfix(SeedType theSeedType, ref bool __result)
+        {
+            if (theSeedType == SeedType.ZombiquariumSnorkel || 
+            theSeedType == SeedType.ZombiquariumTrophy ||
+            theSeedType == SeedType.BeghouledButtonCrater)
+            {
+                __result = true;
+            }
+        }
+    }
+
+    /*
+    [HarmonyPatch(typeof(Challenge), nameof(Challenge.IZombieSeedTypeToZombieType))]
+    public static class dih2
+    {
+        [HarmonyPostfix]
+        public static void Postfix(SeedType theSeedType, ref ZombieType __result)
+        {
+            if (theSeedType == SeedType.ZombiquariumSnorkel)
+            {
+                __result = ZombieType.BackupDancer;
+            }
+        }
+    }
+    */
+
+
+    // Too lazy to find out why it's on plant side so brute force custom zombie to be placed on zombie side
+    [HarmonyPatch(typeof(Challenge), nameof(Challenge.CanPlantAt))]
+    internal static class CustomZombieCanPlantAt_Patch
+    {
+        private static void Postfix(Challenge __instance, int theGridX, int theGridY, SeedType theType, ref PlantingReason __result)
+        {
+
+            if (BoardManager.Board == null || BoardManager.App == null) return;
+            if (!__instance.mApp.IsVersusMode()) return;
+
+            if (theType == SeedType.ZombiquariumSnorkel || 
+            theType == SeedType.ZombiquariumTrophy ||
+            theType == SeedType.BeghouledButtonCrater)
+            {
+                if (theGridX >= 6 && theGridX <= 8){
+                    __result = PlantingReason.Ok;
+                    return;
+                } else {
+                    __result = PlantingReason.VSNotHere;
+                    return;
+                }
+            }
+
+            return;
+        }
+    }
+
 }

@@ -172,9 +172,10 @@ internal class Timer2 : MonoBehaviour
                     {
 
                         SeedPacket temp = SeedBankManager.GetPacketAt(j, index);
+
                         if (temp == null) continue;
 
-                        bool isZombieSeed = ((int)temp.mPacketType >= 60 && (int)temp.mPacketType <= 80);
+                        bool isZombieSeed = ((int)temp.mPacketType >= 60 && (int)temp.mPacketType <= 80) || temp.PacketType == SeedType.ZombiquariumSnorkel || temp.mPacketType == SeedType.ZombiquariumTrophy || temp.mPacketType == SeedType.BeghouledButtonCrater; 
 
                         if (!isZombieSeed)
                         {
