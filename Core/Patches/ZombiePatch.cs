@@ -141,18 +141,55 @@ public sealed class Patch4 : MelonMod
             if (__instance.mZombieType != ZombieType.PeaHead &&
             __instance.mZombieType != ZombieType.GatlingHead &&
             __instance.mZombieType != ZombieType.JalapenoHead &&
-            __instance.mZombieType != ZombieType.TallnutHead) return true;
+            __instance.mZombieType != ZombieType.TallnutHead &&
+            __instance.mZombieType != ZombieType.RedeyeGargantuar) return true;
             if (!__instance.mApp.IsVersusMode()) return true;
-
 
             __instance.mPosX = 800f;
 
             return false;
 
+        }
+
+        
+        // Bobsled: Spawn an ice trail
+        [HarmonyPrefix]
+        private static bool Prefix4(Zombie __instance, int theCol, int theRow)
+        {
+            if (__instance.mZombieType != ZombieType.Bobsled) return true;
+            if (!__instance.mApp.IsVersusMode()) return true;
+            var board = BoardManager.Board;
+            if (board == null) return true;
 
 
+            __instance.mPosX = 870f;
+            __instance.mZombiePhase = ZombiePhase.BobsledSliding;
+
+            board.mIceMinX[theRow] = board.GridToPixelX(6, theRow);
+            board.mIceTimer[theRow] = 1000;
+            
+            return false;
+        }
+
+        // Boss
+        [HarmonyPrefix]
+        private static bool Prefix5(Zombie __instance, int theCol, int theRow)
+        {
+            if (__instance.mZombieType != ZombieType.Boss) return true;
+            if (!__instance.mApp.IsVersusMode()) return true;
+            var board = BoardManager.Board;
+            if (board == null) return true;
+
+
+            __instance.mPosX = 800f;
+            __instance.mZombiePhase = ZombiePhase.BossEnter;
+
+
+            return false;
         }
     }
+
+
 
     // Remove from list if Imp die
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.DieNoLoot))]
@@ -190,12 +227,11 @@ public sealed class Patch4 : MelonMod
 
 
 
-
     [HarmonyPatch(typeof(Board), nameof(Board.AddZombieInRow))]
     internal static class SpawnPlant
     {
         [HarmonyPrefix]
-        private static bool Prefix0(Board __instance, ref ZombieType theZombieType)
+        private static bool Prefix0(Board __instance, ref ZombieType theZombieType, ref int theRow)
         {
             if (!__instance.mApp.IsVersusMode()) return true;
 
@@ -228,6 +264,48 @@ public sealed class Patch4 : MelonMod
                 return true;
             }
 
+            if (zombieCursor == SeedType.BeghouledButtonShuffle
+            || plantCursor == SeedType.BeghouledButtonShuffle)
+            {
+                // Force the translation
+                theZombieType = ZombieType.TallnutHead;
+                return true;
+            }
+
+            if (zombieCursor == SeedType.SlotMachineSun
+            || plantCursor == SeedType.SlotMachineSun)
+            {
+                // Force the translation
+                theZombieType = ZombieType.JalapenoHead;
+                return true;
+            }
+
+            if (zombieCursor == SeedType.SlotMachineDiamond
+            || plantCursor == SeedType.SlotMachineDiamond)
+            {
+                // Force the translation
+                theZombieType = ZombieType.RedeyeGargantuar;
+                return true;
+            }
+
+
+            if (zombieCursor == SeedType.Sprout
+            || plantCursor == SeedType.Sprout)
+            {
+                // Force the translation
+                theZombieType = ZombieType.Bobsled;
+                return true;
+            }
+
+            if (zombieCursor == SeedType.NumSeedTypes
+            || plantCursor == SeedType.NumSeedTypes)
+            {
+                // Force the translation
+                theZombieType = ZombieType.Boss;
+                theRow = 2;
+                return true;
+            }
+
             return true;
         }
 
@@ -255,6 +333,8 @@ public sealed class Patch4 : MelonMod
         }
 
     }
+
+
 
     // Preview image doesnt show on craters for zombies
     [HarmonyPatch(typeof(Board), nameof(Board.CanPlantAt))]
@@ -285,7 +365,12 @@ public sealed class Patch4 : MelonMod
             // Too lazy to find out why it's on plant side so brute force custom zombie to be placed on zombie side
             if (theType == SeedType.ZombiquariumSnorkel || 
             theType == SeedType.ZombiquariumTrophy || 
-            theType == SeedType.BeghouledButtonCrater)
+            theType == SeedType.BeghouledButtonCrater ||
+            theType == SeedType.BeghouledButtonShuffle ||
+            theType == SeedType.SlotMachineDiamond ||
+            theType == SeedType.SlotMachineSun ||
+            theType == SeedType.Sprout ||
+            theType == SeedType.NumSeedTypes) 
             {
                 if (theGridX >= 6 && theGridX <= 8){
                     __result = PlantingReason.Ok;
@@ -441,7 +526,12 @@ public sealed class Patch4 : MelonMod
         {
             if (theSeedType == SeedType.ZombiquariumSnorkel || 
             theSeedType == SeedType.ZombiquariumTrophy ||
-            theSeedType == SeedType.BeghouledButtonCrater)
+            theSeedType == SeedType.BeghouledButtonCrater ||
+            theSeedType == SeedType.BeghouledButtonShuffle ||
+            theSeedType == SeedType.SlotMachineSun ||
+            theSeedType == SeedType.SlotMachineDiamond ||
+            theSeedType == SeedType.Sprout ||
+            theSeedType == SeedType.NumSeedTypes)
             {
                 __result = true;
             }
@@ -476,7 +566,12 @@ public sealed class Patch4 : MelonMod
 
             if (theType == SeedType.ZombiquariumSnorkel || 
             theType == SeedType.ZombiquariumTrophy ||
-            theType == SeedType.BeghouledButtonCrater)
+            theType == SeedType.BeghouledButtonCrater ||
+            theType == SeedType.BeghouledButtonShuffle ||
+            theType == SeedType.SlotMachineSun ||
+            theType == SeedType.SlotMachineDiamond ||
+            theType == SeedType.Sprout ||
+            theType == SeedType.NumSeedTypes)
             {
                 if (theGridX >= 6 && theGridX <= 8){
                     __result = PlantingReason.Ok;

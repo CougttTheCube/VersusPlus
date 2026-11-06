@@ -175,7 +175,7 @@ internal class Timer2 : MonoBehaviour
 
                         if (temp == null) continue;
 
-                        bool isZombieSeed = ((int)temp.mPacketType >= 60 && (int)temp.mPacketType <= 80) || temp.PacketType == SeedType.ZombiquariumSnorkel || temp.mPacketType == SeedType.ZombiquariumTrophy || temp.mPacketType == SeedType.BeghouledButtonCrater; 
+                        bool isZombieSeed = ((int)temp.mPacketType >= 60 && (int)temp.mPacketType <= 80) || temp.PacketType == SeedType.ZombiquariumSnorkel || temp.mPacketType == SeedType.ZombiquariumTrophy || temp.mPacketType == SeedType.BeghouledButtonCrater || temp.mPacketType == SeedType.BeghouledButtonShuffle || temp.mPacketType == SeedType.SlotMachineDiamond || temp.mPacketType == SeedType.SlotMachineSun || temp.PacketType == SeedType.Sprout || temp.mPacketType == SeedType.NumSeedTypes; 
 
                         if (!isZombieSeed)
                         {
