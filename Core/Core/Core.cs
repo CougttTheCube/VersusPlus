@@ -5,12 +5,13 @@
 // D1GQ - SeedChooserDataModel Reload [Removed custom functions]
 // https://github.com/D1GQ/ReplantedOnline/blob/3f1fe17378ec0c98ab9866aa74bb775a3fd71ff6/src/Patches/Reloaded/Gameplay/UI/SeedChooserPatch.cs#L38
 
-// todo: 
-// check for fucking bugs
-// add more zombies: , bobsled,                                  zombies that dont have seed packets:  giga garg   peashooter zombie
-// for custom zombie: use a custom zombie seed packet png that includes custom zombies
-// prob make an alternative with custom design
+// gitAngelHub123 - Adding custom seed types to zombie pool
+// https://github.com/gitAngelHub123/VersusBot/blob/main/Mapa.cs
 
+// issues:
+// - tooltips
+// - preview images
+// - swapping seed packet sheet
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -49,6 +50,7 @@ using Il2CppSource.DataModels;
 using Il2CppSystem;
 using Il2CppSystem.Numerics;
 using Il2CppSystem.Reflection;
+using Il2CppSystem.Security.Cryptography;
 
 using Il2CppTekly.DataModels.Binders;
 using Il2CppTekly.Injectors;
@@ -57,6 +59,7 @@ using Il2CppTekly.Localizations;
 using Il2CppTMPro;
 
 using MelonLoader;
+//using PvZReCoreLib.Content;
 
 using ReplantAPI;
 using ReplantAPI.Managers;
@@ -65,6 +68,9 @@ using Unity.Mathematics;
 
 using UnityEngine;
 using UnityEngine.AddressableAssets;
+using UnityEngine.Device;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.DualShock;
@@ -82,16 +88,20 @@ using VersusPlus.UI;
 using static Il2CppSystem.Net.Http.Headers.Parser;
 using static MelonLoader.MelonLogger;
 using static UnityEngine.ParticleSystem.PlaybackState;
+using static VersusPlus.Gameplay.CustomSeedType;
 using static VersusPlus.Gameplay.Events;
 using static VersusPlus.Helper.CoreHelper;
 using static VersusPlus.Patches.Patch3;
+using static VersusPlus.Patches.Patch4;
 using static VersusPlus.UI.Concede0;
 using static VersusPlus.UI.SpriteSwapper;
 using static VersusPlus.UI.Timer;
 using static VersusPlus.UI.Timer2;
+using static VersusPlus.UI.SeedPacketSwapper;
 
 using CursorManager = ReplantAPI.Managers.CursorManager;
 using Vector2 = UnityEngine.Vector2;
+using MelonLoader.Utils;
 
 public class Core : ReplantAPI
 {
@@ -156,6 +166,9 @@ public class Core : ReplantAPI
 
     public static bool runOnceMushroom = false;
     public static bool runOncedayMushroom = false;
+
+    public static float _locDone = 0f;
+    public static Sprite customSeedSprite;
     internal static class BloomConfig
     {
         public static StringConfigInput Player1Name { get; } = ConfigService.CreateString(
@@ -265,6 +278,11 @@ public class Core : ReplantAPI
             defaultValue: true,
             description: "Disables Starfruit dealing huge damage to zombie eating it closely from the left. Experimental."
         );
+        public static BoolConfigInput TestBoolInput15 { get; } = ConfigService.CreateBool(
+        name: "Texture Switch [Exp]",
+        defaultValue: false,
+        description: "Switches Zombie seed packets texture. Turning this on will use the redesigned packets. Experimental."
+        );
         public static BoolConfigInput TestBoolInput8 { get; } = ConfigService.CreateBool(
         name: "???",
         defaultValue: false,
@@ -283,7 +301,6 @@ public class Core : ReplantAPI
 
 
     }
-    // Custom DieRow
     
     public override void OnInitializeMelon()
     {
@@ -295,6 +312,7 @@ public class Core : ReplantAPI
         ClassInjector.RegisterTypeInIl2Cpp<Concede0>();
         ClassInjector.RegisterTypeInIl2Cpp<VersusNameInField1>();
         ClassInjector.RegisterTypeInIl2Cpp<VersusNameInField2>();
+        ClassInjector.RegisterTypeInIl2Cpp<SeedPacketSwapper>();
 
         ModMenuService.CreateEntry(this)
             .AddDisplayName(Name)
@@ -306,9 +324,8 @@ public class Core : ReplantAPI
         ModMenuService.CreateEntry(this)
             .AddIcon(AssetHelper.LoadSprite<Core>("VersusPlus.Resources.icon.png"));
 
-
-
         if (BloomConfig.TestEnum3.Value == Stage.Night) BloomConfig.TestEnum3.Value = Stage.Day;
+
 
     }
 
@@ -317,6 +334,7 @@ public class Core : ReplantAPI
     public override void OnUpdate()
     {
         base.OnUpdate();
+
         if (!BoardManager.IsLoaded) return;
 
         // todo: add this into event thunderstorm and shockwave
@@ -333,44 +351,31 @@ public class Core : ReplantAPI
 
             var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
 
-            if (activity != null)
+            if (activity != null && key == false)
             {
                 // Switch soundtrack to Brainiac Maniac
                 // Activate key
                 activity.m_audioService.PlayMusic(MusicTune.FinalBossBrainiacManiac, 0, 0);
-                CustomMusicPatch.TargetTune = MusicTune.FinalBossBrainiacManiac;
+                MusicActivity_TriggerAudio_MusicPlayer_Patch.TargetTune = MusicTune.FinalBossBrainiacManiac;
                 Core.key = true;
 
             }
 
         }
+        */
+        if (Input.GetKeyDown(KeyCode.K)) {
 
-
-        if (Input.GetKeyDown(KeyCode.O))
-        {
-            //PlantManager.Spawn(4, 2, SeedType.Gravebuster);
-            foreach (var zombie in BoardManager.Board.GetZombies())
+            foreach (var zombie in BoardManager.Board?.GetZombies())
             {
-                if (zombie.mDead || zombie == null) continue;
-                if (zombie.mZombieType == ZombieType.Target) continue;
-                int zombieCol = BoardManager.PixelToGridX((int)(zombie.mPosX + zombie.mWidth / 2), (int)zombie.mPosY);
-
+                if (zombie == null || zombie.mDead || zombie.IsDeadOrDying()) continue;
                 if (zombie.mZombieType == ZombieType.Boss)
                 {
                     ZombieManager.TakeDamage(zombie, 14000);
                     ZombieManager.ApplyChill(zombie);
                 }
-                else ZombieManager.KillNoLoot(zombie);
-
-                
             }
-
-
-
-            // spawn effect at (8, 2)
-            int gridX = BoardManager.GridToPixelX(8, 2);
-            int gridY = BoardManager.GridToPixelY(8, 2);
-
+            int gridX =8;
+            int gridY = 2;
             EffectsManager.Spawn(410, 355, ParticleEffect.ScreenFlash);
             EffectsManager.Spawn(gridX + 35, gridY + 35, ParticleEffect.PotatoMine);
 
@@ -378,31 +383,19 @@ public class Core : ReplantAPI
             PlaySFX(Constants.Sound.SOUND_THUNDER);
             PlaySFX(Constants.Sound.SOUND_POTATO_MINE);
         }
-                */
-        if (Input.GetKeyDown(KeyCode.K))
+        if (Input.GetKeyDown(KeyCode.L))
         {
-            //BoardManager.Board.AddAGraveStone(4, 2);
-            //PlaySFX(Constants.Sound.SOUND_WINMUSIC);
-            //VersusMode.k_suddenDeathStartTime = 10f;
-            //AchievementsManager.GrantAchievement(AchievementType.LifeWellLived);
-            //SeedBankManager.AddSeed(SeedType.Peashooter ,true);
-            try { var d = BoardManager.Board.mApp.GetPlantDefinition((SeedType)82); MelonLogger.Msg("82 exists"); }
-            catch { MelonLogger.Msg("82 not defined"); }
-
+            MelonLoader.MelonCoroutines.Start(Events.Event42());
         }
-
-
 
         // Detect input for both players
 
         var cursor0 = CursorManager.GetCursor(0);
         var cursor1 = CursorManager.GetCursor(1);
-
         bool p0GamepadB = false;
         bool p1GamepadB = false;
 
         // check whether p0, p1 is gamepad or not
-
 
         if (cursor0 != null && cursor0.m_player != null)
         {
@@ -444,7 +437,6 @@ public class Core : ReplantAPI
         {
             holdDuration2 = 0f;
         }
-
 
 
         // Conceding when hold for player 0
@@ -499,7 +491,6 @@ public class Core : ReplantAPI
                 }
             }
         }
-
 
 
         // Toggle: Sets initial recharge time
@@ -568,9 +559,6 @@ public class Core : ReplantAPI
             }
         }
         
-
-
-
         // Plays huge wave sound when it's Sudden Death
         if (BoardManager.App != null && BoardManager.App.VersusMode != null)
         {
@@ -588,9 +576,6 @@ public class Core : ReplantAPI
                 }
             }
         }
-
-
-
 
         // Plays death sounds when game ends
         if (BoardManager.App != null && BoardManager.App.VersusMode != null)
@@ -637,7 +622,6 @@ public class Core : ReplantAPI
             }
         }
 
-
         // Toggle: Instant Death phase
         if (TenMinute && BloomConfig.TestBoolInput3.Value)
         {
@@ -671,8 +655,6 @@ public class Core : ReplantAPI
             }
 
         }
-
-
 
         // Toggle: Chaotic Death (???) phase
         if (StartMatch && BloomConfig.TestBoolInput8.Value)
@@ -712,7 +694,6 @@ public class Core : ReplantAPI
             }
         }
 
-
         // Shovel keybind
         if (Input.GetKeyDown(KeyCode.X)){
             if (BoardManager.Board.mApp.IsVersusMode()){
@@ -739,11 +720,7 @@ public class Core : ReplantAPI
             }
             
         }
-
-
-
     }
-
     public override void OnSceneWasInitialized(int buildIndex, string sceneName)
     {
         base.OnSceneWasInitialized(buildIndex, sceneName);
@@ -777,10 +754,20 @@ public class Core : ReplantAPI
 
     }
 
+
     // Toggle: Seed recharge tooltip
     // RaptorRush
+
     private static void GameplayStarted(GameplayActivity gameplayActivity)
     {
+        if (!BloomConfig.TestBoolInput.Value)
+        {
+            foreach (var (@override, definition) in SeedPacketToolTipApi.ToolTipsOverrides)
+            {
+                @override.Set($"{@override.OriginalFormat}");
+            }
+            return; 
+        }
 
         foreach (var (@override, definition) in SeedPacketToolTipApi.ToolTipsOverrides
             .Where(t => t.Definition.SeedType != SeedType.Imitater))
@@ -788,9 +775,9 @@ public class Core : ReplantAPI
             int refreshTime = gameplayActivity.IsVersusMode()
                 ? definition.m_versusBaseRefreshTime
                 : definition.m_refreshTime;
-            if (!BloomConfig.TestBoolInput.Value) break;
+            //if (!BloomConfig.TestBoolInput.Value) break;
             //if (!gameplayActivity.IsVersusMode()) break;
-            if (gameplayActivity.IsVersusMode() && BloomConfig.TestBoolInput.Value)
+            if (gameplayActivity.IsVersusMode())
             {
 
 
@@ -815,11 +802,6 @@ public class Core : ReplantAPI
                     $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\n" +
                         $"<color=#008000>Can be planted on land\n<color=#000000>Attacks any lane and shoots down balloon zombies\n(requires lily pad)");
                 }
-                else if (definition.m_seedType == SeedType.ZombiquariumSnorkel)
-                {
-                    @override.Set(
-                    $"<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nThis guy goes alone now.");
-                }
                 else
                 {
                     @override.Set(
@@ -835,10 +817,17 @@ public class Core : ReplantAPI
             }
 
         }
+        
     }
+
+
     public override void OnSceneWasLoaded(int buildIndex, string sceneName)
     {
         base.OnSceneWasLoaded(buildIndex, sceneName);
+
+
+
+
         // Add health to Wall-nut and Tall-nut Zombie in Versus Mode
         var allDefsZ = UnityEngine.Object.FindObjectsOfTypeAll(Il2CppType.Of<ZombieDefinition>());
         foreach (var obj in allDefsZ)
@@ -854,6 +843,10 @@ public class Core : ReplantAPI
                 def.m_versusBodyHealth = 270;
                 def.m_versusArmorHealth = 2400;
             }
+
+
+            if (def.m_zombieType == ZombieType.BackupDancer) def.m_previewSpriteOffset = new Vector2(80, -66);
+            if (def.m_zombieType == ZombieType.Bobsled) def.m_previewSpriteOffset = new Vector2(80, -66);
 
         }
 
@@ -914,286 +907,7 @@ public class Core : ReplantAPI
         */
 
 
-        // Stats for Backup Dancer
-        foreach (var obj in allDefs)
-        {
-            var def = obj.Cast<PlantDefinition>();
-
-
-            
-            // Makes the custom seedtype have stats and images: Backup Dancer
-            if (def.m_seedType == SeedType.ZombiquariumSnorkel)
-            {
-                def.m_versusCost = 0;
-                def.m_versusBaseRefreshTime = 3000;
-                def.m_versusSuddenDeathRefreshTime = 1000;
-
-
-                var backupDancerSprite = new AssetReferenceSprite("b2e616b9bbbacac4980ba6de852d1a44");
-                backupDancerSprite.m_SubObjectName = "SPR_SeedPackets_Zombies_Versus_22";
-                //backupDancerSprite.m_SubObjectType = "UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null";
-                def.m_versusImage = backupDancerSprite;
-
-                var backupDancerAssetReferenceGameObject = new AssetReferenceGameObject("86af4c6f62e682647853b46a5fb99a9e");
-                def.m_preview = backupDancerAssetReferenceGameObject;
-
-                var backupDancerPreviewSprite = new AssetReferenceSprite("863154a01c416424e8a2d97037894d79");
-                backupDancerPreviewSprite.m_SubObjectName = "SPR_Preview_Zombie_backup";
-                def.m_previewSprite = backupDancerPreviewSprite;
-
-                def.m_previewSpriteScale = 0.8f;
-                def.m_previewSpriteOffset = new Vector2(80, -66);
-
-                def.m_plantName = "BACKUP_DANCER";
-                def.m_plantToolTip = "BACKUP_DANCER_DESCRIPTION_HEADER";
-            }
-
-
-
-            // Makes the custom seedtype have stats and images: Giga Gargantuar
-            if (def.m_seedType == SeedType.SlotMachineDiamond)
-            {
-                def.m_versusCost = 475;
-                def.m_versusBaseRefreshTime = 12000;
-                def.m_versusSuddenDeathRefreshTime = 5000;
-
-
-                var backupDancerSprite = new AssetReferenceSprite("b2e616b9bbbacac4980ba6de852d1a44"); // keep this
-                backupDancerSprite.m_SubObjectName = "SPR_SeedPackets_Zombies_Versus_20";
-                //backupDancerSprite.m_SubObjectType = "UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null";
-                def.m_versusImage = backupDancerSprite;
-
-
-                // temporarily use the backup dancer preview image because giga garg doesnt have one :v
-                // todo: load the tall nut zombie preview image
-                var backupDancerAssetReferenceGameObject = new AssetReferenceGameObject("86af4c6f62e682647853b46a5fb99a9e");
-                def.m_preview = backupDancerAssetReferenceGameObject;
-
-                var backupDancerPreviewSprite = new AssetReferenceSprite("863154a01c416424e8a2d97037894d79");
-                backupDancerPreviewSprite.m_SubObjectName = "SPR_Preview_Zombie_backup";
-                def.m_previewSprite = backupDancerPreviewSprite;
-
-                def.m_previewSpriteScale = 0.8f;
-                def.m_previewSpriteOffset = new Vector2(80, -66);
-
-                var a = new LocalizationStringData();
-                a.Id = "$REDEYED_GARGANTUAR_TOOLTIP";
-                a.Format = "Giga-gargantuar is one hell of a beast.";
-
-
-                def.m_plantName = "REDEYED_GARGANTUAR";
-                // Use unused strings in the game
-                // todo: prob create new ones
-                //def.m_plantToolTip = "REDEYED_GARGANTUAR_TOOLTIP";
-            }
-
-
-
-            // Makes the custom seedtype have stats and images: Bobsled
-            if (def.m_seedType == SeedType.Sprout)
-            {
-                def.m_versusCost = 100;
-                def.m_versusBaseRefreshTime = 3000;
-                def.m_versusSuddenDeathRefreshTime = 1200;
-
-
-                var backupDancerSprite = new AssetReferenceSprite("b2e616b9bbbacac4980ba6de852d1a44"); // keep this
-                backupDancerSprite.m_SubObjectName = "SPR_SeedPackets_Zombies_Versus_23";
-                //backupDancerSprite.m_SubObjectType = "UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null";
-                def.m_versusImage = backupDancerSprite;
-
-
-                // temporarily use the backup dancer preview image because giga garg doesnt have one :v
-                // todo: load the tall nut zombie preview image
-                //var backupDancerAssetReferenceGameObject = new AssetReferenceGameObject("86af4c6f62e682647853b46a5fb99a9e");
-                //def.m_preview = backupDancerAssetReferenceGameObject;
-
-                var backupDancerPreviewSprite = new AssetReferenceSprite("3c550c182bb720e4796fb82a81522ad6");
-                backupDancerPreviewSprite.m_SubObjectName = "SPR_Preview_Zombie_bobsled";
-                def.m_previewSprite = backupDancerPreviewSprite;
-
-                def.m_previewSpriteScale = 1f;
-                def.m_previewSpriteOffset = new Vector2(80, -66);
-
-
-                //def.m_plantName = "REDEYED_GARGANTUAR";
-                // Use unused strings in the game
-                // todo: prob create new ones
-                //def.m_plantToolTip = "REDEYED_GARGANTUAR_TOOLTIP";
-            }
-
-
-
-            // Makes the custom seedtype have stats and images: Dr Zomboss
-            if (def.m_seedType == SeedType.NumSeedTypes)
-            {
-                def.m_versusCost = 1000;
-                def.m_versusBaseRefreshTime = 18000;
-                def.m_versusSuddenDeathRefreshTime = 18000;
-
-
-                var backupDancerSprite = new AssetReferenceSprite("b2e616b9bbbacac4980ba6de852d1a44"); // keep this
-                backupDancerSprite.m_SubObjectName = "SPR_SeedPackets_Zombies_Versus_1";
-                //backupDancerSprite.m_SubObjectType = "UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null";
-                def.m_versusImage = backupDancerSprite;
-
-
-                // temporarily use the backup dancer preview image because peahead doesnt have one :v
-                // todo: load the peashooter zombie preview image
-                var backupDancerAssetReferenceGameObject = new AssetReferenceGameObject("86af4c6f62e682647853b46a5fb99a9e");
-                def.m_preview = backupDancerAssetReferenceGameObject;
-
-                var backupDancerPreviewSprite = new AssetReferenceSprite("863154a01c416424e8a2d97037894d79");
-                backupDancerPreviewSprite.m_SubObjectName = "SPR_Preview_Zombie_backup";
-                def.m_previewSprite = backupDancerPreviewSprite;
-
-                def.m_previewSpriteScale = 0.8f;
-                def.m_previewSpriteOffset = new Vector2(80, -66);
-
-                //def.m_plantName = "Backup Dancer";
-                //def.m_plantToolTip = "";
-            }
-
-
-
-
-            // Makes the custom seedtype have stats and images: Peashooter Zombie
-            if (def.m_seedType == SeedType.ZombiquariumTrophy)
-            {
-                def.m_versusCost = 50;
-                def.m_versusBaseRefreshTime = 1500;
-                def.m_versusSuddenDeathRefreshTime = 500;
-
-
-                var backupDancerSprite = new AssetReferenceSprite("b2e616b9bbbacac4980ba6de852d1a44"); // keep this
-                backupDancerSprite.m_SubObjectName = "SPR_SeedPackets_Zombies_Versus_31";
-                //backupDancerSprite.m_SubObjectType = "UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null";
-                def.m_versusImage = backupDancerSprite;
-
-
-                // temporarily use the backup dancer preview image because peahead doesnt have one :v
-                // todo: load the peashooter zombie preview image
-                var backupDancerAssetReferenceGameObject = new AssetReferenceGameObject("86af4c6f62e682647853b46a5fb99a9e");
-                def.m_preview = backupDancerAssetReferenceGameObject;
-
-                var backupDancerPreviewSprite = new AssetReferenceSprite("863154a01c416424e8a2d97037894d79");
-                backupDancerPreviewSprite.m_SubObjectName = "SPR_Preview_Zombie_backup";
-                def.m_previewSprite = backupDancerPreviewSprite;
-
-                def.m_previewSpriteScale = 0.8f;
-                def.m_previewSpriteOffset = new Vector2(80, -66);
-
-                //def.m_plantName = "Backup Dancer";
-                //def.m_plantToolTip = "";
-            }
-
-
-            // Makes the custom seedtype have stats and images: Gatling Pea Zombie
-            if (def.m_seedType == SeedType.BeghouledButtonCrater)
-            {
-                def.m_versusCost = 225;
-                def.m_versusBaseRefreshTime = 4500;
-                def.m_versusSuddenDeathRefreshTime = 2000;
-
-
-                var backupDancerSprite = new AssetReferenceSprite("b2e616b9bbbacac4980ba6de852d1a44"); // keep this
-                backupDancerSprite.m_SubObjectName = "SPR_SeedPackets_Zombies_Versus_0";
-                //backupDancerSprite.m_SubObjectType = "UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null";
-                def.m_versusImage = backupDancerSprite;
-
-
-                // temporarily use the backup dancer preview image because gatling pea doesnt have one :v
-                // todo: load the gatling pea zombie preview image
-                var backupDancerAssetReferenceGameObject = new AssetReferenceGameObject("86af4c6f62e682647853b46a5fb99a9e");
-                def.m_preview = backupDancerAssetReferenceGameObject;
-
-                var backupDancerPreviewSprite = new AssetReferenceSprite("863154a01c416424e8a2d97037894d79");
-                backupDancerPreviewSprite.m_SubObjectName = "SPR_Preview_Zombie_backup";
-                def.m_previewSprite = backupDancerPreviewSprite;
-
-                def.m_previewSpriteScale = 0.8f;
-                def.m_previewSpriteOffset = new Vector2(80, -66);
-
-                //def.m_plantName = "Backup Dancer";
-                //def.m_plantToolTip = "";
-            }
-
-
-
-            // Makes the custom seedtype have stats and images: Tall-nut Zombie
-            if (def.m_seedType == SeedType.BeghouledButtonShuffle)
-            {
-                def.m_versusCost = 175;
-                def.m_versusBaseRefreshTime = 3000;
-                def.m_versusSuddenDeathRefreshTime = 1500;
-
-
-                var backupDancerSprite = new AssetReferenceSprite("b2e616b9bbbacac4980ba6de852d1a44"); // keep this
-                backupDancerSprite.m_SubObjectName = "SPR_SeedPackets_Zombies_Versus_30";
-                //backupDancerSprite.m_SubObjectType = "UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null";
-                def.m_versusImage = backupDancerSprite;
-
-
-                // temporarily use the backup dancer preview image because tall nut zombie doesnt have one :v
-                // todo: load the tall nut zombie preview image
-                var backupDancerAssetReferenceGameObject = new AssetReferenceGameObject("86af4c6f62e682647853b46a5fb99a9e");
-                def.m_preview = backupDancerAssetReferenceGameObject;
-
-                var backupDancerPreviewSprite = new AssetReferenceSprite("863154a01c416424e8a2d97037894d79");
-                backupDancerPreviewSprite.m_SubObjectName = "SPR_Preview_Zombie_backup";
-                def.m_previewSprite = backupDancerPreviewSprite;
-
-                def.m_previewSpriteScale = 0.8f;
-                def.m_previewSpriteOffset = new Vector2(80, -66);
-
-                //def.m_plantName = "Backup Dancer";
-                //def.m_plantToolTip = "";
-            }
-
-
-
-
-
-
-            // Makes the custom seedtype have stats and images: Jalapeno Zombie
-            if (def.m_seedType == SeedType.SlotMachineSun)
-            {
-                def.m_versusCost = 150;
-                def.m_versusBaseRefreshTime = 5000;
-                def.m_versusSuddenDeathRefreshTime = 2000;
-
-
-                var backupDancerSprite = new AssetReferenceSprite("b2e616b9bbbacac4980ba6de852d1a44"); // keep this
-                backupDancerSprite.m_SubObjectName = "SPR_SeedPackets_Zombies_Versus_34";
-                //backupDancerSprite.m_SubObjectType = "UnityEngine.Sprite, UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null";
-                def.m_versusImage = backupDancerSprite;
-
-
-                // temporarily use the backup dancer preview image because jalapeno zombie doesnt have one :v
-                // todo: load the tall nut zombie preview image
-                var backupDancerAssetReferenceGameObject = new AssetReferenceGameObject("86af4c6f62e682647853b46a5fb99a9e");
-                def.m_preview = backupDancerAssetReferenceGameObject;
-
-                var backupDancerPreviewSprite = new AssetReferenceSprite("863154a01c416424e8a2d97037894d79");
-                backupDancerPreviewSprite.m_SubObjectName = "SPR_Preview_Zombie_backup";
-                def.m_previewSprite = backupDancerPreviewSprite;
-
-                def.m_previewSpriteScale = 0.8f;
-                def.m_previewSpriteOffset = new Vector2(80, -66);
-
-                //def.m_plantName = "Backup Dancer";
-                //def.m_plantToolTip = "";
-            }
-
-
-
-
-
-
-        }
-
         // Toggle: Better Sudden Death
-
         foreach (var obj in allDefs)
         {
             if (!BloomConfig.TestBoolInput10.Value) break;
@@ -1253,234 +967,276 @@ public class Core : ReplantAPI
             if (__instance.m_seedChooserScreen.mApp.IsVersusMode())
             {
                 var chosenZombies = __instance.m_seedChooserScreen.mChosenZombies;
-
+                var temp = __instance.m_seedChooserScreen.mChosenZombies[3];
                 // Ensure that it only runs once
                 // Create a new ChosenSeed, take properties of [3] (from a valid zombie) (prob buckethead)
-                ////////////////////////////////////////////////////////
-                ///////////////////////
-                
-                // Backup Dancer
-                bool zombiquariumExists = false;
+                // gitAngelHub123
+
+                // Backup Dancer\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                if (BackupDancerSeed.def == null)
+                    BackupDancerSeed.Init(__instance.m_seedChooserScreen.mApp.GetPlantDefinition(SeedType.ZombiePail));
+
+                // Seed Recharge Tooltip for custom zombies
+                if (BackupDancerSeed.def != null)
+                {
+                    int refreshTime = BackupDancerSeed.def.m_versusBaseRefreshTime;
+                    if (BloomConfig.TestBoolInput.Value)
+                        BackupDancerSeed.def.m_plantToolTip = $"raw:<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nThis zombie appears in set of one whenever its seed packet is used.";
+                    
+                    else
+                        BackupDancerSeed.def.m_plantToolTip = "raw:This zombie appears in set of one whenever its seed packet is used.";  
+                }
+
+                bool isBackupDancer = false;
                 for (int i = 0; i < chosenZombies.Count; i++)
                 {
-                    if (chosenZombies[i].mSeedType == SeedType.ZombiquariumSnorkel)
+                    if (chosenZombies[i].mSeedType == BackupDancerSeed.Id)
                     {
-                        zombiquariumExists = true;
+                        isBackupDancer = true;
                         break;
                     }
                 }
-                if (!zombiquariumExists)
+                if (!isBackupDancer)
                 {
-                    var temp = __instance.m_seedChooserScreen.mChosenZombies[3];
-
                     var s = new ChosenSeed();
-
                     s.mSeedState = temp.mSeedState;
                     s.mImitaterType = temp.mImitaterType;
-                    s.mSeedType = SeedType.ZombiquariumSnorkel;
+                    s.mSeedType = BackupDancerSeed.Id;
+
+                    chosenZombies.Add(s);
+                }
+                // Bobsled\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                if (BobsledSeed.def == null)
+                    BobsledSeed.Init(__instance.m_seedChooserScreen.mApp.GetPlantDefinition(SeedType.ZombiePail));
+                // Seed Recharge Tooltip for custom zombies
+                if (BobsledSeed.def != null)
+                {
+                    int refreshTime = BobsledSeed.def.m_versusBaseRefreshTime;
+                    if (BloomConfig.TestBoolInput.Value)
+                        BobsledSeed.def.m_plantToolTip = $"raw:<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nThese zombies appear in teams of four.";
+
+                    else
+                        BobsledSeed.def.m_plantToolTip = "raw:These zombies appear in teams of four.";
+                }
+
+                bool isBobsled = false;
+                for (int i = 0; i < chosenZombies.Count; i++)
+                {
+                    if (chosenZombies[i].mSeedType == BobsledSeed.Id)
+                    {
+                        isBobsled = true;
+                        break;
+                    }
+                }
+                if (!isBobsled)
+                {
+                    var s = new ChosenSeed();
+                    s.mSeedState = temp.mSeedState;
+                    s.mImitaterType = temp.mImitaterType;
+                    s.mSeedType = BobsledSeed.Id;
 
                     chosenZombies.Add(s);
                 }
 
-                ///////////////////////
-                ////////////////////////////////////////////////////////
-                ////////////////////////////////////////////////////////
-                ///////////////////////
+                // Giga Gargantuar\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                if (GigaGargantuarSeed.def == null)
+                    GigaGargantuarSeed.Init(__instance.m_seedChooserScreen.mApp.GetPlantDefinition(SeedType.ZombiePail));
+                // Seed Recharge Tooltip for custom zombies
+                if (GigaGargantuarSeed.def != null)
+                {
+                    int refreshTime = GigaGargantuarSeed.def.m_versusBaseRefreshTime;
+                    if (BloomConfig.TestBoolInput.Value)
+                        GigaGargantuarSeed.def.m_plantToolTip = $"raw:<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nGiga-gargantuar is a giga-gigantic zombie.";
 
-                // Bobsled
-                bool SproutExists = false;
+                    else
+                        GigaGargantuarSeed.def.m_plantToolTip = "raw:Giga-gargantuar is a giga-gigantic zombie.";
+                }
+
+                bool isGiga = false;
                 for (int i = 0; i < chosenZombies.Count; i++)
                 {
-                    if (chosenZombies[i].mSeedType == SeedType.Sprout)
+                    if (chosenZombies[i].mSeedType == GigaGargantuarSeed.Id)
                     {
-                        SproutExists = true;
+                        isGiga = true;
                         break;
                     }
                 }
-                if (!SproutExists)
+                if (!isGiga)
                 {
-                    var temp = __instance.m_seedChooserScreen.mChosenZombies[3];
-
                     var s = new ChosenSeed();
-
                     s.mSeedState = temp.mSeedState;
                     s.mImitaterType = temp.mImitaterType;
-                    s.mSeedType = SeedType.Sprout;
+                    s.mSeedType = GigaGargantuarSeed.Id;
 
                     chosenZombies.Add(s);
                 }
 
+                // Dr Zomboss\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                if (ZombossSeed.def == null)
+                    ZombossSeed.Init(__instance.m_seedChooserScreen.mApp.GetPlantDefinition(SeedType.ZombiePail));
+                // Seed Recharge Tooltip for custom zombies
+                if (ZombossSeed.def != null)
+                {
+                    int refreshTime = ZombossSeed.def.m_versusBaseRefreshTime;
+                    if (BloomConfig.TestBoolInput.Value)
+                        ZombossSeed.def.m_plantToolTip = $"raw:<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nDr. Zomboss rules them all.";
 
-
-                ///////////////////////
-                ////////////////////////////////////////////////////////
-                ////////////////////////////////////////////////////////
-                ///////////////////////
-                // Giga Gargantuar
-                bool SlotMachineDiamondExists = false;
+                    else
+                        ZombossSeed.def.m_plantToolTip = "raw:Dr. Zomboss rules them all.";
+                }
+                bool isZomboss = false;
                 for (int i = 0; i < chosenZombies.Count; i++)
                 {
-                    if (chosenZombies[i].mSeedType == SeedType.SlotMachineDiamond)
+                    if (chosenZombies[i].mSeedType == ZombossSeed.Id)
                     {
-                        SlotMachineDiamondExists = true;
+                        isZomboss = true;
                         break;
                     }
                 }
-                if (!SlotMachineDiamondExists)
+                if (!isZomboss)
                 {
-                    var temp = __instance.m_seedChooserScreen.mChosenZombies[3];
-
                     var s = new ChosenSeed();
-
                     s.mSeedState = temp.mSeedState;
                     s.mImitaterType = temp.mImitaterType;
-                    s.mSeedType = SeedType.SlotMachineDiamond;
+                    s.mSeedType = ZombossSeed.Id;
 
                     chosenZombies.Add(s);
                 }
 
+                // Peashooter Zombie\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
-                ///////////////////////
-                ////////////////////////////////////////////////////////
-                ////////////////////////////////////////////////////////
-                ///////////////////////
-                // Dr Zomboss
-                bool LastZombieIndexExists = false;
+                if (PeashooterZombieSeed.def == null)
+                    PeashooterZombieSeed.Init(__instance.m_seedChooserScreen.mApp.GetPlantDefinition(SeedType.ZombiePail));
+                // Seed Recharge Tooltip for custom zombies
+                if (PeashooterZombieSeed.def != null)
+                {
+                    int refreshTime = PeashooterZombieSeed.def.m_versusBaseRefreshTime;
+                    if (BloomConfig.TestBoolInput.Value)
+                        PeashooterZombieSeed.def.m_plantToolTip = $"raw:<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nShoots peas at the enemy.";
+
+                    else
+                        PeashooterZombieSeed.def.m_plantToolTip = "raw:Shoots peas at the enemy.";
+                }
+                bool isPeahead = false;
                 for (int i = 0; i < chosenZombies.Count; i++)
                 {
-                    if (chosenZombies[i].mSeedType == SeedType.NumSeedTypes)
+                    if (chosenZombies[i].mSeedType == PeashooterZombieSeed.Id)
                     {
-                        LastZombieIndexExists = true;
+                        isPeahead = true;
                         break;
                     }
                 }
-                if (!LastZombieIndexExists)
+                if (!isPeahead)
                 {
-                    var temp = __instance.m_seedChooserScreen.mChosenZombies[3];
-
                     var s = new ChosenSeed();
-
                     s.mSeedState = temp.mSeedState;
                     s.mImitaterType = temp.mImitaterType;
-                    s.mSeedType = SeedType.NumSeedTypes;
+                    s.mSeedType = PeashooterZombieSeed.Id;
 
                     chosenZombies.Add(s);
                 }
 
+                // Gatling Pea Zombie \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
 
+                if (GatlingPeaZombieSeed.def == null)
+                    GatlingPeaZombieSeed.Init(__instance.m_seedChooserScreen.mApp.GetPlantDefinition(SeedType.ZombiePail));
+                // Seed Recharge Tooltip for custom zombies
+                if (GatlingPeaZombieSeed.def != null)
+                {
+                    int refreshTime = GatlingPeaZombieSeed.def.m_versusBaseRefreshTime;
+                    if (BloomConfig.TestBoolInput.Value)
+                        GatlingPeaZombieSeed.def.m_plantToolTip = $"raw:<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nShoots four peas at your plants at a time.";
 
-                ///////////////////////
-                ////////////////////////////////////////////////////////
-                ////////////////////////////////////////////////////////
-                ///////////////////////
-                // Peashooter Zombie
-
-                bool zombiquariumTrophyExists = false;
+                    else
+                        GatlingPeaZombieSeed.def.m_plantToolTip = "raw:Shoots four peas at your plants at a time.";
+                }
+                bool isGatling = false;
                 for (int i = 0; i < chosenZombies.Count; i++)
                 {
-                    if (chosenZombies[i].mSeedType == SeedType.ZombiquariumTrophy)
+                    if (chosenZombies[i].mSeedType == GatlingPeaZombieSeed.Id)
                     {
-                        zombiquariumTrophyExists = true;
+                        isGatling = true;
                         break;
                     }
                 }
-                if (!zombiquariumTrophyExists)
+                if (!isGatling)
                 {
-                    var temp = __instance.m_seedChooserScreen.mChosenZombies[3];
-
                     var s = new ChosenSeed();
-
                     s.mSeedState = temp.mSeedState;
                     s.mImitaterType = temp.mImitaterType;
-                    s.mSeedType = SeedType.ZombiquariumTrophy;
+                    s.mSeedType = GatlingPeaZombieSeed.Id;
 
                     chosenZombies.Add(s);
                 }
 
-                ///////////////////////
-                ////////////////////////////////////////////////////////
-                ////////////////////////////////////////////////////////
-                ///////////////////////
-                // Gatling Pea Zombie
-                bool BeghouledButtonCraterExists = false;
+                // Jalapeno Zombie \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+
+                if (JalapenoZombieSeed.def == null)
+                    JalapenoZombieSeed.Init(__instance.m_seedChooserScreen.mApp.GetPlantDefinition(SeedType.ZombiePail));
+                // Seed Recharge Tooltip for custom zombies
+                if (JalapenoZombieSeed.def != null)
+                {
+                    int refreshTime = JalapenoZombieSeed.def.m_versusBaseRefreshTime;
+                    if (BloomConfig.TestBoolInput.Value)
+                        JalapenoZombieSeed.def.m_plantToolTip = $"raw:<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nExplodes and destroys a whole lane of plants after a while.";
+
+                    else
+                        JalapenoZombieSeed.def.m_plantToolTip = "raw:Explodes and destroys a whole lane of plants after a while.";
+                }
+                bool isJalapeno = false;
                 for (int i = 0; i < chosenZombies.Count; i++)
                 {
-                    if (chosenZombies[i].mSeedType == SeedType.BeghouledButtonCrater)
+                    if (chosenZombies[i].mSeedType == JalapenoZombieSeed.Id)
                     {
-                        BeghouledButtonCraterExists = true;
+                        isJalapeno = true;
                         break;
                     }
                 }
-                if (!BeghouledButtonCraterExists)
+                if (!isJalapeno)
                 {
-                    var temp = __instance.m_seedChooserScreen.mChosenZombies[3];
-
                     var s = new ChosenSeed();
-
                     s.mSeedState = temp.mSeedState;
                     s.mImitaterType = temp.mImitaterType;
-                    s.mSeedType = SeedType.BeghouledButtonCrater;
+                    s.mSeedType = JalapenoZombieSeed.Id;
 
                     chosenZombies.Add(s);
                 }
 
-                ///////////////////////
-                ////////////////////////////////////////////////////////
-                ////////////////////////////////////////////////////////
-                ///////////////////////
-                // Tall Nut Zombie 
-                bool BeghouledButtonShuffleExists = false;
+                // Tallnut Zombie\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
+                if (TallnutZombieSeed.def == null)
+                    TallnutZombieSeed.Init(__instance.m_seedChooserScreen.mApp.GetPlantDefinition(SeedType.ZombiePail));
+                // Seed Recharge Tooltip for custom zombies
+                if (TallnutZombieSeed.def != null)
+                {
+                    int refreshTime = TallnutZombieSeed.def.m_versusBaseRefreshTime;
+                    if (BloomConfig.TestBoolInput.Value)
+                        TallnutZombieSeed.def.m_plantToolTip = $"raw:<color=#00ff00>Recharge: {refreshTime / 100.0} seconds<color=#000000>\nThis zombie has the health of a Tall-nut.";
+
+                    else
+                        TallnutZombieSeed.def.m_plantToolTip = "raw:This zombie has the health of a Tall-nut.";
+                }
+                bool isTallnut = false;
                 for (int i = 0; i < chosenZombies.Count; i++)
                 {
-                    if (chosenZombies[i].mSeedType == SeedType.BeghouledButtonShuffle)
+                    if (chosenZombies[i].mSeedType == TallnutZombieSeed.Id)
                     {
-                        BeghouledButtonShuffleExists = true;
+                        isTallnut = true;
                         break;
                     }
                 }
-                if (!BeghouledButtonShuffleExists)
+                if (!isTallnut)
                 {
-                    var temp = __instance.m_seedChooserScreen.mChosenZombies[3];
-
                     var s = new ChosenSeed();
-
                     s.mSeedState = temp.mSeedState;
                     s.mImitaterType = temp.mImitaterType;
-                    s.mSeedType = SeedType.BeghouledButtonShuffle;
-
-                    chosenZombies.Add(s);
-                }
-
-
-                ///////////////////////
-                ////////////////////////////////////////////////////////
-                ////////////////////////////////////////////////////////
-                ///////////////////////
-                // Jalapeno Zombie
-                bool SlotMachineSunExists = false;
-                for (int i = 0; i < chosenZombies.Count; i++)
-                {
-                    if (chosenZombies[i].mSeedType == SeedType.SlotMachineSun)
-                    {
-                        SlotMachineSunExists = true;
-                        break;
-                    }
-                }
-                if (!SlotMachineSunExists)
-                {
-                    var temp = __instance.m_seedChooserScreen.mChosenZombies[3];
-
-                    var s = new ChosenSeed();
-
-                    s.mSeedState = temp.mSeedState;
-                    s.mImitaterType = temp.mImitaterType;
-                    s.mSeedType = SeedType.SlotMachineSun;
+                    s.mSeedType = TallnutZombieSeed.Id;
 
                     chosenZombies.Add(s);
                 }
 
 
                 __instance.m_zombieEntriesModel.Clear();
+
 
                 // Make Gravestone on top of seed list
                 for (int i = 0; i < chosenZombies.Count; i++)
@@ -1511,34 +1267,14 @@ public class Core : ReplantAPI
                     SeedChooserEntryModel zombieEntry = new SeedChooserEntryModel(zombieDefinition, zombieChosenSeed, __instance.m_seedChooserScreen, __instance, false, i);
                     __instance.m_zombieEntriesModel.Add(i.ToString(), zombieEntry);
                 }
+
+                SeedPacketZombieSwapper();
                 return false;
             }
 
             return true;
         }
 
-    }
-
-
-
-
-    // Makes the custom zombies selectable
-    [HarmonyPatch(typeof(ChosenSeed), nameof(ChosenSeed.Selected))]
-    internal static class ChosenSeed_Selected_PatchSnorkel
-    {
-        private static bool Prefix(ChosenSeed __instance, SeedChooserScreen seedChooserScreen, int playerIndex)
-        {
-            if (__instance.mSeedType != SeedType.ZombiquariumSnorkel &&
-            __instance.mSeedType != SeedType.ZombiquariumTrophy &&
-            __instance.mSeedType != SeedType.BeghouledButtonCrater &&
-            __instance.mSeedType != SeedType.BeghouledButtonShuffle &&
-            __instance.mSeedType != SeedType.SlotMachineDiamond &&
-            __instance.mSeedType != SeedType.SlotMachineSun &&
-            __instance.mSeedType != SeedType.Sprout &&
-            __instance.mSeedType != SeedType.NumSeedTypes) return true;
-            seedChooserScreen.ClickedSeedInChooser(__instance, playerIndex);
-            return false;
-        }
     }
 
 

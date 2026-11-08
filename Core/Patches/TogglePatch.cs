@@ -79,7 +79,7 @@ public sealed class Patch3 : MelonMod
 
     // music doesnt switch + music player
     [HarmonyPatch(typeof(MusicActivity), nameof(MusicActivity.TriggerAudio))]
-    public static class CustomMusicPatch
+    public static class MusicActivity_TriggerAudio_MusicPlayer_Patch
     {
 
         // why do i need ts?
@@ -128,7 +128,7 @@ public sealed class Patch3 : MelonMod
 
     // Seed recharge slow
     [HarmonyPatch(typeof(SeedPacket), nameof(SeedPacket.Update))]
-    public static class SeedPacketRechargeRatePatch
+    public static class Update_SeedPacketSlowerRecharge_Patch
     {
         [HarmonyPrefix]
         public static bool Prefix(SeedPacket __instance)
@@ -154,7 +154,7 @@ public sealed class Patch3 : MelonMod
     // Custom brain rate
     // Toggle for Vs Chaos
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.ZombieInitialize))]
-    internal static class GravestoneBrainRate_Patch
+    internal static class ZombieInitialize_GravestoneBrainRate_Patch
     {
         [HarmonyPostfix]
         private static void Prefix9(Zombie __instance)
@@ -210,12 +210,9 @@ public sealed class Patch3 : MelonMod
     }
 
 
-
-
-
     // Stop gravestones from being added in Night Vs
     [HarmonyPatch(typeof(Board), nameof(Board.AddGraveStones))]
-    public static class StopAddingGravestoneInVSNight
+    public static class AddGraveStones_Stop_Patch
     {
         public static bool Prefix(Board __instance)
         {
@@ -230,34 +227,13 @@ public sealed class Patch3 : MelonMod
 
     // Spawn a column of graves in Night Vs
     [HarmonyPatch(typeof(Board), nameof(Board.StartLevel))]
-    public static class StartLevelVSNight
+    public static class StartLevel_VSNight_Patch
     {
         public static void Postfix(ref Board __instance)
         {
             if (__instance != null && __instance.mLevelEntryData.m_gameMode == GameMode.Versus &&
             BloomConfig.TestEnum3.Value == Stage.Night)
             {
-
-                //PlantManager.Spawn(0, 0, SeedType.Sunflower);
-                //PlantManager.Spawn(0, 2, SeedType.Sunflower);
-                //PlantManager.Spawn(0, 4, SeedType.Sunflower);
-                /*
-                Zombie newGravestone = ZombieManager.SpawnAtCell(ZombieType.Gravestone, 8, 0);
-                
-                //newGravestone.mZombiePhase = ZombiePhase.RisingFromGrave;
-                newGravestone.mPosX = 8 * 75 + 55;
-                //newGravestone.mPosY += 300f;
-                newGravestone.mGraveX = 8; newGravestone.mGraveY = 0;
-
-                newGravestone.mX = newGravestone.mPosX;// newGravestone.mY = newGravestone.mPosY;
-
-                newGravestone.mTargetRow = 0;
-                newGravestone.mTargetCol = 8;
-                //newGravestone.mPosY = __instance.GridToPixelY(8, 0);
-                */
-                //.mPosX = 8; newGravestone.mY = 0;
-
-
                 BoardManager.Board.AddAGraveStone(5, 0);
                 BoardManager.Board.AddAGraveStone(5, 1);
                 BoardManager.Board.AddAGraveStone(5, 2);

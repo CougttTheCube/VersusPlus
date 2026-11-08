@@ -392,11 +392,9 @@ public sealed class Patch2 : MelonMod
             if (hasRun) return;
 
             hasRun = true;
-            
+
             //GameplayActivity.VersusMode.Phase = VersusPhase.ChooseZombiePacket;
             seedChooserScreen.mApp.VersusMode.Phase = VersusPhase.ChooseZombiePacket;
-            
-
         }
 
     }
@@ -435,7 +433,7 @@ public sealed class Patch2 : MelonMod
     }
 
 
-    // Patch: Grave Buster destroys grave ???
+    // Patch: Grave Buster destroys grave
     [HarmonyPatch(typeof(Board), nameof(Board.CanPlantAt))]
     public static class gravebusterpatch
     {

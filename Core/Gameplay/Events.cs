@@ -226,12 +226,12 @@ public class Events : ReplantAPI
                     if (!isZombossSpawned){
                         ZombieManager.SpawnInRow(ZombieType.Boss, 2);
 
-                        if (activity != null)
+                        if (activity != null && key == false)
                         {
                             // Switch soundtrack to Brainiac Maniac
                             // Activate key
                             activity.m_audioService.PlayMusic(MusicTune.FinalBossBrainiacManiac, 0, 0);
-                            CustomMusicPatch.TargetTune = MusicTune.FinalBossBrainiacManiac;
+                            MusicActivity_TriggerAudio_MusicPlayer_Patch.TargetTune = MusicTune.FinalBossBrainiacManiac;
                             Core.key = true;
 
                         }
@@ -418,7 +418,7 @@ public class Events : ReplantAPI
 
 
         // Destroy a gravestone
-        for (int i = 510; i <= 1010; i += 50)
+        for (int i = 510; i <= 960; i += 50)
         {
             EffectsManager.Spawn(i, pixelRow2, ParticleEffect.Pow); //pow
             yield return new WaitForSecondsRealtime(0.2f);
@@ -445,16 +445,18 @@ public class Events : ReplantAPI
                 if (checkBreak) break;
             }
 
-            if (i >= 860){
-                Zombie zombie = board?.GetBossZombie();
-                if (zombie != null && !zombie.IsDeadOrDying())
+            if (i >= 810){
+                foreach (var zombie in BoardManager.Board?.GetZombies())
                 {
-                    ZombieManager.TakeDamage(zombie, 14000);
-                    ZombieManager.ApplyChill(zombie);
+                    if (zombie == null || zombie.mDead || zombie.IsDeadOrDying()) continue;
+                    if (zombie.mZombieType == ZombieType.Boss)
+                    {
+                        ZombieManager.TakeDamage(zombie, 2800);
+                        ZombieManager.ApplyChill(zombie);
+                        EffectsManager.Spawn(i, pixelRow2 - 25, ParticleEffect.PotatoMine);
+                        PlaySFX(Constants.Sound.SOUND_POTATO_MINE);
+                    }
 
-                    EffectsManager.Spawn(i, pixelRow2 - 25, ParticleEffect.PotatoMine);
-                    PlaySFX(Constants.Sound.SOUND_POTATO_MINE);
-                    break;
                 }
             }
 
@@ -500,27 +502,28 @@ public class Events : ReplantAPI
    
             foreach (var zombie in board.GetZombies())
             {
-                if (zombie.mDead || zombie == null) continue;
-                if (zombie.mZombieType == ZombieType.Target || zombie.mZombieType == ZombieType.Boss) continue;
+                if (zombie == null || zombie.mDead || zombie.IsDeadOrDying()) continue;
+                if (zombie.mZombieType == ZombieType.Target) continue;
                 int zombieCol = BoardManager.PixelToGridX( (int)(zombie.mPosX + zombie.mWidth / 2), (int)zombie.mPosY );
                 if (zombie.mRow == random2 && zombieCol == random1)
                 {
-                    
                     ZombieManager.KillNoLoot(zombie);
                 }
             }
 
             // Thunderstorm will deal 14000 health to Zomboss (5 hits to die)
-            if (random1 == 8){
-                Zombie zombie = board?.GetBossZombie();
-                if (zombie != null && !zombie.IsDeadOrDying())
+            if (random1 == 8)
+            {
+                foreach (var zombie in board.GetZombies())
                 {
-                    ZombieManager.TakeDamage(zombie, 14000);
-                    ZombieManager.ApplyChill(zombie);
+                    if (zombie == null || zombie.mDead || zombie.IsDeadOrDying()) continue;
+                    if (zombie.mZombieType == ZombieType.Boss)
+                    {
+                        ZombieManager.TakeDamage(zombie, 14000);
+                        ZombieManager.ApplyChill(zombie);
+                    }
                 }
             }
-
-
 
 
             int gridX = BoardManager.GridToPixelX(random1, random2);

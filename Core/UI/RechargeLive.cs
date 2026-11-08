@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 
 using HarmonyLib;
-
+using static VersusPlus.Gameplay.CustomSeedType;
 using Il2CppReloaded;
 using Il2CppReloaded.Data;
 using Il2CppReloaded.DataModels;
@@ -23,8 +23,8 @@ using Il2CppSystem;
 using Il2CppSystem.Numerics;
 
 using Il2CppTekly.Localizations;
-using Il2CppTMPro;
 
+using Il2CppTMPro;
 using Il2CppTMPro;
 
 using MelonLoader;
@@ -37,9 +37,12 @@ using UnityEngine.Experimental.Rendering;
 using UnityEngine.TextCore.Text;
 using UnityEngine.UI;
 
-using static MelonLoader.MelonLogger;
 using VersusPlus.Core;
+
+using static MelonLoader.MelonLogger;
 using static VersusPlus.Core.Core;
+using static VersusPlus.Patches.Patch4;
+
 
 using Vector2 = UnityEngine.Vector2;
 using Vector3 = UnityEngine.Vector3;
@@ -175,7 +178,7 @@ internal class Timer2 : MonoBehaviour
 
                         if (temp == null) continue;
 
-                        bool isZombieSeed = ((int)temp.mPacketType >= 60 && (int)temp.mPacketType <= 80) || temp.PacketType == SeedType.ZombiquariumSnorkel || temp.mPacketType == SeedType.ZombiquariumTrophy || temp.mPacketType == SeedType.BeghouledButtonCrater || temp.mPacketType == SeedType.BeghouledButtonShuffle || temp.mPacketType == SeedType.SlotMachineDiamond || temp.mPacketType == SeedType.SlotMachineSun || temp.PacketType == SeedType.Sprout || temp.mPacketType == SeedType.NumSeedTypes; 
+                        bool isZombieSeed = ((int)temp.mPacketType >= 60 && (int)temp.mPacketType <= 80) || isCustomZombieSeedType_Packet(temp); 
 
                         if (!isZombieSeed)
                         {

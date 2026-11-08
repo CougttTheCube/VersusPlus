@@ -17,6 +17,7 @@ using Il2CppGoogle.Protobuf.WellKnownTypes;
 
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
 
 using Il2CppMono.Security.Authenticode;
 
@@ -578,4 +579,5 @@ public class CoreHelper : ReplantAPI
             activity.m_audioService.PlaySample(sound);
         }
     }
+
 }
