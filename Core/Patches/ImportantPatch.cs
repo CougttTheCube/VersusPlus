@@ -130,6 +130,7 @@ public sealed class Patch2 : MelonMod
         {
             // Make Target Zombies and Gravestones invulnerable when behind another gravestone
             // This is a direct fix to Fumeshroom OP piercing logic
+            // Only fires this when Fume-shroom is attacking -> fix Starfruit projectiles go thru gravestones behind
             if (!isFumeshroomAttacking.IsFumeshroomAttacking) return;
             if (__instance.mZombieType != ZombieType.Gravestone && __instance.mZombieType != ZombieType.Target) return;
 
@@ -350,12 +351,11 @@ public sealed class Patch2 : MelonMod
     }
 
 
-    // Prevents clearing board at end of game
+    // Prevents clearing board (at plants only for some reason) at end of game
     [HarmonyPatch(typeof(VersusMode), nameof(VersusMode.ClearBoard))]
     internal static class clearboard
     {
         [HarmonyPrefix]
-
         private static bool Prefix()
         {
             return false;
@@ -449,8 +449,7 @@ public sealed class Patch2 : MelonMod
             }
             
 
-            // if tile is occupied -> not ok to plant lily pad
-            
+            // if tile is occupied -> not ok to plant lily pad 
             if (theType == SeedType.Lilypad) { 
                 if (PlantManager.GetTopAt(theGridX, theGridY) == null && !isGravestoneOnGrid(__instance, theGridX, theGridY))
                     __result = PlantingReason.Ok;
@@ -484,8 +483,7 @@ public sealed class Patch2 : MelonMod
         } 
 
     }
-
-
+    // If Grave Buster dies -> destroy a gravestone on its tile
     [HarmonyPatch(typeof(Plant), nameof(Plant.Die))]
     public static class gravebusterpatch2
     {
@@ -501,6 +499,47 @@ public sealed class Patch2 : MelonMod
                     grave.GridItemDie();
                 }
             }
+        }
+    }
+
+
+
+
+    // Stop gravestones from being added in Night Vs
+    [HarmonyPatch(typeof(Board), nameof(Board.AddGraveStones))]
+    public static class AddGraveStones_Stop_Patch
+    {
+        public static bool Prefix(Board __instance)
+        {
+            if (__instance != null && __instance.mLevelEntryData.m_gameMode == GameMode.Versus &&
+            BloomConfig.TestEnum3.Value == Stage.Night)
+            {
+                return false;
+            }
+            return true;
+        }
+    }
+
+    // Spawn a column of graves in Night Vs
+    [HarmonyPatch(typeof(Board), nameof(Board.StartLevel))]
+    public static class StartLevel_VSNight_Patch
+    {
+        public static void Postfix(ref Board __instance)
+        {
+            if (__instance != null && __instance.mLevelEntryData.m_gameMode == GameMode.Versus &&
+            BloomConfig.TestEnum3.Value == Stage.Night)
+            {
+                BoardManager.Board.AddAGraveStone(5, 0);
+                BoardManager.Board.AddAGraveStone(5, 1);
+                BoardManager.Board.AddAGraveStone(5, 2);
+                BoardManager.Board.AddAGraveStone(5, 3);
+                BoardManager.Board.AddAGraveStone(5, 4);
+
+                __instance.mEnableGraveStones = true;
+
+                //MelonLogger.Msg("GRAVESTONE COUNT: " + BoardManager.Board.GetGraveStoneCount());
+            }
+
         }
     }
 }

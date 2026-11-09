@@ -151,7 +151,6 @@ public sealed class CustomSeedType : MelonMod
             def.m_plantToolTip = "raw:fallback";
         }
     }
-
     internal static class PeashooterZombieSeed
     {
         internal static SeedType Id = (SeedType)1003;
@@ -203,8 +202,8 @@ public sealed class CustomSeedType : MelonMod
             def.m_seedType = Id;
             def.m_packetIndex = (int)Id;
 
-            def.m_versusCost = 225;
-            def.m_versusBaseRefreshTime = 4500;
+            def.m_versusCost = 200;
+            def.m_versusBaseRefreshTime = 5000;
             def.m_versusSuddenDeathRefreshTime = 2000;
 
 
@@ -309,7 +308,6 @@ public sealed class CustomSeedType : MelonMod
             def.m_plantToolTip = "raw:fallback";
         }
     }
-
     internal static class ZombossSeed
     {
         internal static SeedType Id = (SeedType)1007;
@@ -415,68 +413,45 @@ public sealed class CustomSeedType : MelonMod
             if (zombieCursor == BackupDancerSeed.Id
             || plantCursor == BackupDancerSeed.Id)
             {
-                // Force the translation
                 theZombieType = ZombieType.BackupDancer;
-                return true;
             }
-
             // Swap ZombiquariumTrophy with Peashooter Zombie
             if (zombieCursor == BobsledSeed.Id
             || plantCursor == BobsledSeed.Id)
             {
-                // Force the translation
                 theZombieType = ZombieType.Bobsled;
-                return true;
             }
-
             if (zombieCursor == GigaGargantuarSeed.Id
             || plantCursor == GigaGargantuarSeed.Id)
             {
-                // Force the translation
                 theZombieType = ZombieType.RedeyeGargantuar;
-                return true;
             }
-
             if (zombieCursor == GatlingPeaZombieSeed.Id
             || plantCursor == GatlingPeaZombieSeed.Id)
             {
-                // Force the translation
                 theZombieType = ZombieType.GatlingHead;
-                return true;
             }
-
             if (zombieCursor == TallnutZombieSeed.Id
             || plantCursor == TallnutZombieSeed.Id)
             {
-                // Force the translation
                 theZombieType = ZombieType.TallnutHead;
-                return true;
             }
-
             if (zombieCursor == JalapenoZombieSeed.Id
             || plantCursor == JalapenoZombieSeed.Id)
             {
-                // Force the translation
                 theZombieType = ZombieType.JalapenoHead;
-                return true;
             }
-
-
             if (zombieCursor == PeashooterZombieSeed.Id
             || plantCursor == PeashooterZombieSeed.Id)
             {
-                // Force the translation
                 theZombieType = ZombieType.PeaHead;
-                return true;
             }
 
             if (zombieCursor == ZombossSeed.Id
             || plantCursor == ZombossSeed.Id)
             {
-                // Force the translation
                 theZombieType = ZombieType.Boss;
                 theRow = 2;
-                return true;
             }
 
             return true;
@@ -506,6 +481,7 @@ public sealed class CustomSeedType : MelonMod
             }
         }
     }
+
     // Set these seedtypes to zombie: Fixes preview image of custom zombies, if not included in here then auto falls back to basic zombie
     /*
     [HarmonyPatch(typeof(Challenge), nameof(Challenge.IZombieSeedTypeToZombieType))]
@@ -563,18 +539,15 @@ public sealed class CustomSeedType : MelonMod
             theType == GigaGargantuarSeed.Id ||
             theType == JalapenoZombieSeed.Id ||
             theType == BobsledSeed.Id ||
-
             theType == ZombossSeed.Id)
             {
                 if (theGridX >= 6 && theGridX <= 8)
                 {
                     __result = PlantingReason.Ok;
-                    return;
                 }
                 else
                 {
                     __result = PlantingReason.VSNotHere;
-                    return;
                 }
             }
 
@@ -597,18 +570,15 @@ public sealed class CustomSeedType : MelonMod
             theType == GigaGargantuarSeed.Id ||
             theType == JalapenoZombieSeed.Id ||
             theType == BobsledSeed.Id ||
-
             theType == ZombossSeed.Id)
             {
                 if (theGridX >= 6 && theGridX <= 8)
                 {
                     __result = PlantingReason.Ok;
-                    return;
                 }
                 else
                 {
                     __result = PlantingReason.VSNotHere;
-                    return;
                 }
             }
 

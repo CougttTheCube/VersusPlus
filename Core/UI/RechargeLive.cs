@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 
 using HarmonyLib;
-using static VersusPlus.Gameplay.CustomSeedType;
 using Il2CppReloaded;
 using Il2CppReloaded.Data;
 using Il2CppReloaded.DataModels;
@@ -25,7 +24,6 @@ using Il2CppSystem.Numerics;
 using Il2CppTekly.Localizations;
 
 using Il2CppTMPro;
-using Il2CppTMPro;
 
 using MelonLoader;
 
@@ -42,6 +40,7 @@ using VersusPlus.Core;
 using static MelonLoader.MelonLogger;
 using static VersusPlus.Core.Core;
 using static VersusPlus.Patches.Patch4;
+using static VersusPlus.Gameplay.CustomSeedType;
 
 
 using Vector2 = UnityEngine.Vector2;

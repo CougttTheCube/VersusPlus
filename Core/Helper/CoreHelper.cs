@@ -4,10 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-using BloomEngine.Config;
-using BloomEngine.Config.Inputs;
-using BloomEngine.Helpers;
-using BloomEngine.ModMenu;
 
 using HarmonyLib;
 
@@ -52,11 +48,6 @@ using ReplantAPI.Managers;
 
 using UnityEngine;
 using UnityEngine.AddressableAssets;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem;
-using UnityEngine.InputSystem.DualShock;
-using UnityEngine.InputSystem.Switch;
-using UnityEngine.InputSystem.XInput;
 using UnityEngine.Rendering.RenderGraphModule.NativeRenderPassCompiler;
 
 using VersusPlus.Patches;
@@ -76,7 +67,7 @@ public class CoreHelper : ReplantAPI
         public static readonly HashSet<System.IntPtr> GraveImps = new HashSet<System.IntPtr>();
 
         public const float FAST_IMP_SPEED = 0.87338448f; // I-Zombie Imp speed
-        public const float SLOW_IMP_SPEED = 0.29112816f; // Standard Garg-thrown Imp speed
+        public const float SLOW_IMP_SPEED = 0.29112816f; // Normal Imp speed
     }
 
     public static void DieRow(int row)
@@ -135,8 +126,6 @@ public class CoreHelper : ReplantAPI
             var focusCircle = GameObject.Find("Area1-Day(Clone)/P_FocusCircle(Clone)/Canvas");
             if (focusCircle != null)
             {
-                //UnityEngine.Object.Destroy(focusCircle);
-
                 focusCircle.SetActive(false);
             }
             foreach (var zombie in board.GetZombies())
@@ -152,7 +141,6 @@ public class CoreHelper : ReplantAPI
                     zombie.TakeDamage(99999, DamageFlags.DoesntLeaveBody);
                     zombie.TakeDamage(99999, DamageFlags.DoesntLeaveBody);
                     zombie.TakeDamage(99999, DamageFlags.DoesntLeaveBody);
-
                 }
             }
 
@@ -171,14 +159,6 @@ public class CoreHelper : ReplantAPI
 
 
 
-
-
-
-
-
-
-
-
     // Text enumerator
     public static System.Collections.IEnumerator WaitForChaosMessage()
     {
@@ -188,22 +168,15 @@ public class CoreHelper : ReplantAPI
         AdviceManager.SetDuration(500);
     }
 
-
-
-
     // Doom-shroom spawn enumerator
     public static System.Collections.IEnumerator SpawnDoomShroom()
     {
         int random, random2;
         for (int i = 1; i < 8; i++)
         {
-
             random = UnityEngine.Random.Range(0, 5);
             random2 = UnityEngine.Random.Range(0, 5);
-            while (random == random2)
-            {
-                random2 = UnityEngine.Random.Range(0, 5);
-            }
+            while (random == random2) random2 = UnityEngine.Random.Range(0, 5);
 
             if (i <= 5)
             {
@@ -213,7 +186,8 @@ public class CoreHelper : ReplantAPI
                     PlantManager.Spawn(i, random, SeedType.Doomshroom);
                     PlantManager.Spawn(i, random2, SeedType.Doomshroom);
 
-                    if (BloomConfig.TestEnum3.Value != Stage.Night){
+                    if (BloomConfig.TestEnum3.Value != Stage.Night)
+                    {
                         PlantManager.Spawn(i, random, SeedType.InstantCoffee);
                         PlantManager.Spawn(i, random2, SeedType.InstantCoffee);
                     }
@@ -226,8 +200,6 @@ public class CoreHelper : ReplantAPI
             }
             else
             {
-                
-
                 PlantManager.Spawn(i, random, SeedType.Doomshroom);
                 PlantManager.Spawn(i, random2, SeedType.Doomshroom);
 
@@ -239,9 +211,6 @@ public class CoreHelper : ReplantAPI
             }
             yield return new WaitForSecondsRealtime(0.15f);
         }
-
-
-
     }
 
 
@@ -360,7 +329,7 @@ public class CoreHelper : ReplantAPI
             {
                 rect.localPosition = new UnityEngine.Vector3(0f, 758.6f ,0f);
             }
-            MelonLogger.Msg("Moved grids!");
+            //MelonLogger.Msg("Moved grids!");
         }
 
 
@@ -374,7 +343,7 @@ public class CoreHelper : ReplantAPI
                 // New header pos
                 rect2.localPosition = new UnityEngine.Vector3(0f, 20f, 0f);
                 rect2.sizeDelta = new UnityEngine.Vector2(0f, 250f);
-                MelonLogger.Msg("adjusted background size!");
+                //MelonLogger.Msg("adjusted background size!");
             }
         }
 
@@ -388,7 +357,7 @@ public class CoreHelper : ReplantAPI
                 // New header pos
                 rect2.localPosition = new UnityEngine.Vector3(0f, 20f, 0f);
                 rect2.sizeDelta = new UnityEngine.Vector2(0f, 250f);
-                MelonLogger.Msg("adjusted scrim");
+                //MelonLogger.Msg("adjusted scrim");
             }
         }
     }
@@ -411,7 +380,7 @@ public class CoreHelper : ReplantAPI
             {
                 rect.localPosition = new UnityEngine.Vector3(0f, 748.7f, 0f);
             }
-            MelonLogger.Msg("Moved grids!");
+            //MelonLogger.Msg("Moved grids!");
         }
 
 
@@ -425,7 +394,7 @@ public class CoreHelper : ReplantAPI
                 // New header pos
                 rect2.localPosition = new UnityEngine.Vector3(0f, 20f, 0f);
                 rect2.sizeDelta = new UnityEngine.Vector2(0f, 250f);
-                MelonLogger.Msg("adjusted background size!");
+                //MelonLogger.Msg("adjusted background size!");
             }
         }
 
@@ -439,7 +408,7 @@ public class CoreHelper : ReplantAPI
                 // New header pos
                 rect2.localPosition = new UnityEngine.Vector3(0f, 20f, 0f);
                 rect2.sizeDelta = new UnityEngine.Vector2(0f, 250f);
-                MelonLogger.Msg("adjusted scrim");
+                //MelonLogger.Msg("adjusted scrim");
             }
         }
     }

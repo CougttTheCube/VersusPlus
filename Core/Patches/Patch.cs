@@ -261,28 +261,6 @@ public sealed class Patch : MelonMod
                 __instance.m_scale = new UnityEngine.Vector2(1.2f, 1.2f);
             }
         }
-
-        public static void Postfix(PlantController __instance)
-        {
-            if (__instance.gameObject.name.Contains("SplitPea"))
-            {
-                //__instance.AnimationController.SkeletonAnimation.timeScale = 0.7f;
-                /*
-                foreach (var x in __instance.AnimationController.SkeletonAnimation.state.tracks){
-                    if (x != null && x.Animation != null && x.Animation.Name.Contains("head_idle")){
-                        x.timeScale = 1f;
-                       
-                    }
-                    if (x != null && x.Animation != null && x.Animation.Name.Contains("idle"))
-                    {
-                        x.timeScale = 1f;
-                        
-                    }
-                }
-                */
-            }
-            
-        }
     }
 
     // Fix Wall-nut bite particles offset
@@ -351,12 +329,7 @@ public sealed class Patch : MelonMod
                 __instance.VisualOffset = new UnityEngine.Vector3(100f, -115f, 0f);
                 //__instance.m_projectile.mShadowOffsetX
             }
-            else if (__instance.gameObject.name.Contains("Projectile-Star"))
-            {
-                //__instance.gameObject. = new Unity.Mathematics.float2(-50f, 3f);
-                //__instance.m_projectile.GetProjectileRect();
 
-            }
 
             //P_Reanim_JalapenoFire_FirePea
             //P_Reanim_JalapenoFire
@@ -391,7 +364,7 @@ public sealed class Patch : MelonMod
 
 
 
-
+    /*
     [HarmonyPatch(typeof(ReanimationController), nameof(ReanimationController.OnInit))]
     public static class ReanimationControllerOffsetPatch
     {
@@ -406,6 +379,7 @@ public sealed class Patch : MelonMod
             //P_Reanim_JalapenoFire
         }
     }
+    */
 
     // Camera doesn't pan when zombie walk into house anymore
     [HarmonyPatch(typeof(Zombie), nameof(Zombie.WalkIntoHouse))]

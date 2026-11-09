@@ -38,18 +38,17 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.UI;
 
 using VersusPlus.Core;
-using VersusPlus.Gameplay;
 
 using static Il2CppReloaded.Constants;
 using static VersusPlus.Core.Core;
-
 using static VersusPlus.Helper.CoreHelper;
 using static VersusPlus.Patches.Patch3;
+using static VersusPlus.Gameplay.CustomSeedType;
 
 using Common = Il2CppReloaded.Gameplay.Common;
 using Vector2 = UnityEngine.Vector2;
 using Zombie = Il2CppReloaded.Gameplay.Zombie;
-using static VersusPlus.Gameplay.CustomSeedType;
+
 public sealed class Patch4 : MelonMod
 {
 
@@ -111,7 +110,7 @@ public sealed class Patch4 : MelonMod
             if (__instance.mZombieType != ZombieType.Balloon) return true;
             if (!__instance.mApp.IsVersusMode()) return true;
 
-            __instance.mPosX = 800f; // Push it off-screen immediately
+            __instance.mPosX = 800f; 
             __instance.mZombiePhase = ZombiePhase.BalloonFlying;
 
 
@@ -136,7 +135,7 @@ public sealed class Patch4 : MelonMod
 
         }
 
-        // Skip rise from grave phase for the zombotanies
+        // Skip rise from grave phase for the zombotanies and Giga garg
         [HarmonyPrefix]
         private static bool Prefix3(Zombie __instance)
         {
@@ -241,28 +240,32 @@ public sealed class Patch4 : MelonMod
 
 
 
-    // Plays huge wave sound when Flag Zombie is spawned
-    [HarmonyPrefix]
-    private static bool Prefix2(Board __instance, ZombieType theZombieType)
-    {
-        if (!__instance.mApp.IsVersusMode()) return true;
-        if (theZombieType == ZombieType.Flag)
+    [HarmonyPatch(typeof(Board), nameof(Board.AddZombieInRow))]
+    internal static class FlagZombiePatch{
+        // Plays huge wave sound when Flag Zombie is spawned
+        [HarmonyPrefix]
+        private static bool Prefix2(Board __instance, ZombieType theZombieType)
         {
-            var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
-            if (activity != null)
+            if (!__instance.mApp.IsVersusMode()) return true;
+            if (theZombieType == ZombieType.Flag)
             {
-                activity.m_audioService.PlaySample(Constants.Sound.SOUND_HUGE_WAVE);
+                var activity = UnityEngine.Object.FindObjectOfType<GameplayActivity>();
+                if (activity != null)
+                {
+                    activity.m_audioService.PlaySample(Constants.Sound.SOUND_HUGE_WAVE);
 
+                }
+                // Buff Flag Zombie: Add 2 more zombies
+                int random = UnityEngine.Random.Range(0, 5);
+                ZombieManager.SpawnInRow(ZombieType.Pail, random);
+                random = UnityEngine.Random.Range(0, 5);
+                ZombieManager.SpawnInRow(ZombieType.Normal, random);
             }
-            // Buff Flag Zombie: Add 2 more zombies
-            int random = UnityEngine.Random.Range(0, 5);
-            ZombieManager.SpawnInRow(ZombieType.Pail, random);
-            random = UnityEngine.Random.Range(0, 5);
-            ZombieManager.SpawnInRow(ZombieType.Normal, random);
-        }
 
-        return true;
+            return true;
+        }
     }
+
 
 
 
@@ -278,7 +281,7 @@ public sealed class Patch4 : MelonMod
             if (__instance == null) return;
             if (!__instance.mApp.IsVersusMode()) return;
 
-            if (((int)theType >= 60 && (int)theType <= 80) &&
+            if ( ( (int)theType >= 60 && (int)theType <= 80 || theType == BackupDancerSeed.Id) &&
             (GridItemManager.GetAt(GridItemType.Crater, theGridX, theGridY) != null))
             {
                 if ((int)theType == 65 ||
@@ -290,33 +293,10 @@ public sealed class Patch4 : MelonMod
                 (int)theType == 78 ||
                 (int)theType == 79) return;
 
+
                 __result = PlantingReason.NotOnCrater;
 
             }
-
-            // Too lazy to find out why it's on plant side so brute force custom zombie to be placed on zombie side
-            if (theType == BackupDancerSeed.Id ||
-            theType == SeedType.ZombiquariumTrophy ||
-            theType == SeedType.BeghouledButtonCrater ||
-            theType == SeedType.BeghouledButtonShuffle ||
-            theType == SeedType.SlotMachineDiamond ||
-            theType == SeedType.SlotMachineSun ||
-            theType == SeedType.Sprout ||
-
-            theType == ZombossSeed.Id)
-            {
-                if (theGridX >= 6 && theGridX <= 8)
-                {
-                    __result = PlantingReason.Ok;
-                    return;
-                }
-                else
-                {
-                    __result = PlantingReason.VSNotHere;
-                    return;
-                }
-            }
-
             return;
         }
     }
@@ -347,6 +327,8 @@ public sealed class Patch4 : MelonMod
                 (int)cursorSeed == 78 ||
                 (int)cursorSeed == 79) holdingZombieSeed = false;
 
+            if (cursorSeed == BackupDancerSeed.Id) holdingZombieSeed = true;
+
             if (holdingZombieSeed)
             {
                 int targetCol = __instance.mBoard.PixelToGridX(x, y);
@@ -364,7 +346,7 @@ public sealed class Patch4 : MelonMod
             return true;
         }
 
-
+        // Prevent gravestones from being placed on Lily Pads
         [HarmonyPrefix]
         private static bool Prefix2(Challenge __instance, int x, int y, int theClickCount, int playerIndex)
         {

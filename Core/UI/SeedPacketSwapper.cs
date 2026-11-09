@@ -28,6 +28,7 @@ using static VersusPlus.Core.Core;
 
 public class SeedPacketSwapper :  MonoBehaviour
 {
+        // Swap Texture2D with external image
         public static void SeedPacketZombieSwapper()
         {
             Texture2D targetZombieVSTexture = Resources.FindObjectsOfTypeAll<Texture2D>()
@@ -35,6 +36,7 @@ public class SeedPacketSwapper :  MonoBehaviour
 
             string GameRootDirectory = MelonEnvironment.GameRootDirectory;
             string imageDataPath = Path.Combine(GameRootDirectory, "Mods", "VersusPlus_Resources", "main.png"); //fallback
+
             if (BloomConfig.TestBoolInput15.Value) imageDataPath = Path.Combine(GameRootDirectory, "Mods", "VersusPlus_Resources", "new.png");
             else imageDataPath = Path.Combine(GameRootDirectory, "Mods", "VersusPlus_Resources", "main.png");
 

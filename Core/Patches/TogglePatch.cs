@@ -66,6 +66,7 @@ public sealed class Patch3 : MelonMod
         }
     }
 
+    // Tracks current gameplay activity
     [HarmonyPatch(typeof(GameplayActivity), nameof(GameplayActivity.StartPlaying))]
     public static class GameplayActivityTracker
     {
@@ -209,44 +210,6 @@ public sealed class Patch3 : MelonMod
         }
     }
 
-
-    // Stop gravestones from being added in Night Vs
-    [HarmonyPatch(typeof(Board), nameof(Board.AddGraveStones))]
-    public static class AddGraveStones_Stop_Patch
-    {
-        public static bool Prefix(Board __instance)
-        {
-            if (__instance != null && __instance.mLevelEntryData.m_gameMode == GameMode.Versus &&
-            BloomConfig.TestEnum3.Value == Stage.Night)
-            {
-                return false;
-            }
-            return true;
-        }
-    }
-
-    // Spawn a column of graves in Night Vs
-    [HarmonyPatch(typeof(Board), nameof(Board.StartLevel))]
-    public static class StartLevel_VSNight_Patch
-    {
-        public static void Postfix(ref Board __instance)
-        {
-            if (__instance != null && __instance.mLevelEntryData.m_gameMode == GameMode.Versus &&
-            BloomConfig.TestEnum3.Value == Stage.Night)
-            {
-                BoardManager.Board.AddAGraveStone(5, 0);
-                BoardManager.Board.AddAGraveStone(5, 1);
-                BoardManager.Board.AddAGraveStone(5, 2);
-                BoardManager.Board.AddAGraveStone(5, 3);
-                BoardManager.Board.AddAGraveStone(5, 4);
-                
-                __instance.mEnableGraveStones = true;
-                
-                //MelonLogger.Msg("GRAVESTONE COUNT: " + BoardManager.Board.GetGraveStoneCount());
-            }
-
-        }
-    }
 
 
     
